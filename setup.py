@@ -13,10 +13,10 @@ ROOT_DIRECTORY = Path(__file__).parent.resolve()
 setuptools.setup(
     name='license_tools',
     description='Collection of tools for working with Open Source licenses',
-    version='0.1.0',
+    version='0.1.1',
     license='Apache-2.0',
     long_description=Path(ROOT_DIRECTORY / 'README.md').read_text(encoding='UTF-8'),
-    long_description_content_tyoe='text/markdown',
+    long_description_content_type='text/markdown',
     author='stefan6419846',
     url='https://github.com/stefan6419846/license_tools',
     packages=setuptools.find_packages(),
