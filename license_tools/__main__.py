@@ -28,19 +28,19 @@ def main():
     )
 
     parser.add_argument(
-        '--retrieve-copyrights', action='store_true', required=False, default=True, help='Retrieve copyrights.'
+        '--retrieve-copyrights', action='store_true', required=False, default=False, help='Retrieve copyrights.'
     )
     parser.add_argument(
-        '--retrieve-emails', action='store_true', required=False, default=True, help='Retrieve e-mails.'
+        '--retrieve-emails', action='store_true', required=False, default=False, help='Retrieve e-mails.'
     )
     parser.add_argument(
-        '--retrieve-file-info', action='store_true', required=False, default=True, help='Retrieve file information.'
+        '--retrieve-file-info', action='store_true', required=False, default=False, help='Retrieve file information.'
     )
     parser.add_argument(
-        '--retrieve-urls', action='store_true', required=False, default=True, help='Retrieve URLs.'
+        '--retrieve-urls', action='store_true', required=False, default=False, help='Retrieve URLs.'
     )
     parser.add_argument(
-        '--retrieve-ldd-data', action='store_true', required=False, default=True, help='Retrieve shared object linking data.'
+        '--retrieve-ldd-data', action='store_true', required=False, default=False, help='Retrieve shared object linking data.'
     )
 
     arguments = parser.parse_args()
