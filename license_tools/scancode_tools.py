@@ -199,8 +199,7 @@ def run_on_file(
     if retrieve_ldd_data:
         results = check_shared_objects(path=path, short_path=short_path)
         if results:
-            print(short_path)
-            print(check_shared_objects(path=path, short_path=short_path))
+            print(short_path + '\n' + results)
     return FileResults(
         path=path,
         short_path=short_path,

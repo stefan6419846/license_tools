@@ -1,5 +1,9 @@
 # Development version
 
+# Version 0.1.3 - 2023-06-14
+
+* Avoid running shared object linking analysis twice.
+
 # Version 0.1.2 - 2023-06-14
 
 * Fix defaults for retrieval parameters.
