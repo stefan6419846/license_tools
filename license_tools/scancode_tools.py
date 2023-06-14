@@ -181,10 +181,6 @@ class FileResults:
 
 
 def check_shared_objects(path: Path, short_path: str) -> str:
-    # https://opensource.stackexchange.com/questions/13060/linking-closed-source-with-linux-vdso-so-1
-    # https://github.com/torvalds/linux/blob/master/LICENSES/exceptions/Linux-syscall-note
-    # https://github.com/torvalds/linux/blob/master/COPYING
-    # https://www.kernel.org/doc/html/v4.18/process/license-rules.html
     if path.suffix != '.so' and not (path.suffixes and path.suffixes[0] == '.so'):
         return
     output = subprocess.check_output(['ldd', path], stderr=subprocess.PIPE)
