@@ -1,5 +1,10 @@
 # Development version
 
+# Version 0.2.0 - 2023-06-15
+
+* Make sure to delete the temporary run-specific directory on exit.
+* Add some code documentation.
+
 # Version 0.1.3 - 2023-06-14
 
 * Avoid running shared object linking analysis twice.

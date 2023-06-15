@@ -2,8 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 # See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
 
+"""
+Convenience interface for the ScanCode toolkit project using some predefined
+configuration and returning `dataclass` instances instead of dictionaries.
+"""
+
 from __future__ import annotations
 
+import atexit
 import datetime
 import shutil
 import subprocess
@@ -14,6 +20,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Generator
 
+import scancode_config
+from commoncode import fileutils
 from joblib import Parallel, delayed
 from scancode import api
 
@@ -23,6 +31,10 @@ NOT_REQUESTED = object()
 
 @dataclass
 class Author:
+    """
+    Matching information about an author.
+    """
+
     author: str
     start_line: int
     end_line: int
@@ -30,6 +42,10 @@ class Author:
 
 @dataclass
 class Holder:
+    """
+    Matching information about a copyright holder.
+    """
+
     holder: str
     start_line: int
     end_line: int
@@ -37,6 +53,10 @@ class Holder:
 
 @dataclass
 class Copyright:
+    """
+    Matching information about copyrights.
+    """
+
     copyright: str
     start_line: int
     end_line: int
@@ -44,6 +64,10 @@ class Copyright:
 
 @dataclass
 class Copyrights:
+    """
+    Copyright-specific results.
+    """
+
     copyrights: list[Copyright] = dataclass_field(default_factory=list)
     holders: list[Holder] = dataclass_field(default_factory=list)
     authors: list[Author] = dataclass_field(default_factory=list)
@@ -56,6 +80,10 @@ class Copyrights:
 
 @dataclass
 class Email:
+    """
+    Matching information about an e-mail.
+    """
+
     email: str
     start_line: int
     end_line: int
@@ -63,6 +91,10 @@ class Email:
 
 @dataclass
 class Emails:
+    """
+    E-mail-specific results.
+    """
+
     emails: list[Email] = dataclass_field(default_factory=list)
 
     def __post_init__(self):
@@ -71,6 +103,10 @@ class Emails:
 
 @dataclass
 class Url:
+    """
+    Matching information about an URL.
+    """
+
     url: str
     start_line: int
     end_line: int
@@ -78,6 +114,10 @@ class Url:
 
 @dataclass
 class Urls:
+    """
+    URL-specific results.
+    """
+
     urls: list[Url] = dataclass_field(default_factory=list)
 
     def __post_init__(self):
@@ -86,6 +126,10 @@ class Urls:
 
 @dataclass
 class FileInfo:
+    """
+    File-specific results.
+    """
+
     date: datetime.date
     size: int
     sha1: str
@@ -107,6 +151,10 @@ class FileInfo:
 
 @dataclass
 class LicenseMatch:
+    """
+    Matching information about a license.
+    """
+
     score: float
     start_line: int
     end_line: int
@@ -121,6 +169,10 @@ class LicenseMatch:
 
 @dataclass
 class LicenseDetection:
+    """
+    Information an a specific detected license.
+    """
+
     license_expression: str
     identifier: str
     matches: list[LicenseMatch] = dataclass_field(default_factory=list)
@@ -131,6 +183,10 @@ class LicenseDetection:
 
 @dataclass
 class Licenses:
+    """
+    Information on all detected licenses.
+    """
+
     detected_license_expression: str
     detected_license_expression_spdx: str
     percentage_of_license_text: float
@@ -153,13 +209,22 @@ class Licenses:
 
 @dataclass
 class FileResults:
+    """
+    Container for all available file-level results.
+    """
+
+    # Reference to the analyzed file.
     path: Path
     short_path: str
+
+    # Configuration values to determine which information to retrieve.
     retrieve_copyrights: bool = False
     retrieve_emails: bool = False
     retrieve_urls: bool = False
     retrieve_licenses: bool = False
     retrieve_file_info: bool = False
+
+    # Analysis results.
     copyrights: Copyrights = NOT_REQUESTED
     emails: Emails = NOT_REQUESTED
     urls: Urls = NOT_REQUESTED
@@ -180,7 +245,13 @@ class FileResults:
             self.file_info = FileInfo(**api.get_file_info(path_str))
 
 
-def check_shared_objects(path: Path, short_path: str) -> str:
+def check_shared_objects(path: Path) -> str | None:
+    """
+    Check which other shared objects a shared object links to.
+
+    :param path: The file path to analyze.
+    :return: The analysis results if the path points to a shared object, `None` otherwise.
+    """
     if path.suffix != '.so' and not (path.suffixes and path.suffixes[0] == '.so'):
         return
     output = subprocess.check_output(['ldd', path], stderr=subprocess.PIPE)
@@ -196,10 +267,27 @@ def run_on_file(
         retrieve_urls: bool = False,
         retrieve_ldd_data: bool = False,
 ) -> FileResults:
+    """
+    Run the analysis on the given file.
+
+    :param path: The file path to analyze.
+    :param short_path: The short path to use for display.
+    :param retrieve_copyrights: Whether to retrieve copyright information.
+    :param retrieve_emails: Whether to retrieve e-mails.
+    :param retrieve_file_info: Whether to retrieve file-specific information.
+    :param retrieve_urls: Whether to retrieve URLs.
+    :param retrieve_ldd_data: Whether to retrieve linking data for shared objects.
+    :return: The requested results.
+    """
+    # This data is not yet part of the dataclasses above, as it is a custom analysis.
     if retrieve_ldd_data:
-        results = check_shared_objects(path=path, short_path=short_path)
+        results = check_shared_objects(path=path)
         if results:
             print(short_path + '\n' + results)
+
+    # Register this here as each parallel process has its own directory.
+    atexit.register(cleanup, scancode_config.scancode_temp_dir)
+
     return FileResults(
         path=path,
         short_path=short_path,
@@ -220,6 +308,18 @@ def run_on_directory(
         retrieve_urls: bool = False,
         retrieve_ldd_data: bool = False,
 ) -> Generator[FileResults, None, None]:
+    """
+    Run the analysis on the given directory.
+
+    :param path: The directory to analyze.
+    :param job_count: The number of parallel jobs to use.
+    :param retrieve_copyrights: Whether to retrieve copyright information.
+    :param retrieve_emails: Whether to retrieve e-mails.
+    :param retrieve_file_info: Whether to retrieve file-specific information.
+    :param retrieve_urls: Whether to retrieve URLs.
+    :param retrieve_ldd_data: Whether to retrieve linking data for shared objects.
+    :return: The requested results per file.
+    """
     common_prefix_length = len(directory) + int(not directory.endswith("/"))
 
     def get_paths() -> tuple[Path, str]:
@@ -245,8 +345,25 @@ def run_on_directory(
 
 def run_on_package_archive_file(
         archive_path: Path,
-        **kwargs
+        job_count: int = 4,
+        retrieve_copyrights: bool = False,
+        retrieve_emails: bool = False,
+        retrieve_file_info: bool = False,
+        retrieve_urls: bool = False,
+        retrieve_ldd_data: bool = False,
 ) -> Generator[FileResults, None, None]:
+    """
+    Run the analysis on the given package archive file.
+
+    :param path: The package archive path to analyze.
+    :param job_count: The number of parallel jobs to use.
+    :param retrieve_copyrights: Whether to retrieve copyright information.
+    :param retrieve_emails: Whether to retrieve e-mails.
+    :param retrieve_file_info: Whether to retrieve file-specific information.
+    :param retrieve_urls: Whether to retrieve URLs.
+    :param retrieve_ldd_data: Whether to retrieve linking data for shared objects.
+    :return: The requested results.
+    """
     with TemporaryDirectory() as working_directory:
         if archive_path.suffix == ".whl":
             # `shutil.unpack_archive` cannot handle wheel files.
@@ -256,15 +373,37 @@ def run_on_package_archive_file(
             shutil.unpack_archive(archive_path, working_directory)
         yield from run_on_directory(
             directory=working_directory,
-            **kwargs
+            job_count=job_count,
+            retrieve_copyrights=retrieve_copyrights,
+            retrieve_emails=retrieve_emails,
+            retrieve_file_info=retrieve_file_info,
+            retrieve_urls=retrieve_urls,
         )
 
 
 def run_on_downloaded_package_file(
         package_definition: str,
         index_url: str | None = None,
-        **kwargs
+        job_count: int = 4,
+        retrieve_copyrights: bool = False,
+        retrieve_emails: bool = False,
+        retrieve_file_info: bool = False,
+        retrieve_urls: bool = False,
+        retrieve_ldd_data: bool = False,
 ) -> Generator[FileResults, None, None]:
+    """
+    Run the analysis for the given package definition.
+
+    :param package_definition: The package definition to get the files for.
+    :param index_url: The PyPI index URL to use. Uses the default one from the `.pypirc` file if unset.
+    :param job_count: The number of parallel jobs to use.
+    :param retrieve_copyrights: Whether to retrieve copyright information.
+    :param retrieve_emails: Whether to retrieve e-mails.
+    :param retrieve_file_info: Whether to retrieve file-specific information.
+    :param retrieve_urls: Whether to retrieve URLs.
+    :param retrieve_ldd_data: Whether to retrieve linking data for shared objects.
+    :return: The requested results.
+    """
     with TemporaryDirectory() as download_directory:
         command = [
             "pip",
@@ -280,13 +419,27 @@ def run_on_downloaded_package_file(
         name = list(Path(download_directory).glob("*"))[0]
         yield from run_on_package_archive_file(
             archive_path=name.resolve(),
-            **kwargs
+            job_count=job_count,
+            retrieve_copyrights=retrieve_copyrights,
+            retrieve_emails=retrieve_emails,
+            retrieve_file_info=retrieve_file_info,
+            retrieve_urls=retrieve_urls,
         )
 
 
-def _check_only_one_value_set(values):
+def _check_that_exactly_one_value_is_set(values: list[Path | str | None]) -> bool:
+    """
+    Check that exactly one value does not evaluate to `False`.
+    """
     filtered = list(filter(None, values))
     return len(filtered) == 1
+
+
+def cleanup(directory: Path | str) -> None:
+    """
+    Remove the given directory.
+    """
+    fileutils.delete(directory)
 
 
 def run(
@@ -301,7 +454,28 @@ def run(
         retrieve_urls: bool = False,
         retrieve_ldd_data: bool = False,
 ) -> FileResults:
-    assert _check_only_one_value_set([directory, file_path, package_definition]), 'Exactly one source is required.'
+    """
+    Run the analysis for the given input definition.
+
+    The `directory`, `file_path` and `package_definition` parameters are mutually exclusive,
+    but exactly one has to be set.
+
+    :param directory: The directory to run on.
+    :param file_path: The file to run on.
+    :param package_definition: The package definition to run for.
+    :param index_url: The PyPI index URL to use. Uses the default one from the `.pypirc` file if unset.
+    :param job_count: The number of parallel jobs to use.
+    :param retrieve_copyrights: Whether to retrieve copyright information.
+    :param retrieve_emails: Whether to retrieve e-mails.
+    :param retrieve_file_info: Whether to retrieve file-specific information.
+    :param retrieve_urls: Whether to retrieve URLs.
+    :param retrieve_ldd_data: Whether to retrieve linking data for shared objects.
+    :return: The requested results.
+    """
+    # Remove the temporary directory of the main thread.
+    atexit.register(cleanup, scancode_config.scancode_temp_dir)
+
+    assert _check_that_exactly_one_value_is_set([directory, file_path, package_definition]), 'Exactly one source is required.'
 
     license_counts = defaultdict(int)
     kwargs = dict(
@@ -313,6 +487,7 @@ def run(
         job_count=job_count,
     )
 
+    # Run the analysis itself.
     if package_definition:
         results = list(
             run_on_downloaded_package_file(
@@ -338,6 +513,7 @@ def run(
             )
         ]
 
+    # Display the file-level results.
     for result in results:
         scores = result.licenses.get_scores_of_detected_license_expression_spdx()
         print(
@@ -349,6 +525,7 @@ def run(
         )
         license_counts[result.licenses.detected_license_expression_spdx] += 1
 
+    # Display the license-level results.
     print()
     print("=" * 130)
     print()

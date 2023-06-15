@@ -13,7 +13,7 @@ ROOT_DIRECTORY = Path(__file__).parent.resolve()
 setuptools.setup(
     name='license_tools',
     description='Collection of tools for working with Open Source licenses',
-    version='0.1.3',
+    version='0.2.0',
     license='Apache-2.0',
     long_description=Path(ROOT_DIRECTORY / 'README.md').read_text(encoding='UTF-8'),
     long_description_content_type='text/markdown',
