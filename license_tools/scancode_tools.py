@@ -245,6 +245,72 @@ class FileResults:
             self.file_info = FileInfo(**api.get_file_info(path_str))
 
 
+class RetrievalFlags:
+    """
+    Data retrieval flags to get shorter parameter lists.
+    """
+
+    COPYRIGHTS = 1
+    EMAILS = 2
+    FILE_INFO = 4
+    URLS = 8
+    LDD_DATA = 16
+
+    @classmethod
+    def to_int(
+            cls,
+            retrieve_copyrights: bool = False,
+            retrieve_emails: bool = False,
+            retrieve_file_info: bool = False,
+            retrieve_urls: bool = False,
+            retrieve_ldd_data: bool = False,
+    ) -> int:
+        """
+        Convert the given boolean parameter values to a single integer flag value.
+
+        :param retrieve_copyrights: Whether to retrieve copyright information.
+        :param retrieve_emails: Whether to retrieve e-mails.
+        :param retrieve_file_info: Whether to retrieve file-specific information.
+        :param retrieve_urls: Whether to retrieve URLs.
+        :param retrieve_ldd_data: Whether to retrieve linking data for shared objects.
+        :return: The flags derived from the given parameters.
+        """
+        return (
+            cls.COPYRIGHTS * retrieve_copyrights +
+            cls.EMAILS * retrieve_emails +
+            cls.FILE_INFO * retrieve_file_info +
+            cls.URLS * retrieve_urls +
+            cls.LDD_DATA * retrieve_ldd_data
+        )
+
+    @classmethod
+    def is_set(cls, flags: int, flag: int) -> bool:
+        """
+        Check if the given flag is set.
+
+        :param flags: The flags to check inside.
+        :param flag: The flag value to check for.
+        :return: The check result.
+        """
+        return bool(flags & flag)
+
+    @classmethod
+    def to_kwargs(cls, flags: int) -> dict[str, bool]:
+        """
+        Convert the given flags to keyword arguments.
+
+        :param flags: The flags to convert.
+        :return: The associated keyword arguments.
+        """
+        return dict(
+            retrieve_copyrights=cls.is_set(flags=flags, flag=cls.COPYRIGHTS),
+            retrieve_emails=cls.is_set(flags=flags, flag=cls.EMAILS),
+            retrieve_file_info=cls.is_set(flags=flags, flag=cls.FILE_INFO),
+            retrieve_urls=cls.is_set(flags=flags, flag=cls.URLS),
+            retrieve_ldd_data=cls.is_set(flags=flags, flag=cls.LDD_DATA),
+        )
+
+
 def check_shared_objects(path: Path) -> str | None:
     """
     Check which other shared objects a shared object links to.
@@ -261,26 +327,21 @@ def check_shared_objects(path: Path) -> str | None:
 def run_on_file(
         path: Path,
         short_path: str,
-        retrieve_copyrights: bool = False,
-        retrieve_emails: bool = False,
-        retrieve_file_info: bool = False,
-        retrieve_urls: bool = False,
-        retrieve_ldd_data: bool = False,
+        retrieval_flags: int = 0,
 ) -> FileResults:
     """
     Run the analysis on the given file.
 
     :param path: The file path to analyze.
     :param short_path: The short path to use for display.
-    :param retrieve_copyrights: Whether to retrieve copyright information.
-    :param retrieve_emails: Whether to retrieve e-mails.
-    :param retrieve_file_info: Whether to retrieve file-specific information.
-    :param retrieve_urls: Whether to retrieve URLs.
-    :param retrieve_ldd_data: Whether to retrieve linking data for shared objects.
+    :param retrieval_flags: Values to retrieve.
     :return: The requested results.
     """
+    retrieval_kwargs = RetrievalFlags.to_kwargs(flags=retrieval_flags)
+    print(retrieval_kwargs)
+
     # This data is not yet part of the dataclasses above, as it is a custom analysis.
-    if retrieve_ldd_data:
+    if retrieval_kwargs.pop('retrieve_ldd_data'):
         results = check_shared_objects(path=path)
         if results:
             print(short_path + '\n' + results)
@@ -291,33 +352,22 @@ def run_on_file(
     return FileResults(
         path=path,
         short_path=short_path,
-        retrieve_copyrights=retrieve_copyrights,
-        retrieve_emails=retrieve_emails,
-        retrieve_file_info=retrieve_file_info,
-        retrieve_urls=retrieve_urls,
         retrieve_licenses=True,
+        **retrieval_kwargs
     )
 
 
 def run_on_directory(
         directory: str,
         job_count: int = 4,
-        retrieve_copyrights: bool = False,
-        retrieve_emails: bool = False,
-        retrieve_file_info: bool = False,
-        retrieve_urls: bool = False,
-        retrieve_ldd_data: bool = False,
+        retrieval_flags: int = 0,
 ) -> Generator[FileResults, None, None]:
     """
     Run the analysis on the given directory.
 
     :param path: The directory to analyze.
     :param job_count: The number of parallel jobs to use.
-    :param retrieve_copyrights: Whether to retrieve copyright information.
-    :param retrieve_emails: Whether to retrieve e-mails.
-    :param retrieve_file_info: Whether to retrieve file-specific information.
-    :param retrieve_urls: Whether to retrieve URLs.
-    :param retrieve_ldd_data: Whether to retrieve linking data for shared objects.
+    :param retrieval_flags: Values to retrieve.
     :return: The requested results per file.
     """
     common_prefix_length = len(directory) + int(not directory.endswith("/"))
@@ -331,13 +381,9 @@ def run_on_directory(
 
     results = Parallel(n_jobs=job_count)(
         delayed(run_on_file)(
-            path,
-            short_path,
-            retrieve_copyrights,
-            retrieve_emails,
-            retrieve_file_info,
-            retrieve_urls,
-            retrieve_ldd_data,
+            path=path,
+            short_path=short_path,
+            retrieval_flags=retrieval_flags,
         ) for path, short_path in get_paths()
     )
     yield from results
@@ -346,22 +392,14 @@ def run_on_directory(
 def run_on_package_archive_file(
         archive_path: Path,
         job_count: int = 4,
-        retrieve_copyrights: bool = False,
-        retrieve_emails: bool = False,
-        retrieve_file_info: bool = False,
-        retrieve_urls: bool = False,
-        retrieve_ldd_data: bool = False,
+        retrieval_flags: int = 0,
 ) -> Generator[FileResults, None, None]:
     """
     Run the analysis on the given package archive file.
 
     :param path: The package archive path to analyze.
     :param job_count: The number of parallel jobs to use.
-    :param retrieve_copyrights: Whether to retrieve copyright information.
-    :param retrieve_emails: Whether to retrieve e-mails.
-    :param retrieve_file_info: Whether to retrieve file-specific information.
-    :param retrieve_urls: Whether to retrieve URLs.
-    :param retrieve_ldd_data: Whether to retrieve linking data for shared objects.
+    :param retrieval_flags: Values to retrieve.
     :return: The requested results.
     """
     with TemporaryDirectory() as working_directory:
@@ -374,10 +412,7 @@ def run_on_package_archive_file(
         yield from run_on_directory(
             directory=working_directory,
             job_count=job_count,
-            retrieve_copyrights=retrieve_copyrights,
-            retrieve_emails=retrieve_emails,
-            retrieve_file_info=retrieve_file_info,
-            retrieve_urls=retrieve_urls,
+            retrieval_flags=retrieval_flags,
         )
 
 
@@ -385,11 +420,7 @@ def run_on_downloaded_package_file(
         package_definition: str,
         index_url: str | None = None,
         job_count: int = 4,
-        retrieve_copyrights: bool = False,
-        retrieve_emails: bool = False,
-        retrieve_file_info: bool = False,
-        retrieve_urls: bool = False,
-        retrieve_ldd_data: bool = False,
+        retrieval_flags: int = 0,
 ) -> Generator[FileResults, None, None]:
     """
     Run the analysis for the given package definition.
@@ -397,11 +428,7 @@ def run_on_downloaded_package_file(
     :param package_definition: The package definition to get the files for.
     :param index_url: The PyPI index URL to use. Uses the default one from the `.pypirc` file if unset.
     :param job_count: The number of parallel jobs to use.
-    :param retrieve_copyrights: Whether to retrieve copyright information.
-    :param retrieve_emails: Whether to retrieve e-mails.
-    :param retrieve_file_info: Whether to retrieve file-specific information.
-    :param retrieve_urls: Whether to retrieve URLs.
-    :param retrieve_ldd_data: Whether to retrieve linking data for shared objects.
+    :param retrieval_flags: Values to retrieve.
     :return: The requested results.
     """
     with TemporaryDirectory() as download_directory:
@@ -415,15 +442,12 @@ def run_on_downloaded_package_file(
         ]
         if index_url:
             command += ["--index-url", index_url]
-        subprocess.check_output(command, stderr=subprocess.PIPE)
+        subprocess.check_output(command)
         name = list(Path(download_directory).glob("*"))[0]
         yield from run_on_package_archive_file(
             archive_path=name.resolve(),
             job_count=job_count,
-            retrieve_copyrights=retrieve_copyrights,
-            retrieve_emails=retrieve_emails,
-            retrieve_file_info=retrieve_file_info,
-            retrieve_urls=retrieve_urls,
+            retrieval_flags=retrieval_flags,
         )
 
 
@@ -445,6 +469,7 @@ def cleanup(directory: Path | str) -> None:
 def run(
         directory: Path | str | None = None,
         file_path: Path | str | None = None,
+        archive_path: Path | str | None = None,
         package_definition: str | None = None,
         index_url: str | None = None,
         job_count: int = 4,
@@ -457,11 +482,12 @@ def run(
     """
     Run the analysis for the given input definition.
 
-    The `directory`, `file_path` and `package_definition` parameters are mutually exclusive,
+    The `directory`, `file_path`, `archive_path` and `package_definition` parameters are mutually exclusive,
     but exactly one has to be set.
 
     :param directory: The directory to run on.
     :param file_path: The file to run on.
+    :param archive_path: The package archive to run on.
     :param package_definition: The package definition to run for.
     :param index_url: The PyPI index URL to use. Uses the default one from the `.pypirc` file if unset.
     :param job_count: The number of parallel jobs to use.
@@ -475,16 +501,17 @@ def run(
     # Remove the temporary directory of the main thread.
     atexit.register(cleanup, scancode_config.scancode_temp_dir)
 
-    assert _check_that_exactly_one_value_is_set([directory, file_path, package_definition]), 'Exactly one source is required.'
+    assert _check_that_exactly_one_value_is_set(
+        [directory, file_path, archive_path, package_definition]
+    ), 'Exactly one source is required.'
 
     license_counts = defaultdict(int)
-    kwargs = dict(
+    retrieval_flags = RetrievalFlags.to_int(
         retrieve_copyrights=retrieve_copyrights,
         retrieve_emails=retrieve_emails,
         retrieve_file_info=retrieve_file_info,
         retrieve_urls=retrieve_urls,
         retrieve_ldd_data=retrieve_ldd_data,
-        job_count=job_count,
     )
 
     # Run the analysis itself.
@@ -493,23 +520,32 @@ def run(
             run_on_downloaded_package_file(
                 package_definition=package_definition,
                 index_url=index_url,
-                **kwargs
+                retrieval_flags=retrieval_flags,
+                job_count=job_count,
             )
         )
     elif directory:
         results = list(
             run_on_directory(
                 directory=directory,
-                **kwargs
+                retrieval_flags=retrieval_flags,
+                job_count=job_count,
+            )
+        )
+    elif archive_path:
+        results = list(
+            run_on_package_archive_file(
+                archive_path=Path(archive_path),
+                retrieval_flags=retrieval_flags,
+                job_count=job_count,
             )
         )
     elif file_path:
-        kwargs.pop('job_count')
         results = [
             run_on_file(
-                path=file_path,
+                path=Path(file_path),
                 short_path=file_path,
-                **kwargs
+                retrieval_flags=retrieval_flags,
             )
         ]
 

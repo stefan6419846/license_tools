@@ -1,8 +1,14 @@
 # Development version
 
+# Version 0.3.0 - 2023-06-19
+
+* Do not hide stderr output from `pip download` to directly see the corresponding issue.
+* Allow running on local archive files from CLI, for example because the package version is not available for the Python version used for the analysis.
+* Migrate retrieval parameter handling to flags to avoid duplicates.
+
 # Version 0.2.0 - 2023-06-15
 
-* Make sure to delete the temporary run-specific directory on exit.
+* Make sure to delete the temporary run-specific directories on exit.
 * Add some code documentation.
 
 # Version 0.1.3 - 2023-06-14

@@ -18,6 +18,7 @@ def main():
     source_group = source_group.add_mutually_exclusive_group(required=False)
     source_group.add_argument('--directory', action='store', type=str, help='Directory to work on.')
     source_group.add_argument('--file', action='store', type=str, help='File to work on.')
+    source_group.add_argument('--archive', action='store', type=str, help='Archive file to work on.')
     source_group.add_argument('--package', action='store', type=str, help='Package specification to use.')
 
     parser.add_argument(
@@ -48,6 +49,7 @@ def main():
     scancode_tools.run(
         directory=arguments.directory,
         file_path=arguments.file,
+        archive_path=arguments.archive,
         package_definition=arguments.package,
         index_url=arguments.index_url,
         job_count=arguments.jobs,
