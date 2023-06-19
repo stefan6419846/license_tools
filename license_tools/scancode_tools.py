@@ -338,7 +338,6 @@ def run_on_file(
     :return: The requested results.
     """
     retrieval_kwargs = RetrievalFlags.to_kwargs(flags=retrieval_flags)
-    print(retrieval_kwargs)
 
     # This data is not yet part of the dataclasses above, as it is a custom analysis.
     if retrieval_kwargs.pop('retrieve_ldd_data'):
