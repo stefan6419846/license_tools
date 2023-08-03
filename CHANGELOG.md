@@ -1,5 +1,9 @@
 # Development version
 
+# Version 0.3.1 - 2023-08-03
+
+* Dynamically adjust the width of the path column.
+
 # Version 0.3.0 - 2023-06-19
 
 * Do not hide stderr output from `pip download` to directly see the corresponding issue.

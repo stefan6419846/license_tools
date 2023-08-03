@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import atexit
 import datetime
+import math
 import shutil
 import subprocess
 import zipfile
@@ -549,10 +550,11 @@ def run(
         ]
 
     # Display the file-level results.
+    max_path_length = max(len(result.short_path) for result in results)
     for result in results:
         scores = result.licenses.get_scores_of_detected_license_expression_spdx()
         print(
-            f"{result.short_path:>50}",
+            f"{result.short_path:>{max_path_length}}",
             f"{result.licenses.detected_license_expression_spdx:>70}"
             if result.licenses.detected_license_expression_spdx
             else " " * 70,
@@ -562,9 +564,12 @@ def run(
 
     # Display the license-level results.
     print()
-    print("=" * 130)
+    columns = shutil.get_terminal_size((80, 20)).columns
+    print("=" * columns)
     print()
+    count_length = max(math.log10(count) for count in license_counts.values())
+    count_length = int(count_length) + 1
     for identifier in sorted(license_counts, key=str):
-        print(f"{identifier!s:>70}", f"{license_counts[identifier]:>4d}")
+        print(f"{identifier!s:>70}", f"{license_counts[identifier]:>{count_length + 1}d}")
 
     return results
