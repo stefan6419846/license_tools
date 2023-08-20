@@ -31,6 +31,7 @@ setuptools.setup(
         'dev': [
             'flake8',
             'pep8-naming',
+            'mypy',
         ]
     },
     classifiers=[
