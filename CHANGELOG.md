@@ -1,5 +1,8 @@
 # Development version
 
+* Fix type hints.
+* Mark package as typed.
+
 # Version 0.3.1 - 2023-08-03
 
 * Dynamically adjust the width of the path column.
