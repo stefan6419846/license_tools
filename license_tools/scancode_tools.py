@@ -19,12 +19,12 @@ from collections import defaultdict
 from dataclasses import dataclass, field as dataclass_field
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Generator
+from typing import cast, Generator
 
-import scancode_config
-from commoncode import fileutils
-from joblib import Parallel, delayed
-from scancode import api
+import scancode_config  # type: ignore[import]
+from commoncode import fileutils  # type: ignore[import]
+from joblib import Parallel, delayed  # type: ignore[import]
+from scancode import api  # type: ignore[import]
 
 
 NOT_REQUESTED = object()
@@ -226,11 +226,11 @@ class FileResults:
     retrieve_file_info: bool = False
 
     # Analysis results.
-    copyrights: Copyrights = NOT_REQUESTED
-    emails: Emails = NOT_REQUESTED
-    urls: Urls = NOT_REQUESTED
-    licenses: Licenses = NOT_REQUESTED
-    file_info: FileInfo = NOT_REQUESTED
+    copyrights: Copyrights | object = NOT_REQUESTED
+    emails: Emails | object = NOT_REQUESTED
+    urls: Urls | object = NOT_REQUESTED
+    licenses: Licenses | object = NOT_REQUESTED
+    file_info: FileInfo | object = NOT_REQUESTED
 
     def __post_init__(self):
         path_str = str(self.path)
@@ -320,7 +320,7 @@ def check_shared_objects(path: Path) -> str | None:
     :return: The analysis results if the path points to a shared object, `None` otherwise.
     """
     if path.suffix != '.so' and not (path.suffixes and path.suffixes[0] == '.so'):
-        return
+        return None
     output = subprocess.check_output(['ldd', path], stderr=subprocess.PIPE)
     return output.decode('UTF-8')
 
@@ -372,7 +372,7 @@ def run_on_directory(
     """
     common_prefix_length = len(directory) + int(not directory.endswith("/"))
 
-    def get_paths() -> tuple[Path, str]:
+    def get_paths() -> Generator[tuple[Path, str], None, None]:
         for path in sorted(Path(directory).rglob("*"), key=str):
             if path.is_dir():
                 continue
@@ -478,7 +478,7 @@ def run(
         retrieve_file_info: bool = False,
         retrieve_urls: bool = False,
         retrieve_ldd_data: bool = False,
-) -> FileResults:
+) -> list[FileResults]:
     """
     Run the analysis for the given input definition.
 
@@ -505,7 +505,7 @@ def run(
         [directory, file_path, archive_path, package_definition]
     ), 'Exactly one source is required.'
 
-    license_counts = defaultdict(int)
+    license_counts: dict[str, int] = defaultdict(int)
     retrieval_flags = RetrievalFlags.to_int(
         retrieve_copyrights=retrieve_copyrights,
         retrieve_emails=retrieve_emails,
@@ -527,7 +527,7 @@ def run(
     elif directory:
         results = list(
             run_on_directory(
-                directory=directory,
+                directory=str(directory),
                 retrieval_flags=retrieval_flags,
                 job_count=job_count,
             )
@@ -544,7 +544,7 @@ def run(
         results = [
             run_on_file(
                 path=Path(file_path),
-                short_path=file_path,
+                short_path=str(file_path),
                 retrieval_flags=retrieval_flags,
             )
         ]
@@ -552,15 +552,18 @@ def run(
     # Display the file-level results.
     max_path_length = max(len(result.short_path) for result in results)
     for result in results:
-        scores = result.licenses.get_scores_of_detected_license_expression_spdx()
+        if result.licenses == NOT_REQUESTED:
+            continue
+        licenses = cast(Licenses, result.licenses)
+        scores = licenses.get_scores_of_detected_license_expression_spdx()
         print(
             f"{result.short_path:>{max_path_length}}",
-            f"{result.licenses.detected_license_expression_spdx:>70}"
-            if result.licenses.detected_license_expression_spdx
+            f"{licenses.detected_license_expression_spdx:>70}"
+            if licenses.detected_license_expression_spdx
             else " " * 70,
             scores if scores else "",
         )
-        license_counts[result.licenses.detected_license_expression_spdx] += 1
+        license_counts[licenses.detected_license_expression_spdx] += 1
 
     # Display the license-level results.
     print()
