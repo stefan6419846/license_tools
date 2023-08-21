@@ -1,5 +1,7 @@
 # Development version
 
+# Version 0.3.2 - 2023-08-21
+
 * Fix type hints.
 * Mark package as typed.
 
