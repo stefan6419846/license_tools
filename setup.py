@@ -30,6 +30,7 @@ setuptools.setup(
     extras_require={
         'dev': [
             'flake8',
+            'flake8-bugbear',
             'pep8-naming',
             'mypy',
         ]
