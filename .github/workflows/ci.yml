@@ -29,7 +29,7 @@ jobs:
           cd intbitset-*
           rm -rf intbitset/intbitset.c
           cython intbitset/intbitset.pyx
-          python -m pip uninstall cython
+          python -m pip uninstall cython -y
           python -m pip install --verbose .
           cd ..
           rm -rf intbitset-*
