@@ -25,6 +25,7 @@ jobs:
           python -m pip download --no-binary=:all: --no-deps intbitset
           python -m pip install cython
           tar -xvf intbitset-*
+          rm intbitset-*.tar.gz
           cd intbitset-*
           rm -rf intbitset/intbitset.c
           cython intbitset/intbitset.pyx
