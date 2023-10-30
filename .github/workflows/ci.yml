@@ -45,4 +45,4 @@ jobs:
           flake8
       - name: mypy
         run:
-          mypy license_tools/
+          mypy --strict license_tools/

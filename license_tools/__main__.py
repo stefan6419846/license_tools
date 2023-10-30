@@ -9,7 +9,7 @@ import argparse
 from license_tools import scancode_tools
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description='Run selected license tools. Will determine all license from the given source by default.',
     )

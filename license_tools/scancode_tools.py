@@ -21,10 +21,10 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import cast, Generator
 
-import scancode_config  # type: ignore[import]
-from commoncode import fileutils  # type: ignore[import]
-from joblib import Parallel, delayed  # type: ignore[import]
-from scancode import api  # type: ignore[import]
+import scancode_config  # type: ignore[import-untyped]
+from commoncode import fileutils  # type: ignore[import-untyped]
+from joblib import Parallel, delayed  # type: ignore[import-untyped]
+from scancode import api  # type: ignore[import-untyped]
 
 
 NOT_REQUESTED = object()
@@ -73,10 +73,10 @@ class Copyrights:
     holders: list[Holder] = dataclass_field(default_factory=list)
     authors: list[Author] = dataclass_field(default_factory=list)
 
-    def __post_init__(self):
-        self.copyrights = [Copyright(**x) for x in self.copyrights]
-        self.holders = [Holder(**x) for x in self.holders]
-        self.authors = [Author(**x) for x in self.authors]
+    def __post_init__(self) -> None:
+        self.copyrights = [Copyright(**x) for x in self.copyrights]  # type: ignore[arg-type]
+        self.holders = [Holder(**x) for x in self.holders]  # type: ignore[arg-type]
+        self.authors = [Author(**x) for x in self.authors]  # type: ignore[arg-type]
 
 
 @dataclass
@@ -98,8 +98,8 @@ class Emails:
 
     emails: list[Email] = dataclass_field(default_factory=list)
 
-    def __post_init__(self):
-        self.emails = [Email(**x) for x in self.emails]
+    def __post_init__(self) -> None:
+        self.emails = [Email(**x) for x in self.emails]  # type: ignore[arg-type]
 
 
 @dataclass
@@ -121,8 +121,8 @@ class Urls:
 
     urls: list[Url] = dataclass_field(default_factory=list)
 
-    def __post_init__(self):
-        self.urls = [Url(**x) for x in self.urls]
+    def __post_init__(self) -> None:
+        self.urls = [Url(**x) for x in self.urls]  # type: ignore[arg-type]
 
 
 @dataclass
@@ -146,8 +146,9 @@ class FileInfo:
     is_source: bool
     is_script: bool
 
-    def __post_init__(self):
-        self.date = datetime.datetime.strptime(self.date, "%Y-%m-%d").date()
+    def __post_init__(self) -> None:
+        if isinstance(self.date, str):
+            self.date = datetime.datetime.strptime(self.date, "%Y-%m-%d").date()
 
 
 @dataclass
@@ -178,8 +179,8 @@ class LicenseDetection:
     identifier: str
     matches: list[LicenseMatch] = dataclass_field(default_factory=list)
 
-    def __post_init__(self):
-        self.matches = [LicenseMatch(**x) for x in self.matches]
+    def __post_init__(self) -> None:
+        self.matches = [LicenseMatch(**x) for x in self.matches]  # type: ignore[arg-type]
 
 
 @dataclass
@@ -194,18 +195,19 @@ class Licenses:
     license_detections: list[LicenseDetection] = dataclass_field(default_factory=list)
     license_clues: list[str] = dataclass_field(default_factory=list)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.license_detections = [
-            LicenseDetection(**x) for x in self.license_detections
+            LicenseDetection(**x) for x in self.license_detections  # type: ignore[arg-type]
         ]
 
-    def get_scores_of_detected_license_expression_spdx(self):
+    def get_scores_of_detected_license_expression_spdx(self) -> list[float]:
         scores = []
         for detection in self.license_detections:
             if detection.license_expression == self.detected_license_expression:
                 for match in detection.matches:
                     scores.append(match.score)
                 return scores
+        return scores
 
 
 @dataclass
@@ -232,7 +234,7 @@ class FileResults:
     licenses: Licenses | object = NOT_REQUESTED
     file_info: FileInfo | object = NOT_REQUESTED
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         path_str = str(self.path)
         if self.retrieve_copyrights:
             self.copyrights = Copyrights(**api.get_copyrights(path_str))
