@@ -46,3 +46,4 @@ jobs:
       - name: mypy
         run:
           mypy --strict license_tools/
+        if: ${{ matrix.python != '3.7' }}
