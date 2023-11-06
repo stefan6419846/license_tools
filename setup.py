@@ -21,7 +21,7 @@ setuptools.setup(
     url='https://github.com/stefan6419846/license_tools',
     packages=setuptools.find_packages(),
     include_package_data=True,
-    python_requires=">=3.7, <4",
+    python_requires=">=3.8, <4",
     install_requires=[
         'scancode-toolkit',
         'typecode-libmagic',

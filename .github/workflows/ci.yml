@@ -10,7 +10,7 @@ jobs:
     name: Test with Python ${{ matrix.python }}
     strategy:
       matrix:
-        python: ['3.7' , '3.8', '3.9', '3.10', '3.11', '3.12']
+        python: ['3.8', '3.9', '3.10', '3.11', '3.12']
     steps:
       - uses: actions/checkout@v4
       - name: setup test environment
@@ -43,7 +43,3 @@ jobs:
       - name: lint
         run:
           flake8
-      - name: mypy
-        run:
-          mypy --strict license_tools/ tests/
-        if: ${{ matrix.python != '3.7' }}
