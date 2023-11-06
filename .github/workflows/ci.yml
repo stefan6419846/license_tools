@@ -44,3 +44,6 @@ jobs:
       - name: lint
         run:
           flake8
+      - name: mypy
+        run:
+          mypy --strict license_tools/ tests/
