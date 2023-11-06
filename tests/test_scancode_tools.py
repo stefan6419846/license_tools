@@ -8,7 +8,7 @@ from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
 from tempfile import mkdtemp, NamedTemporaryFile, TemporaryDirectory
-from typing import Any, cast, Generator, List
+from typing import Any, cast, Dict, Generator, List
 from unittest import mock, TestCase
 
 import requests
@@ -41,7 +41,7 @@ class FileResultsTestCase(TestCase):
                 method(scancode_tools.NOT_REQUESTED, getattr(result, field))
 
     def test_full(self) -> None:
-        flags = cast(dict[str, bool], RetrievalFlags.all(as_kwargs=True))
+        flags = cast(Dict[str, bool], RetrievalFlags.all(as_kwargs=True))
         del flags["retrieve_ldd_data"]
         result = FileResults(path=SETUP_PATH, short_path="setup.py", retrieve_licenses=True, **flags)
         self.assertEqual(SETUP_PATH, result.path)
@@ -121,7 +121,7 @@ class RetrievalFlagsTestCase(TestCase):
         self.assertEqual(31, RetrievalFlags.all())
         self.assertDictEqual(
             dict(retrieve_copyrights=True, retrieve_emails=True, retrieve_file_info=True, retrieve_urls=True, retrieve_ldd_data=True),
-            cast(dict[str, bool], RetrievalFlags.all(as_kwargs=True))
+            cast(Dict[str, bool], RetrievalFlags.all(as_kwargs=True))
         )
 
     def test_is_set(self) -> None:
