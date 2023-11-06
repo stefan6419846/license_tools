@@ -33,6 +33,8 @@ setuptools.setup(
             'flake8-bugbear',
             'pep8-naming',
             'mypy',
+            'requests',
+            'types-requests',
         ]
     },
     classifiers=[
