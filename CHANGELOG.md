@@ -1,5 +1,10 @@
 # Development version
 
+* Switch to *mypy* strict mode.
+* Add unit tests.
+* Fix handling of license clues.
+* Drop support for Python 3.7.
+
 # Version 0.3.2 - 2023-08-21
 
 * Fix type hints.
