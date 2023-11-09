@@ -44,7 +44,7 @@ SETUP_PY_LICENSES = Licenses(
             license_expression='apache-2.0', identifier='apache_2_0-e267f9d9-ae62-e9c9-9cc2-8cd0a1e4928f',
             matches=[
                 LicenseMatch(
-                    score=95.0, start_line=44, end_line=44, matched_length=6, match_coverage=100.0, matcher='2-aho',
+                    score=95.0, start_line=46, end_line=46, matched_length=6, match_coverage=100.0, matcher='2-aho',
                     license_expression='apache-2.0', rule_identifier='pypi_apache_no-version.RULE', rule_relevance=95,
                     rule_url='https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/pypi_apache_no-version.RULE'
                 )
@@ -53,7 +53,7 @@ SETUP_PY_LICENSES = Licenses(
     ],
     license_clues=[
         LicenseClue(
-            score=50.0, start_line=50, end_line=50, matched_length=3, match_coverage=100.0, matcher='2-aho',
+            score=50.0, start_line=52, end_line=52, matched_length=3, match_coverage=100.0, matcher='2-aho',
             license_expression='free-unknown', rule_identifier='free-unknown_88.RULE', rule_relevance=50,
             rule_url='https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/free-unknown_88.RULE'
         )
