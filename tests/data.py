@@ -6,7 +6,7 @@ from license_tools.scancode_tools import FileResults, LicenseClue, LicenseDetect
 SETUP_PY_LICENSES = Licenses(
     detected_license_expression='apache-2.0 AND (unknown-license-reference AND apache-2.0)',
     detected_license_expression_spdx='Apache-2.0 AND (LicenseRef-scancode-unknown-license-reference AND Apache-2.0)',
-    percentage_of_license_text=22.44,
+    percentage_of_license_text=21.74,
     license_detections=[
         LicenseDetection(
             license_expression='apache-2.0',
