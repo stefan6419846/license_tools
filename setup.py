@@ -19,7 +19,9 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     author='stefan6419846',
     url='https://github.com/stefan6419846/license_tools',
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(
+        include=['license_tools', 'license_tools.*']
+    ),
     include_package_data=True,
     python_requires=">=3.8, <4",
     install_requires=[
