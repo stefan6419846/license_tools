@@ -1,9 +1,12 @@
 # Development version
 
+# Version 0.4.0 - 2023-11-21
+
 * Switch to *mypy* strict mode.
 * Add unit tests.
 * Fix handling of license clues.
 * Drop support for Python 3.7.
+* Add support for download URLs.
 
 # Version 0.3.2 - 2023-08-21
 
