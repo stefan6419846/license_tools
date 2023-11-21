@@ -285,6 +285,29 @@ class RunOnPackageArchiveFileTestCase(TestCase):
         self._check_call(suffix=".tar.gz", url=url, expected_files=TYPING_EXTENSION_4_8_0__SOURCE_FILES)
 
 
+class RunOnDownloadedArchiveFileTestCase(TestCase):
+    def _check_call(self, suffix: str, url: str) -> None:
+        directory_result = [object(), object(), object()]
+
+        def run_on_package_archive_file(archive_path: Path, job_count: int, retrieval_flags: int) -> Generator[Any, None, None]:
+            self.assertEqual(2, job_count)
+            self.assertEqual(42, retrieval_flags)
+            self.assertEqual(suffix, archive_path.name[-len(suffix):])
+            yield from directory_result
+
+        with mock.patch.object(scancode_tools, "run_on_package_archive_file", side_effect=run_on_package_archive_file):
+            result = list(scancode_tools.run_on_downloaded_archive_file(download_url=url, job_count=2, retrieval_flags=42))
+        self.assertEqual(directory_result, result)
+
+    def test_wheel_file(self) -> None:
+        url = "https://files.pythonhosted.org/packages/24/21/7d397a4b7934ff4028987914ac1044d3b7d52712f30e2ac7a2ae5bc86dd0/typing_extensions-4.8.0-py3-none-any.whl"  # noqa: E501
+        self._check_call(suffix=".whl", url=url)
+
+    def test_non_wheel_file(self) -> None:
+        url = "https://files.pythonhosted.org/packages/1f/7a/8b94bb016069caa12fc9f587b28080ac33b4fbb8ca369b98bc0a4828543e/typing_extensions-4.8.0.tar.gz"
+        self._check_call(suffix=".tar.gz", url=url)
+
+
 class RunOnDownloadedPackageFileTestCase(TestCase):
     def test_valid_package_name(self) -> None:
         stderr = StringIO()
@@ -421,6 +444,14 @@ class RunTestCase(TestCase):
             with mock.patch.object(scancode_tools, "run_on_package_archive_file", return_value=iter(TYPING_EXTENSION_4_8_0__LICENSES)) as run_mock:
                 result = scancode_tools.run(archive_path=Path("/tmp/dummy/typing_extensions-4.8.0.tar.gz"), retrieve_copyrights=True, job_count=1)
         run_mock.assert_called_once_with(archive_path=Path("/tmp/dummy/typing_extensions-4.8.0.tar.gz"), retrieval_flags=1, job_count=1)
+        self.assertEqual(TYPING_EXTENSION_4_8_0__LICENSES, result)
+        self.assertEqual(TYPING_EXTENSION_4_8_0__EXPECTED_OUTPUT, str(stdout))
+
+    def test_download_url(self) -> None:
+        with self.record_stdout() as stdout:
+            with mock.patch.object(scancode_tools, "run_on_downloaded_archive_file", return_value=iter(TYPING_EXTENSION_4_8_0__LICENSES)) as run_mock:
+                result = scancode_tools.run(download_url="https://example.org/archive.tar.gz", retrieve_copyrights=True, job_count=1)
+        run_mock.assert_called_once_with(download_url="https://example.org/archive.tar.gz", retrieval_flags=1, job_count=1)
         self.assertEqual(TYPING_EXTENSION_4_8_0__LICENSES, result)
         self.assertEqual(TYPING_EXTENSION_4_8_0__EXPECTED_OUTPUT, str(stdout))
 

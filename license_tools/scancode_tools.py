@@ -19,9 +19,10 @@ import zipfile
 from collections import defaultdict
 from dataclasses import dataclass, field as dataclass_field
 from pathlib import Path
-from tempfile import TemporaryDirectory
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import cast, Generator
 
+import requests
 import scancode_config  # type: ignore[import-untyped]
 from commoncode import fileutils  # type: ignore[import-untyped]
 from joblib import Parallel, delayed  # type: ignore[import-untyped]
@@ -454,6 +455,40 @@ def run_on_package_archive_file(
         )
 
 
+def run_on_downloaded_archive_file(
+        download_url: str,
+        job_count: int = 4,
+        retrieval_flags: int = 0,
+) -> Generator[FileResults, None, None]:
+    """
+    Run the analysis on the given archive file after downloading it.
+
+    :param download_url: The URL to download the archive from.
+    :param job_count: The number of parallel jobs to use.
+    :param retrieval_flags: Values to retrieve.
+    :return: The requested results.
+    """
+    # Retrieving the correct suffixes is a bit tricky here, so we use some guessing as well.
+    # This basically uses the trailing URL part (usually the filename itself) and forwards
+    # guessing the suffixes to Python itself. Due to the way the suffixes are determined,
+    # we probably get some part of the (irrelevant) filename as well as the suffix (due to
+    # dotted package versions for example), but this should not hurt. We just have to make
+    # sure that we do not really loose important suffix information as Python will not be
+    # able to unpack this archive otherwise, for example because we supply `.gz` instead
+    # of `.tar.gz` only.
+    suffixes = Path(download_url.rsplit("/", maxsplit=1)[1]).suffixes
+    suffix = "".join(suffixes)
+    with NamedTemporaryFile(suffix=suffix) as downloaded_file:
+        response = requests.get(url=download_url)
+        downloaded_file.write(response.content)
+        downloaded_file.seek(0)
+        yield from run_on_package_archive_file(
+            archive_path=Path(downloaded_file.name),
+            job_count=job_count,
+            retrieval_flags=retrieval_flags,
+        )
+
+
 def run_on_downloaded_package_file(
         package_definition: str,
         index_url: str | None = None,
@@ -518,6 +553,7 @@ def run(
         file_path: Path | str | None = None,
         archive_path: Path | str | None = None,
         package_definition: str | None = None,
+        download_url: str | None = None,
         index_url: str | None = None,
         job_count: int = 4,
         retrieve_copyrights: bool = False,
@@ -536,6 +572,7 @@ def run(
     :param file_path: The file to run on.
     :param archive_path: The package archive to run on.
     :param package_definition: The package definition to run for.
+    :param download_url: The package URL to download and run on.
     :param index_url: The PyPI index URL to use. Uses the default one from the `.pypirc` file if unset.
     :param job_count: The number of parallel jobs to use.
     :param retrieve_copyrights: Whether to retrieve copyright information.
@@ -549,7 +586,7 @@ def run(
     atexit.register(cleanup, scancode_config.scancode_temp_dir)
 
     assert _check_that_exactly_one_value_is_set(
-        [directory, file_path, archive_path, package_definition]
+        [directory, file_path, archive_path, package_definition, download_url]
     ), "Exactly one source is required."
 
     license_counts: dict[str | None, int] = defaultdict(int)
@@ -583,6 +620,14 @@ def run(
         results = list(
             run_on_package_archive_file(
                 archive_path=Path(archive_path),
+                retrieval_flags=retrieval_flags,
+                job_count=job_count,
+            )
+        )
+    elif download_url:
+        results = list(
+            run_on_downloaded_archive_file(
+                download_url=download_url,
                 retrieval_flags=retrieval_flags,
                 job_count=job_count,
             )

@@ -11,37 +11,38 @@ from license_tools import scancode_tools
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description='Run selected license tools. Will determine all license from the given source by default.',
+        description="Run selected license tools. Will determine all license from the given source by default.",
     )
 
-    source_group = parser.add_argument_group('Artifact source')
+    source_group = parser.add_argument_group("Artifact source")
     source_group = source_group.add_mutually_exclusive_group(required=False)
-    source_group.add_argument('--directory', action='store', type=str, help='Directory to work on.')
-    source_group.add_argument('--file', action='store', type=str, help='File to work on.')
-    source_group.add_argument('--archive', action='store', type=str, help='Archive file to work on.')
-    source_group.add_argument('--package', action='store', type=str, help='Package specification to use.')
+    source_group.add_argument("--directory", action="store", type=str, help="Directory to work on.")
+    source_group.add_argument("--file", action="store", type=str, help="File to work on.")
+    source_group.add_argument("--archive", action="store", type=str, help="Archive file to work on.")
+    source_group.add_argument("--package", action="store", type=str, help="Package specification to use.")
+    source_group.add_argument("--url", action="store", type=str, help="Download URL to use.")
 
     parser.add_argument(
-        '--index-url', action='store', type=str, required=False, default='', help='PyPI index URL to use.'
+        "--index-url", action="store", type=str, required=False, default="", help="PyPI index URL to use."
     )
     parser.add_argument(
-        '--jobs', action='store', type=int, required=False, default=4, help='Parallel jobs to use.'
+        "--jobs", action="store", type=int, required=False, default=4, help="Parallel jobs to use."
     )
 
     parser.add_argument(
-        '--retrieve-copyrights', action='store_true', required=False, default=False, help='Retrieve copyrights.'
+        "--retrieve-copyrights", action="store_true", required=False, default=False, help="Retrieve copyrights."
     )
     parser.add_argument(
-        '--retrieve-emails', action='store_true', required=False, default=False, help='Retrieve e-mails.'
+        "--retrieve-emails", action="store_true", required=False, default=False, help="Retrieve e-mails."
     )
     parser.add_argument(
-        '--retrieve-file-info', action='store_true', required=False, default=False, help='Retrieve file information.'
+        "--retrieve-file-info", action="store_true", required=False, default=False, help="Retrieve file information."
     )
     parser.add_argument(
-        '--retrieve-urls', action='store_true', required=False, default=False, help='Retrieve URLs.'
+        "--retrieve-urls", action="store_true", required=False, default=False, help="Retrieve URLs."
     )
     parser.add_argument(
-        '--retrieve-ldd-data', action='store_true', required=False, default=False, help='Retrieve shared object linking data.'
+        "--retrieve-ldd-data", action="store_true", required=False, default=False, help="Retrieve shared object linking data."
     )
 
     arguments = parser.parse_args()
@@ -51,6 +52,7 @@ def main() -> None:
         file_path=arguments.file,
         archive_path=arguments.archive,
         package_definition=arguments.package,
+        download_url=arguments.url,
         index_url=arguments.index_url,
         job_count=arguments.jobs,
         retrieve_copyrights=arguments.retrieve_copyrights,
@@ -61,5 +63,5 @@ def main() -> None:
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
