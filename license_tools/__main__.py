@@ -11,7 +11,7 @@ from license_tools import retrieval
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Run selected license tools. Will determine all license from the given source by default.",
+        description="Run selected license tools. Will determine all licenses from the given source by default.",
     )
 
     source_group = parser.add_argument_group("Artifact source")
@@ -26,7 +26,7 @@ def main() -> None:
         "--archive", action="store", type=str, help="Archive file to work on."
     )
     source_group.add_argument(
-        "--package", action="store", type=str, help="Package specification to use."
+        "--package", action="store", type=str, help="Python package specification to use."
     )
     source_group.add_argument(
         "--url", action="store", type=str, help="Download URL to use."
