@@ -10,6 +10,7 @@ At the moment, this primarily provides some convenience wrappers around the [Sca
 * Automatically download a specific Python package from PyPI and analyze it.
 * Aggregate how often each license has been used inside the current artifact.
 * Look into shared object files (`*.so*`) to see what they are linking to.
+* Look into font files to easily analyze their metadata.
 * Make everything available from the terminal.
 * Drop all confusing parameters.
 
