@@ -52,6 +52,7 @@ class FileResultsTestCase(TestCase):
     def test_full(self) -> None:
         flags = cast(Dict[str, bool], RetrievalFlags.all(as_kwargs=True))
         del flags["retrieve_ldd_data"]
+        del flags["retrieve_font_data"]
         result = FileResults(
             path=SETUP_PATH, short_path="setup.py", retrieve_licenses=True, **flags
         )

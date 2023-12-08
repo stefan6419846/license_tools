@@ -23,7 +23,7 @@ import requests
 import scancode_config  # type: ignore[import-untyped]
 from joblib import Parallel, delayed  # type: ignore[import-untyped]
 
-from license_tools import linking_tools, scancode_tools
+from license_tools import font_tools, linking_tools, scancode_tools
 from license_tools.constants import NOT_REQUESTED
 from license_tools.scancode_tools import FileResults, Licenses
 
@@ -38,6 +38,7 @@ class RetrievalFlags:
     FILE_INFO = 4
     URLS = 8
     LDD_DATA = 16
+    FONT_DATA = 32
 
     @classmethod
     def to_int(
@@ -47,6 +48,7 @@ class RetrievalFlags:
         retrieve_file_info: bool = False,
         retrieve_urls: bool = False,
         retrieve_ldd_data: bool = False,
+        retrieve_font_data: bool = False,
     ) -> int:
         """
         Convert the given boolean parameter values to a single integer flag value.
@@ -56,6 +58,7 @@ class RetrievalFlags:
         :param retrieve_file_info: Whether to retrieve file-specific information.
         :param retrieve_urls: Whether to retrieve URLs.
         :param retrieve_ldd_data: Whether to retrieve linking data for shared objects.
+        :param retrieve_font_data: Whether to retrieve font data.
         :return: The flags derived from the given parameters.
         """
         return (
@@ -64,6 +67,7 @@ class RetrievalFlags:
             + cls.FILE_INFO * retrieve_file_info
             + cls.URLS * retrieve_urls
             + cls.LDD_DATA * retrieve_ldd_data
+            + cls.FONT_DATA * retrieve_font_data
         )
 
     @classmethod
@@ -74,7 +78,7 @@ class RetrievalFlags:
         :param: If enabled, return kwargs instead of the integer value.
         :return: The value for all flags enabled.
         """
-        value = cls.to_int(True, True, True, True, True)
+        value = cls.to_int(True, True, True, True, True, True)
         if as_kwargs:
             return cls.to_kwargs(value)
         return value
@@ -104,6 +108,7 @@ class RetrievalFlags:
             retrieve_file_info=cls.is_set(flags=flags, flag=cls.FILE_INFO),
             retrieve_urls=cls.is_set(flags=flags, flag=cls.URLS),
             retrieve_ldd_data=cls.is_set(flags=flags, flag=cls.LDD_DATA),
+            retrieve_font_data=cls.is_set(flags=flags, flag=cls.FONT_DATA),
         )
 
 
@@ -125,6 +130,10 @@ def run_on_file(
     # This data is not yet part of the dataclasses above, as it is a custom analysis.
     if retrieval_kwargs.pop("retrieve_ldd_data"):
         results = linking_tools.check_shared_objects(path=path)
+        if results:
+            print(short_path + "\n" + results)
+    if retrieval_kwargs.pop("retrieve_font_data"):
+        results = font_tools.check_font(path=path)
         if results:
             print(short_path + "\n" + results)
 
@@ -310,6 +319,7 @@ def run(
     retrieve_file_info: bool = False,
     retrieve_urls: bool = False,
     retrieve_ldd_data: bool = False,
+    retrieve_font_data: bool = False,
 ) -> list[FileResults]:
     """
     Run the analysis for the given input definition.
@@ -329,6 +339,7 @@ def run(
     :param retrieve_file_info: Whether to retrieve file-specific information.
     :param retrieve_urls: Whether to retrieve URLs.
     :param retrieve_ldd_data: Whether to retrieve linking data for shared objects.
+    :param retrieve_font_data: Whether to retrieve font data.
     :return: The requested results.
     """
     # Remove the temporary directory of the main thread.
@@ -345,6 +356,7 @@ def run(
         retrieve_file_info=retrieve_file_info,
         retrieve_urls=retrieve_urls,
         retrieve_ldd_data=retrieve_ldd_data,
+        retrieve_font_data=retrieve_font_data,
     )
 
     # Run the analysis itself.

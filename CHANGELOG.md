@@ -1,6 +1,7 @@
 # Development version
 
 * Move code to dedicated files.
+* Add support for analyzing fonts.
 
 # Version 0.4.0 - 2023-11-21
 

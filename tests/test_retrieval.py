@@ -32,10 +32,10 @@ from tests.data import (
 class RetrievalFlagsTestCase(TestCase):
     def test_to_int(self) -> None:
         self.assertEqual(0, RetrievalFlags.to_int())
-        self.assertEqual(21, RetrievalFlags.to_int(True, False, True, False, True))
+        self.assertEqual(21, RetrievalFlags.to_int(True, False, True, False, True, False))
 
     def test_all(self) -> None:
-        self.assertEqual(31, RetrievalFlags.all())
+        self.assertEqual(63, RetrievalFlags.all())
         self.assertDictEqual(
             dict(
                 retrieve_copyrights=True,
@@ -43,6 +43,7 @@ class RetrievalFlagsTestCase(TestCase):
                 retrieve_file_info=True,
                 retrieve_urls=True,
                 retrieve_ldd_data=True,
+                retrieve_font_data=True,
             ),
             cast(Dict[str, bool], RetrievalFlags.all(as_kwargs=True)),
         )
@@ -61,6 +62,7 @@ class RetrievalFlagsTestCase(TestCase):
                 retrieve_file_info=False,
                 retrieve_urls=False,
                 retrieve_ldd_data=False,
+                retrieve_font_data=False,
             ),
             RetrievalFlags.to_kwargs(0),
         )
@@ -71,6 +73,7 @@ class RetrievalFlagsTestCase(TestCase):
                 retrieve_file_info=True,
                 retrieve_urls=False,
                 retrieve_ldd_data=True,
+                retrieve_font_data=False,
             ),
             RetrievalFlags.to_kwargs(21),
         )
@@ -78,25 +81,22 @@ class RetrievalFlagsTestCase(TestCase):
 
 class RunOnFileTestCase(TestCase):
     def _run_mocked(
-        self, flags: int, return_value: str | None = ""
+        self, flags: int, mock_target: str, return_value: str | None = "",
     ) -> tuple[mock.Mock, mock.Mock, str]:
         stdout = StringIO()
         file_result = object()
         with mock.patch.object(
             retrieval, "FileResults", return_value=file_result
-        ) as results_mock, redirect_stdout(stdout), mock.patch(
-            "license_tools.linking_tools.check_shared_objects",
-            return_value=return_value,
-        ) as check_mock:
+        ) as results_mock, redirect_stdout(stdout), mock.patch(mock_target, return_value=return_value) as check_mock:
             result = retrieval.run_on_file(
                 path=SETUP_PATH, short_path="setup.py", retrieval_flags=flags
             )
             self.assertEqual(file_result, result)
         return results_mock, check_mock, stdout.getvalue()
 
-    def test_run_on_file(self) -> None:
+    def test_run_on_file__ldd_handling(self) -> None:
         # 1) LDD handling is inactive.
-        results_mock, check_mock, stdout = self._run_mocked(flags=15)
+        results_mock, check_mock, stdout = self._run_mocked(flags=15, mock_target="license_tools.linking_tools.check_shared_objects")
         check_mock.assert_not_called()
         results_mock.assert_called_once_with(
             path=SETUP_PATH,
@@ -113,7 +113,7 @@ class RunOnFileTestCase(TestCase):
         for result in ["", None]:
             with self.subTest(result=result):
                 results_mock, check_mock, stdout = self._run_mocked(
-                    flags=31, return_value=result
+                    flags=31, return_value=result, mock_target="license_tools.linking_tools.check_shared_objects"
                 )
                 check_mock.assert_called_once_with(path=SETUP_PATH)
                 results_mock.assert_called_once_with(
@@ -135,7 +135,7 @@ class RunOnFileTestCase(TestCase):
     /lib64/ld-linux-x86-64.so.2 (0x00007fbe492b8000)
 """
         results_mock, check_mock, stdout = self._run_mocked(
-            flags=31, return_value=ldd_usr_bin_bc
+            flags=31, return_value=ldd_usr_bin_bc, mock_target="license_tools.linking_tools.check_shared_objects"
         )
         check_mock.assert_called_once_with(path=SETUP_PATH)
         results_mock.assert_called_once_with(
@@ -148,6 +148,67 @@ class RunOnFileTestCase(TestCase):
             retrieve_urls=True,
         )
         self.assertEqual("setup.py\n" + ldd_usr_bin_bc + "\n", stdout)
+
+    def test_run_on_file__font_handling(self) -> None:
+        # 1) Font handling is inactive.
+        results_mock, check_mock, stdout = self._run_mocked(flags=15, mock_target="license_tools.font_tools.check_font")
+        check_mock.assert_not_called()
+        results_mock.assert_called_once_with(
+            path=SETUP_PATH,
+            short_path="setup.py",
+            retrieve_licenses=True,
+            retrieve_copyrights=True,
+            retrieve_emails=True,
+            retrieve_file_info=True,
+            retrieve_urls=True,
+        )
+        self.assertEqual("", stdout)
+
+        # 2) Font handling is active, but has no results.
+        for result in ["", None]:
+            with self.subTest(result=result):
+                results_mock, check_mock, stdout = self._run_mocked(
+                    flags=63, return_value=result, mock_target="license_tools.font_tools.check_font"
+                )
+                check_mock.assert_called_once_with(path=SETUP_PATH)
+                results_mock.assert_called_once_with(
+                    path=SETUP_PATH,
+                    short_path="setup.py",
+                    retrieve_licenses=True,
+                    retrieve_copyrights=True,
+                    retrieve_emails=True,
+                    retrieve_file_info=True,
+                    retrieve_urls=True,
+                )
+                self.assertEqual("", stdout)
+
+        # 3) Font handling is active and has results.
+        font_awesome = """             Copyright notice: Copyright (c) Font Awesome
+          Font family name: Font Awesome 6 Free Solid
+       Font subfamily name: Solid
+    Unique font identifier: Font Awesome 6 Free Solid-6.5.1
+            Full font name: Font Awesome 6 Free Solid
+            Version string: Version 773.01171875 (Font Awesome version: 6.5.1)
+           PostScript name: FontAwesome6Free-Solid
+               Description: The web's most popular icon set and toolkit.
+                URL Vendor: https://fontawesome.com
+   Typographic Family name: Font Awesome 6 Free
+Typographic Subfamily name: Solid
+"""
+        results_mock, check_mock, stdout = self._run_mocked(
+            flags=63, return_value=font_awesome, mock_target="license_tools.font_tools.check_font"
+        )
+        check_mock.assert_called_once_with(path=SETUP_PATH)
+        results_mock.assert_called_once_with(
+            path=SETUP_PATH,
+            short_path="setup.py",
+            retrieve_licenses=True,
+            retrieve_copyrights=True,
+            retrieve_emails=True,
+            retrieve_file_info=True,
+            retrieve_urls=True,
+        )
+        self.assertEqual("setup.py\n" + font_awesome + "\n", stdout)
 
 
 class GetFilesFromDirectoryTestCase(TestCase):

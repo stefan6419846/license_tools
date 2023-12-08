@@ -84,6 +84,13 @@ def main() -> None:
         default=False,
         help="Retrieve shared object linking data.",
     )
+    parser.add_argument(
+        "--retrieve-font-data",
+        action="store_true",
+        required=False,
+        default=False,
+        help="Retrieve font metadata.",
+    )
 
     arguments = parser.parse_args()
 
@@ -100,6 +107,7 @@ def main() -> None:
         retrieve_file_info=arguments.retrieve_file_info,
         retrieve_urls=arguments.retrieve_urls,
         retrieve_ldd_data=arguments.retrieve_ldd_data,
+        retrieve_font_data=arguments.retrieve_font_data,
     )
 
 

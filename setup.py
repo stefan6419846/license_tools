@@ -26,6 +26,7 @@ setuptools.setup(
         "scancode-toolkit",
         "typecode-libmagic",
         "joblib",
+        "fontTools[woff]",
     ],
     extras_require={
         "dev": [
