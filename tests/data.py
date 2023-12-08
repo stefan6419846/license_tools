@@ -390,6 +390,4 @@ typing_extensions-4.8.0.dist-info/METADATA                                      
                                                                   None  3
                                                             Python-2.0  1
 Python-2.0 AND (Python-2.0 AND BSD-3-Clause) AND (Python-2.0 AND BSD-3-Clause AND 0BSD)  1
-"""[
-    1:
-]  # noqa: W291
+"""  # noqa: W291

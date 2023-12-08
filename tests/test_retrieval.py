@@ -258,7 +258,7 @@ class RunOnDownloadedArchiveFileTestCase(TestCase):
         ) -> Generator[Any, None, None]:
             self.assertEqual(2, job_count)
             self.assertEqual(42, retrieval_flags)
-            self.assertEqual(suffix, archive_path.name[-len(suffix) :])
+            self.assertEqual(suffix, archive_path.name[-len(suffix):])
             yield from directory_result
 
         with mock.patch.object(
@@ -529,6 +529,6 @@ class RunTestCase(TestCase):
 ====================================================================================================
 
 Apache-2.0 AND (LicenseRef-scancode-unknown-license-reference AND Apache-2.0)  1
-""",
+""",  # noqa: W291
             str(stdout),
-        )  # noqa: W291
+        )
