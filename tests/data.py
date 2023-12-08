@@ -4,10 +4,10 @@
 
 from contextlib import contextmanager
 try:
-    from importlib.resources import files, as_file
+    from importlib.resources import files, as_file  # type: ignore[attr-defined,unused-ignore]
 except ImportError:
     # Python 3.8
-    from importlib_resources import files, as_file  # type: ignore
+    from importlib_resources import files, as_file  # type: ignore[unused-ignore,import-not-found,no-redef]
 from pathlib import Path
 from typing import Generator
 
