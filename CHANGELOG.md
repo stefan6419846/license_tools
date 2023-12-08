@@ -1,5 +1,7 @@
 # Development version
 
+* Move code to dedicated files.
+
 # Version 0.4.0 - 2023-11-21
 
 * Switch to *mypy* strict mode.

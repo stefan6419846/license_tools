@@ -37,7 +37,7 @@ Example: To see the licenses of a specific *joblib* package version, use somethi
 python -m license_tools --package "joblib==1.2.0"
 ```
 
-If you want to use the package as a library, have a look at the `license_tools.scancode_tools.run` method for example to see how everything interacts.
+If you want to use the package as a library, have a look at the `license_tools.retrieval.run` method for example to see how everything interacts.
 
 ## License
 
