@@ -3,7 +3,11 @@
 # See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
 
 from contextlib import contextmanager
-from importlib.resources import files, as_file
+try:
+    from importlib.resources import files, as_file
+except ImportError:
+    # Python 3.8
+    from importlib_resources import files, as_file  # type: ignore
 from pathlib import Path
 from typing import Generator
 
@@ -32,7 +36,7 @@ def get_file(name: str) -> Generator[Path, None, None]:
 SETUP_PY_LICENSES = Licenses(
     detected_license_expression="apache-2.0 AND (unknown-license-reference AND apache-2.0)",
     detected_license_expression_spdx="Apache-2.0 AND (LicenseRef-scancode-unknown-license-reference AND Apache-2.0)",
-    percentage_of_license_text=21.47,
+    percentage_of_license_text=20.71,
     license_detections=[
         LicenseDetection(
             license_expression="apache-2.0",
@@ -100,8 +104,8 @@ SETUP_PY_LICENSES = Licenses(
             matches=[
                 LicenseMatch(
                     score=95.0,
-                    start_line=45,
-                    end_line=45,
+                    start_line=46,
+                    end_line=46,
                     matched_length=6,
                     match_coverage=100.0,
                     matcher="2-aho",
@@ -116,8 +120,8 @@ SETUP_PY_LICENSES = Licenses(
     license_clues=[
         LicenseClue(
             score=50.0,
-            start_line=51,
-            end_line=51,
+            start_line=52,
+            end_line=52,
             matched_length=3,
             match_coverage=100.0,
             matcher="2-aho",
