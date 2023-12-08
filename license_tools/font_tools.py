@@ -91,7 +91,10 @@ def convert_timestamp_to_datetime(value: int) -> datetime.datetime:
     :param value: The font timestamp since the font epoch in 1904.
     :return: The regular datetime object.
     """
-    return datetime.datetime.fromtimestamp(max(0, value) + timeTools.epoch_diff)
+    return datetime.datetime.fromtimestamp(
+        max(0, value) + timeTools.epoch_diff,
+        tz=datetime.timezone.utc
+    )
 
 
 def convert_timestamp_to_string(value: int) -> str:

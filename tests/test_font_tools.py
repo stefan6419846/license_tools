@@ -36,7 +36,7 @@ class ConvertHeadFlagsTestCase(TestCase):
 
     def test_some(self) -> None:
         self.assertEqual(
-            ("Baseline for font at y=0; " "Font converted"),
+            "Baseline for font at y=0; " "Font converted",
             font_tools.convert_head_flags(1 + 2**12),
         )
 
@@ -44,14 +44,14 @@ class ConvertHeadFlagsTestCase(TestCase):
 class ConvertTimestamp(TestCase):
     def test_convert_timestamp(self) -> None:
         self.assertEqual(
-            datetime.datetime(year=2023, month=12, day=3, hour=5, minute=8, second=57),
+            datetime.datetime(year=2023, month=12, day=3, hour=4, minute=8, second=57, tzinfo=datetime.timezone.utc),
             font_tools.convert_timestamp_to_datetime(3784421337),
         )
         self.assertEqual(
-            "2023-11-29 21:15:42", font_tools.convert_timestamp_to_string(3784133742)
+            "2023-11-29 20:15:42", font_tools.convert_timestamp_to_string(3784133742)
         )
         self.assertEqual(
-            "1904-01-01 01:00:00", font_tools.convert_timestamp_to_string(-1)
+            "1904-01-01 00:00:00", font_tools.convert_timestamp_to_string(-1)
         )
 
 
@@ -62,7 +62,7 @@ class ConvertMacStyleTestCase(TestCase):
     def test_all(self) -> None:
         self.assertEqual(
             "Bold, Italic, Underline, Outline, Shadow, Condensed, Extended",
-            font_tools.convert_mac_style(2**7 - 1),
+            font_tools.convert_mac_style(2 ** 7 - 1),
         )
 
     def test_some(self) -> None:
@@ -120,8 +120,8 @@ class AnalyzeFontTestCase(TestCase):
                             "Baseline for font at y=0; Left sidebearing point at x=0; Force ppem to integer values; Instructions may alter advance width",
                         ),
                         ("Units per em", 2048),
-                        ("Created", "2009-07-08 00:19:06"),
-                        ("Modified", "2023-02-28 12:34:38"),
+                        ("Created", "2009-07-07 22:19:06"),
+                        ("Modified", "2023-02-28 11:34:38"),
                         ("xMin", -1002),
                         ("yMin", -529),
                         ("xMax", 2351),
@@ -182,8 +182,8 @@ class AnalyzeFontTestCase(TestCase):
                             ),
                         ),
                         ("Units per em", 2048),
-                        ("Created", "2015-08-18 23:25:12"),
-                        ("Modified", "2015-08-18 23:25:12"),
+                        ("Created", "2015-08-18 21:25:12"),
+                        ("Modified", "2015-08-18 21:25:12"),
                         ("xMin", -10),
                         ("yMin", -678),
                         ("xMax", 3133),
@@ -229,8 +229,8 @@ class AnalyzeFontTestCase(TestCase):
                         ("Magic number", 1594834165),
                         ("Flags", "Baseline for font at y=0; Left sidebearing point at x=0; Force ppem to integer values"),
                         ("Units per em", 512),
-                        ("Created", "2023-11-29 23:28:05"),
-                        ("Modified", "2023-11-29 23:28:05"),
+                        ("Created", "2023-11-29 22:28:05"),
+                        ("Modified", "2023-11-29 22:28:05"),
                         ("xMin", -13),
                         ("yMin", -75),
                         ("xMax", 651),
