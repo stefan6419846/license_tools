@@ -36,7 +36,7 @@ setuptools.setup(
             "mypy",
             "requests",
             "types-requests",
-            "importlib_metadata; python_version < '3.9'",
+            "importlib_resources; python_version<'3.9'",
         ]
     },
     classifiers=[
