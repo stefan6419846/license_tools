@@ -283,6 +283,7 @@ class CheckFontTestCase(TestCase):
     def test_valid(self) -> None:
         with get_file("fa-solid-900.woff2") as path:
             result = font_tools.check_font(path)
+        # Important note: The output does not end with a newline!
         self.assertEqual(
             """
           Copyright notice: Copyright (c) Font Awesome

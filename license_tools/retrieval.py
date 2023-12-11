@@ -135,7 +135,7 @@ def run_on_file(
     if retrieval_kwargs.pop("retrieve_font_data"):
         results = font_tools.check_font(path=path)
         if results:
-            print(short_path + "\n" + results)
+            print(short_path + "\n" + results + "\n")
 
     # Register this here as each parallel process has its own directory.
     atexit.register(scancode_tools.cleanup, scancode_config.scancode_temp_dir)

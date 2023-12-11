@@ -208,7 +208,7 @@ Typographic Subfamily name: Solid
             retrieve_file_info=True,
             retrieve_urls=True,
         )
-        self.assertEqual("setup.py\n" + font_awesome + "\n", stdout)
+        self.assertEqual("setup.py\n" + font_awesome + "\n\n", stdout)
 
 
 class GetFilesFromDirectoryTestCase(TestCase):
