@@ -309,10 +309,11 @@ class DumpToTtxTestCase(TestCase):
                 result = font_tools.dump_to_ttx(source_path=path, target_path=target_path)
                 self.assertEqual(target_path, result)
 
-                # Due to the obligation of the OFL-1.1, do not compare against the actual
+                # Due to the obligations of the OFL-1.1, do not compare against the actual
                 # content here. TTX files can be considered a format conversion and thus
                 # would require not using the `Carlito` name if we would ship the
                 # corresponding target files. A size comparison should be sufficient
-                # for now.
+                # for now, as this mostly is some basic *fontTools* integration test
+                # anyway.
                 actual = target_path.read_text()
                 self.assertLessEqual(9627200, len(actual))  # Tests showed 9627208.
