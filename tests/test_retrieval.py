@@ -12,7 +12,7 @@ from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
-from typing import Any, cast, Dict, Generator, List
+from typing import Any, cast, Dict, Generator, List, Tuple  # TODO: Remove `Tuple` after dropping Python 3.8.
 from unittest import mock, TestCase
 
 import requests
@@ -312,7 +312,7 @@ class RunOnDirectoryTestCase(TestCase):
                 )
 
         result_set: set[Path] = cast(set[Path], set(results))
-        expected: list[tuple[Path, str]] = []
+        expected: list[Tuple[Path, str]] = []
         self.assertEqual(4, len(results), results)
         for name in ['directory/file.txt', 'nested.tar.bz2', 'nested_tar_bz2']:
             result_set.remove(directory / name)
