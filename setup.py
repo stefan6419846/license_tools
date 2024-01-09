@@ -27,6 +27,7 @@ setuptools.setup(
         "typecode-libmagic",
         "joblib",
         "fontTools[woff]",
+        "rpmfile",
     ],
     extras_require={
         "dev": [
@@ -37,7 +38,7 @@ setuptools.setup(
             "requests",
             "types-requests",
             "importlib_resources; python_version<'3.9'",
-        ]
+        ],
     },
     classifiers=[
         "Development Status :: 4 - Beta",

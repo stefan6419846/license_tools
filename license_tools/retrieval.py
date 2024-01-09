@@ -13,7 +13,6 @@ import math
 import shutil
 import subprocess
 import sys
-import zipfile
 from collections import defaultdict
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
@@ -25,7 +24,8 @@ from joblib import Parallel, delayed  # type: ignore[import-untyped]
 
 from license_tools import font_tools, linking_tools, scancode_tools
 from license_tools.constants import NOT_REQUESTED
-from license_tools.scancode_tools import FileResults, Licenses
+from license_tools.scancode_tools import FileResults, Licenses, PackageResults
+from license_tools.utils import archive_utils
 
 
 class RetrievalFlags:
@@ -115,6 +115,7 @@ class RetrievalFlags:
 def run_on_file(
     path: Path,
     short_path: str,
+    job_count: int = 4,
     retrieval_flags: int = 0,
 ) -> FileResults:
     """
@@ -122,6 +123,7 @@ def run_on_file(
 
     :param path: The file path to analyze.
     :param short_path: The short path to use for display.
+    :param job_count: The number of parallel jobs to use.
     :param retrieval_flags: Values to retrieve.
     :return: The requested results.
     """
@@ -147,15 +149,17 @@ def run_on_file(
 
 def get_files_from_directory(
     directory: str | Path,
+    prefix: str | None = None,
 ) -> Generator[tuple[Path, str], None, None]:
     """
     Get the files from the given directory, recursively.
 
     :param directory: The directory to walk through.
+    :param prefix: Custom prefix to use.
     :return: For each file, the complete Path object as well as the path string
              relative to the given directory.
     """
-    directory_string = str(directory)
+    directory_string = str(directory) if prefix is None else prefix
     common_prefix_length = len(directory_string) + int(
         not directory_string.endswith("/")
     )
@@ -171,6 +175,7 @@ def run_on_directory(
     directory: str,
     job_count: int = 4,
     retrieval_flags: int = 0,
+    prefix: str | None = None,
 ) -> Generator[FileResults, None, None]:
     """
     Run the analysis on the given directory.
@@ -178,17 +183,44 @@ def run_on_directory(
     :param directory: The directory to analyze.
     :param job_count: The number of parallel jobs to use.
     :param retrieval_flags: Values to retrieve.
+    :param prefix: Custom prefix to use.
     :return: The requested results per file.
     """
+    files = list(get_files_from_directory(directory, prefix))
     results = Parallel(n_jobs=job_count)(
         delayed(run_on_file)(
             path=path,
             short_path=short_path,
+            job_count=job_count,
             retrieval_flags=retrieval_flags,
         )
-        for path, short_path in get_files_from_directory(directory)
+        for path, short_path in files
     )
     yield from results
+
+    for path, _ in files:
+        archive_handler = archive_utils.get_handler_for_archive(path)
+        if archive_handler:
+            name = path.name[:-len("".join(path.suffixes))]
+            subdirectory = path.parent / f'{name}_{"_".join(path.suffixes).replace(".", "")}'
+            if subdirectory.exists():
+                with TemporaryDirectory(dir=path.parent) as tempdir:
+                    subdirectory = Path(tempdir)
+                    archive_handler(archive_path=path, target_directory=subdirectory)
+                    yield from run_on_directory(
+                        directory=str(subdirectory),
+                        job_count=job_count,
+                        retrieval_flags=retrieval_flags,
+                        prefix=directory,
+                    )
+            else:
+                archive_handler(archive_path=path, target_directory=subdirectory)
+                yield from run_on_directory(
+                    directory=str(subdirectory),
+                    job_count=job_count,
+                    retrieval_flags=retrieval_flags,
+                    prefix=directory,
+                )
 
 
 def run_on_package_archive_file(
@@ -204,13 +236,16 @@ def run_on_package_archive_file(
     :param retrieval_flags: Values to retrieve.
     :return: The requested results.
     """
+    if archive_path.suffix == ".rpm" or (archive_path.suffixes and ".rpm" in archive_path.suffixes):
+        rpm_results = PackageResults.from_rpm(archive_path)
+        if rpm_results.declared_license_expression_spdx:
+            print(f'{archive_path} declares the {rpm_results.declared_license_expression_spdx} license in its metadata.\n')
+
     with TemporaryDirectory() as working_directory:
-        if archive_path.suffix == ".whl":
-            # `shutil.unpack_archive` cannot handle wheel files.
-            with zipfile.ZipFile(archive_path, "r") as zip_file:
-                zip_file.extractall(working_directory)
-        else:
-            shutil.unpack_archive(archive_path, working_directory)
+        handler = archive_utils.get_handler_for_archive(archive_path=archive_path)
+        if not handler:
+            raise ValueError(f'Unsupported archive format: {archive_path}')
+        handler(archive_path=archive_path, target_directory=working_directory)
         yield from run_on_directory(
             directory=working_directory,
             job_count=job_count,
@@ -400,7 +435,7 @@ def run(
                 short_path=str(file_path),
                 retrieval_flags=retrieval_flags,
             )
-        ]
+         ]
     else:
         return []
 

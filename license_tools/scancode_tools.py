@@ -13,9 +13,11 @@ import atexit
 import datetime
 from dataclasses import dataclass, field as dataclass_field
 from pathlib import Path
+from typing import Literal
 
 import scancode_config  # type: ignore[import-untyped]
 from commoncode import fileutils  # type: ignore[import-untyped]
+from packagedcode.rpm import RpmArchiveHandler  # type: ignore[import-untyped]
 from scancode import api  # type: ignore[import-untyped]
 
 from license_tools.constants import NOT_REQUESTED
@@ -158,6 +160,7 @@ class LicenseMatch:
     rule_identifier: str
     rule_relevance: int
     rule_url: str | None
+    matched_text: str | None = None
 
 
 @dataclass
@@ -249,6 +252,89 @@ class FileResults:
             self.licenses = Licenses(**api.get_licenses(path_str))
         if self.retrieve_file_info:
             self.file_info = FileInfo(**api.get_file_info(path_str))
+
+
+@dataclass
+class Party:
+    """
+    A party related to a package.
+    """
+
+    PARTY_TYPES = Literal[None, "person", "project", "organization"]
+
+    type: PARTY_TYPES = None
+    role: str | None = None
+    name: str | None = None
+    email: str | None = None
+    url: str | None = None
+
+
+@dataclass
+class PackageResults:
+    """
+    Container for package-specific data, based upon `packagedcode.models.PackageData`.
+    """
+
+    api_data_url: str | None = None
+    bug_tracking_url: str | None = None
+    code_view_url: str | None = None
+    copyright: str | None = None
+    datasource_id: str | None = None
+    declared_license_expression: str | None = None
+    declared_license_expression_spdx: str | None = None
+    # dependencies: list[DependentPackage] = dataclass_field(default_factory=list)
+    description: str | None = None
+    download_url: str | None = None
+    # extra_data: dict[str, Any] = dataclass_field(default_factory=dict)
+    extracted_license_statement: str | None = None
+    # file_references: list[FileReference] = dataclass_field(default_factory=list)
+    holder: str | None = None
+    homepage_url: str | None = None
+    keywords: list[str] = dataclass_field(default_factory=list)
+    license_detections: list[LicenseDetection] = dataclass_field(default_factory=list)
+    md5: str | None = None
+    name: str | None = None
+    namespace: str | None = None
+    notice_text: str | None = None
+    other_license_detections: list[LicenseDetection] = dataclass_field(default_factory=list)
+    other_license_expression: str | None = None
+    other_license_expression_spdx: str | None = None
+    parties: list[Party] = dataclass_field(default_factory=list)
+    primary_language: str | None = None
+    purl: str | None = None
+    qualifiers: dict[str, str] = dataclass_field(default_factory=dict)
+    release_date: datetime.date | None = None
+    repository_download_url: str | None = None
+    repository_homepage_url: str | None = None
+    sha1: str | None = None
+    sha256: str | None = None
+    sha512: str | None = None
+    size: int | None = None
+    source_packages: list[str] | None = None
+    subpath: str | None = None
+    type: str | None = None
+    vcs_url: str | None = None
+    version: str | None = None
+
+    def __post_init__(self) -> None:
+        self.license_detections = [
+            LicenseDetection(**x) if not isinstance(x, LicenseDetection) else x for x in self.license_detections  # type: ignore[arg-type]
+        ]
+        self.other_license_detections = [
+            LicenseDetection(**x) if not isinstance(x, LicenseDetection) else x for x in self.other_license_detections  # type: ignore[arg-type]
+        ]
+        self.parties = [
+            Party(**x) if not isinstance(x, Party) else x for x in self.parties  # type: ignore[arg-type]
+        ]
+
+    @classmethod
+    def from_rpm(cls, path: Path) -> 'PackageResults':
+        # Drop some keys which we do not handle for now.
+        data = next(RpmArchiveHandler.parse(path)).to_dict()
+        data.pop('dependencies', None)
+        data.pop('extra_data', None)
+        data.pop('file_references', None)
+        return cls(**data)
 
 
 def cleanup(directory: Path | str) -> None:

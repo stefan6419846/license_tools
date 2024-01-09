@@ -7,6 +7,7 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+import tarfile
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
@@ -260,7 +261,7 @@ class RunOnDirectoryTestCase(TestCase):
         file_results_iterable = iter(file_results)
         paths = [(Path(f"/tmp/file{i}.py"), f"file{i}.py") for i in range(1, 6)]
 
-        def run_on_file(path: Path, short_path: str, retrieval_flags: int = 0) -> Any:
+        def run_on_file(path: Path, short_path: str, job_count: int = 4, retrieval_flags: int = 0) -> Any:
             return next(file_results_iterable)
 
         with mock.patch.object(
@@ -277,14 +278,62 @@ class RunOnDirectoryTestCase(TestCase):
         run_mock.assert_has_calls(
             [
                 mock.call(
-                    path=current_path, short_path=current_short_path, retrieval_flags=42
+                    path=current_path, short_path=current_short_path, job_count=1, retrieval_flags=42
                 )
                 for current_path, current_short_path in paths
             ],
             any_order=False,
         )
         self.assertEqual(len(paths), run_mock.call_count, run_mock.call_args_list)
-        get_mock.assert_called_once_with("/tmp/dummy/directory")
+        get_mock.assert_called_once_with("/tmp/dummy/directory", None)
+
+    def test_nested_with_existing_directory(self):
+        with TemporaryDirectory() as tempdir:
+            directory = Path(tempdir)
+            directory.joinpath("directory").mkdir()
+            directory.joinpath("directory", "file.txt").write_text("MIT-0")
+            directory.joinpath("nested_tar_bz2").write_text("Dummy")
+            with TemporaryDirectory() as nested_directory:
+                nested_path = Path(nested_directory)
+                nested_path.joinpath("LICENSE").write_text("This is my license.")
+                with tarfile.open(directory / "nested.tar.bz2", "w:bz2") as tar:
+                    tar.add(nested_path, arcname=nested_path.name)
+
+            def run_on_file(path: Path, short_path: str, job_count: int = 4, retrieval_flags: int = 0) -> Any:
+                return path
+
+            with mock.patch.object(
+                retrieval, "run_on_file", side_effect=run_on_file
+            ) as run_mock:
+                results = list(
+                    retrieval.run_on_directory(
+                        tempdir, job_count=1, retrieval_flags=42
+                    )
+                )
+
+        result_set = set(results)
+        expected = []
+        self.assertEqual(4, len(results), results)
+        for name in ['directory/file.txt', 'nested.tar.bz2', 'nested_tar_bz2']:
+            result_set.remove(directory / name)  # type: ignore
+            expected.append((directory / name, name))
+        self.assertEqual(1, len(result_set), result_set)
+        remaining = result_set.pop()
+        self.assertEqual(directory, remaining.parent.parent.parent)
+        self.assertEqual(nested_path.name, remaining.parent.name)
+        self.assertEqual('LICENSE', remaining.name)
+        expected.append((remaining, "/".join(str(remaining).rsplit("/", maxsplit=3)[1:])))
+
+        run_mock.assert_has_calls(
+            [
+                mock.call(
+                    path=current_path, short_path=current_short_path, job_count=1, retrieval_flags=42
+                )
+                for current_path, current_short_path in expected
+            ],
+            any_order=False,
+        )
+        self.assertEqual(len(expected), run_mock.call_count, run_mock.call_args_list)
 
 
 class RunOnPackageArchiveFileTestCase(TestCase):
@@ -326,6 +375,25 @@ class RunOnPackageArchiveFileTestCase(TestCase):
             suffix=".tar.gz",
             url=url,
             expected_files=TYPING_EXTENSION_4_8_0__SOURCE_FILES,
+        )
+
+    def test_rpm(self) -> None:
+        url = "https://download.opensuse.org/distribution/leap/15.6/repo/oss/x86_64/libaio1-0.3.109-1.25.x86_64.rpm"
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            self._check_call(
+                suffix=".rpm",
+                url=url,
+                expected_files=[
+                    "lib64/libaio.so.1",
+                    "lib64/libaio.so.1.0.1",
+                    "usr/share/doc/packages/libaio1/COPYING",
+                    "usr/share/doc/packages/libaio1/TODO",
+                ],
+            )
+        self.assertRegex(
+            expected_regex=r"^\/tmp\/tmp[^/]+\.rpm declares the LGPL-2\.1-or-later license in its metadata\.\n$",
+            text=stdout.getvalue()
         )
 
 
@@ -610,5 +678,45 @@ class RunTestCase(TestCase):
 
 Apache-2.0 AND (LicenseRef-scancode-unknown-license-reference AND Apache-2.0)  1
 """,  # noqa: W291
+            str(stdout),
+        )
+
+    def test_nested_archive(self) -> None:
+        # url = "https://download.opensuse.org/source/distribution/leap/15.6/repo/oss/src/libaio-0.3.109-1.25.src.rpm"  # Takes too long.
+        with TemporaryDirectory() as archive_directory, NamedTemporaryFile(suffix=".tar.gz") as archive_file:
+            archive_directory_path = Path(archive_directory)
+            archive_directory_path.joinpath("directory1", "directory2").mkdir(parents=True)
+            archive_directory_path.joinpath("directory1", "directory2", "file.txt").write_text("MIT-0")
+            archive_directory_path.joinpath("directory1", "directory2", "file2.txt").write_text("Apache-2.0")
+            with TemporaryDirectory() as nested_directory:
+                nested_path = Path(nested_directory)
+                nested_path.joinpath("subdirectory").mkdir()
+                nested_path.joinpath("subdirectory", "README").write_text("CC-BY-2.0")
+                nested_path.joinpath("LICENSE").write_text("This is my license.")
+                with tarfile.open(archive_directory_path / "nested.tar.bz2", "w:bz2") as tar:
+                    tar.add(nested_path, arcname=nested_path.name)
+
+            archive_path = Path(archive_file.name)
+            with tarfile.open(archive_path, "w:gz") as tar:
+                tar.add(archive_directory_path, arcname=archive_directory_path.name)
+
+            with self.record_stdout() as stdout:
+                result = retrieval.run(archive_path=archive_path, job_count=1)
+
+        self.assertIsInstance(result, list)
+        self.assertEqual(5, len(result), result)
+        self.assertEqual(
+            f"""                {archive_directory_path.name}/directory1/directory2/file.txt                                                                        
+               {archive_directory_path.name}/directory1/directory2/file2.txt                                                             Apache-2.0 [100.0]
+                                {archive_directory_path.name}/nested.tar.bz2                                                                        
+            {archive_directory_path.name}/nested_tar_bz2/{nested_path.name}/LICENSE                                                                        
+{archive_directory_path.name}/nested_tar_bz2/{nested_path.name}/subdirectory/README                                                              CC-BY-2.0 [50.0]
+
+====================================================================================================
+
+                                                            Apache-2.0  1
+                                                             CC-BY-2.0  1
+                                                                  None  3
+""",  # noqa: E501, W291
             str(stdout),
         )

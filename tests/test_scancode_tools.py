@@ -10,6 +10,8 @@ from tempfile import mkdtemp, NamedTemporaryFile
 from typing import cast, Dict
 from unittest import TestCase
 
+import requests
+
 from license_tools import scancode_tools
 from license_tools.constants import NOT_REQUESTED
 from license_tools.retrieval import RetrievalFlags
@@ -20,8 +22,8 @@ from license_tools.scancode_tools import (
     FileInfo,
     FileResults,
     Holder,
-    Licenses,
-    Url,
+    LicenseDetection, LicenseMatch, Licenses,
+    PackageResults, Party, Url,
     Urls,
 )
 from tests.data import LICENSE_PATH, SETUP_PATH, SETUP_PY_LICENSES
@@ -172,6 +174,52 @@ class FileResultsTestCase(TestCase):
             is_script=False,
         )
         self.assertEqual(expected, result.file_info)
+
+
+class PackageResultsTestCase(TestCase):
+    def test_rpm(self):
+        url = "https://download.opensuse.org/distribution/leap/15.6/repo/oss/x86_64/libaio1-0.3.109-1.25.x86_64.rpm"
+        with NamedTemporaryFile(suffix=".rpm") as rpm_file:
+            rpm_path = Path(rpm_file.name)
+            rpm_path.write_bytes(requests.get(url).content)
+            results = PackageResults.from_rpm(rpm_path)
+        self.assertEqual(
+            PackageResults(
+                api_data_url=None, bug_tracking_url=None, code_view_url=None, copyright=None, datasource_id='rpm_archive',
+                declared_license_expression='lgpl-2.1-plus', declared_license_expression_spdx='LGPL-2.1-or-later',
+                description=(
+                    'Linux-Native Asynchronous I/O Access Library\nThe Linux-native asynchronous I/O facility ("async I/O", or "aio") has\n'
+                    'a richer API and capability set than the simple POSIX async I/O\nfacility. This library provides the Linux-native API for async I/O. '
+                    'The\nPOSIX async I/O facility requires this library to provide\nkernel-accelerated async I/O capabilities, as do applications that\n'
+                    'require the Linux-native async I/O API.'
+                ),
+                download_url=None, extracted_license_statement='LGPL-2.1+', holder=None,
+                homepage_url='http://kernel.org/pub/linux/libs/aio/', keywords=[],
+                license_detections=[
+                    LicenseDetection(
+                        license_expression='lgpl-2.1-plus', identifier='lgpl_2_1_plus-d0bddf88-13b4-4982-bdf5-ce866a0e8394',
+                        matches=[
+                            LicenseMatch(
+                                score=100.0, start_line=1, end_line=1, matched_length=3, match_coverage=100.0, matcher='1-hash',
+                                license_expression='lgpl-2.1-plus', rule_identifier='lgpl-2.1-plus_64.RULE', rule_relevance=100,
+                                rule_url='https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/lgpl-2.1-plus_64.RULE',
+                                matched_text='LGPL-2.1+'
+                            )
+                        ]
+                    )
+                ],
+                md5=None, name='libaio1', namespace=None, notice_text=None, other_license_detections=[], other_license_expression=None,
+                other_license_expression_spdx=None,
+                parties=[
+                    Party(type=None, role='distributor', name='SUSE Linux Enterprise 15', email=None, url=None),
+                    Party(type=None, role='vendor', name='SUSE LLC <https://www.suse.com/>', email=None, url=None)
+                ],
+                primary_language=None, purl='pkg:rpm/libaio1@0.3.109-1.25', qualifiers={}, release_date=None,
+                repository_download_url=None, repository_homepage_url=None, sha1=None, sha256=None, sha512=None, size=None,
+                source_packages=['pkg:rpm/libaio@0.3.109-1.25?arch=src'], subpath=None, type='rpm', vcs_url=None, version='0.3.109-1.25'
+            ),
+            results
+        )
 
 
 class CleanupTestCase(TestCase):

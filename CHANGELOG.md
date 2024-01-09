@@ -1,5 +1,9 @@
 # Development version
 
+* Skip symlinks for LDD analysis.
+* Analyze nested archives.
+* Analyze RPM files.
+
 # Version 0.5.0 - 2023-12-11
 
 * Move code to dedicated files.
