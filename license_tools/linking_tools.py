@@ -9,6 +9,7 @@ Tools related to binary linking.
 from __future__ import annotations
 
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -21,6 +22,12 @@ def check_shared_objects(path: Path) -> str | None:
     """
     # TODO: Handle binary files here as well (like `/usr/bin/bc`).
     if path.suffix != ".so" and not (path.suffixes and path.suffixes[0] == ".so"):
+        return None
+    if path.is_symlink():
+        # Ignore symlinks as they usually are package-internal and `ldd` does not always like them.
+        sys.stderr.write(
+            f"Ignoring symlink {path} to {path.resolve()} for shared object analysis.\n",
+        )
         return None
     output = subprocess.check_output(["ldd", path], stderr=subprocess.PIPE)
     return output.decode("UTF-8")

@@ -3,6 +3,7 @@
 # See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
 
 from contextlib import contextmanager
+
 try:
     from importlib.resources import files, as_file  # type: ignore[attr-defined,unused-ignore]
 except ImportError:
@@ -27,7 +28,7 @@ LICENSE_PATH = SETUP_PATH.parent / "LICENSE.txt"
 
 @contextmanager
 def get_file(name: str) -> Generator[Path, None, None]:
-    reference = files('tests') / 'files' / name
+    reference = files("tests") / "files" / name
     with as_file(reference) as path:
         yield path
 

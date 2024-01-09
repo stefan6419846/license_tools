@@ -26,7 +26,10 @@ def main() -> None:
         "--archive", action="store", type=str, help="Archive file to work on."
     )
     source_group.add_argument(
-        "--package", action="store", type=str, help="Python package specification to use."
+        "--package",
+        action="store",
+        type=str,
+        help="Python package specification to use.",
     )
     source_group.add_argument(
         "--url", action="store", type=str, help="Download URL to use."

@@ -44,7 +44,15 @@ class ConvertHeadFlagsTestCase(TestCase):
 class ConvertTimestamp(TestCase):
     def test_convert_timestamp(self) -> None:
         self.assertEqual(
-            datetime.datetime(year=2023, month=12, day=3, hour=4, minute=8, second=57, tzinfo=datetime.timezone.utc),
+            datetime.datetime(
+                year=2023,
+                month=12,
+                day=3,
+                hour=4,
+                minute=8,
+                second=57,
+                tzinfo=datetime.timezone.utc,
+            ),
             font_tools.convert_timestamp_to_datetime(3784421337),
         )
         self.assertEqual(
@@ -62,7 +70,7 @@ class ConvertMacStyleTestCase(TestCase):
     def test_all(self) -> None:
         self.assertEqual(
             "Bold, Italic, Underline, Outline, Shadow, Condensed, Extended",
-            font_tools.convert_mac_style(2 ** 7 - 1),
+            font_tools.convert_mac_style(2**7 - 1),
         )
 
     def test_some(self) -> None:
@@ -128,24 +136,36 @@ class AnalyzeFontTestCase(TestCase):
                         ("yMax", 2078),
                         ("Mac Style", "%"),
                         ("Smallest readable size in pixels", 6),
-                        ("Font direction hint", "Strongly left to right, but also contains neutrals"),
+                        (
+                            "Font direction hint",
+                            "Strongly left to right, but also contains neutrals",
+                        ),
                         ("Index to Loc format", "Long offsets (Offset32)"),
                         ("Glyph Data Format", 0),
                     ]
                 ),
                 "name": OrderedDict(
                     [
-                        ("Copyright notice", "Copyright 2013 The Carlito Project Authors (https://github.com/googlefonts/carlito)"),
+                        (
+                            "Copyright notice",
+                            "Copyright 2013 The Carlito Project Authors (https://github.com/googlefonts/carlito)",
+                        ),
                         ("Font family name", "Carlito"),
                         ("Font subfamily name", "Regular"),
                         ("Unique font identifier", "1.104;tyPL;Carlito-Regular"),
                         ("Full font name", "Carlito Regular"),
                         ("Version string", "Version 1.104"),
                         ("PostScript name", "Carlito-Regular"),
-                        ("Trademark", "Carlito is a trademark of tyPoland Lukasz Dziedzic."),
+                        (
+                            "Trademark",
+                            "Carlito is a trademark of tyPoland Lukasz Dziedzic.",
+                        ),
                         ("Manufacturer", "tyPoland Lukasz Dziedzic"),
                         ("Designer", "Lukasz Dziedzic"),
-                        ("Description", "Carlito is a sanserif typeface family based on Lato."),
+                        (
+                            "Description",
+                            "Carlito is a sanserif typeface family based on Lato.",
+                        ),
                         ("URL Vendor", "http://www.lukaszdziedzic.eu"),
                         ("URL Designer", "http://www.lukaszdziedzic.eu"),
                         (
@@ -190,7 +210,10 @@ class AnalyzeFontTestCase(TestCase):
                         ("yMax", 2245),
                         ("Mac Style", "%"),
                         ("Smallest readable size in pixels", 8),
-                        ("Font direction hint", "Strongly left to right, but also contains neutrals"),
+                        (
+                            "Font direction hint",
+                            "Strongly left to right, but also contains neutrals",
+                        ),
                         ("Index to Loc format", "Short offsets (Offset16)"),
                         ("Glyph Data Format", 0),
                     ]
@@ -205,10 +228,16 @@ class AnalyzeFontTestCase(TestCase):
                         ("Font subfamily name", "Regular"),
                         ("Unique font identifier", "1.100;UKWN;WeatherIcons-Regular"),
                         ("Full font name", "Weather Icons Regular"),
-                        ("Version string", "Version 1.100;PS 001.100;hotconv 1.0.70;makeotf.lib2.5.58329"),
+                        (
+                            "Version string",
+                            "Version 1.100;PS 001.100;hotconv 1.0.70;makeotf.lib2.5.58329",
+                        ),
                         ("PostScript name", "WeatherIcons-Regular"),
                         ("Designer", "Erik Flowers, Lukas Bischoff (v1 Art)"),
-                        ("URL Designer", "http://www.helloerik.com, http://www.artill.de"),
+                        (
+                            "URL Designer",
+                            "http://www.helloerik.com, http://www.artill.de",
+                        ),
                     ]
                 ),
             },
@@ -227,7 +256,10 @@ class AnalyzeFontTestCase(TestCase):
                         ("Font Revision", 773.01171875),
                         ("Checksum", 1882611267),
                         ("Magic number", 1594834165),
-                        ("Flags", "Baseline for font at y=0; Left sidebearing point at x=0; Force ppem to integer values"),
+                        (
+                            "Flags",
+                            "Baseline for font at y=0; Left sidebearing point at x=0; Force ppem to integer values",
+                        ),
                         ("Units per em", 512),
                         ("Created", "2023-11-29 22:28:05"),
                         ("Modified", "2023-11-29 22:28:05"),
@@ -237,7 +269,10 @@ class AnalyzeFontTestCase(TestCase):
                         ("yMax", 459),
                         ("Mac Style", "%"),
                         ("Smallest readable size in pixels", 8),
-                        ("Font direction hint", "Strongly left to right, but also contains neutrals"),
+                        (
+                            "Font direction hint",
+                            "Strongly left to right, but also contains neutrals",
+                        ),
                         ("Index to Loc format", "Long offsets (Offset32)"),
                         ("Glyph Data Format", 0),
                     ]
@@ -249,7 +284,10 @@ class AnalyzeFontTestCase(TestCase):
                         ("Font subfamily name", "Solid"),
                         ("Unique font identifier", "Font Awesome 6 Free Solid-6.5.1"),
                         ("Full font name", "Font Awesome 6 Free Solid"),
-                        ("Version string", "Version 773.01171875 (Font Awesome version: 6.5.1)"),
+                        (
+                            "Version string",
+                            "Version 773.01171875 (Font Awesome version: 6.5.1)",
+                        ),
                         ("PostScript name", "FontAwesome6Free-Solid"),
                         ("Description", "The web's most popular icon set and toolkit."),
                         ("URL Vendor", "https://fontawesome.com"),
@@ -270,13 +308,16 @@ class CheckFontTestCase(TestCase):
     def test_no_names(self) -> None:
         reference = font_tools.analyze_font
 
-        def analyze_font(path: Path) -> dict[str, None | dict[str, font_tools.FONT_VALUE_TYPE]] | None:
+        def analyze_font(
+            path: Path,
+        ) -> dict[str, None | dict[str, font_tools.FONT_VALUE_TYPE]] | None:
             _result = reference(path)
             _result["name"] = None  # type: ignore[index]
             return _result
 
-        with get_file("Carlito-Regular.ttf") as ttf_path, \
-                mock.patch.object(font_tools, "analyze_font", side_effect=analyze_font):
+        with get_file("Carlito-Regular.ttf") as ttf_path, mock.patch.object(
+            font_tools, "analyze_font", side_effect=analyze_font
+        ):
             result = font_tools.check_font(ttf_path)
         self.assertIsNone(result)
 
@@ -297,7 +338,7 @@ class CheckFontTestCase(TestCase):
                 URL Vendor: https://fontawesome.com
    Typographic Family name: Font Awesome 6 Free
 Typographic Subfamily name: Solid"""[1:],
-            result
+            result,
         )
 
 
@@ -306,7 +347,9 @@ class DumpToTtxTestCase(TestCase):
         with get_file("Carlito-Regular.ttf") as path:
             with NamedTemporaryFile(suffix=".ttx") as target:
                 target_path = Path(target.name)
-                result = font_tools.dump_to_ttx(source_path=path, target_path=target_path)
+                result = font_tools.dump_to_ttx(
+                    source_path=path, target_path=target_path
+                )
                 self.assertEqual(target_path, result)
 
                 # Due to the obligations of the OFL-1.1, do not compare against the actual

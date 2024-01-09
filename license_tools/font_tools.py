@@ -17,7 +17,7 @@ from fontTools import ttx  # type: ignore[import-untyped]
 from fontTools.misc import timeTools  # type: ignore[import-untyped]
 from fontTools.ttLib import TTFont  # type: ignore[import-untyped]
 from fontTools.ttLib.tables._h_e_a_d import table__h_e_a_d as HeadTable  # type: ignore[import-untyped]  # noqa: N812
-from fontTools.ttLib.tables._n_a_m_e import table__n_a_m_e as NameTable  # type: ignore[import-untyped]  # noqa: 812
+from fontTools.ttLib.tables._n_a_m_e import table__n_a_m_e as NameTable  # type: ignore[import-untyped]  # noqa: N812
 
 
 # https://learn.microsoft.com/en-us/typography/opentype/spec/name#name-ids
@@ -92,8 +92,7 @@ def convert_timestamp_to_datetime(value: int) -> datetime.datetime:
     :return: The regular datetime object.
     """
     return datetime.datetime.fromtimestamp(
-        max(0, value) + timeTools.epoch_diff,
-        tz=datetime.timezone.utc
+        max(0, value) + timeTools.epoch_diff, tz=datetime.timezone.utc
     )
 
 
