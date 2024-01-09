@@ -115,7 +115,6 @@ class RetrievalFlags:
 def run_on_file(
     path: Path,
     short_path: str,
-    job_count: int = 4,
     retrieval_flags: int = 0,
 ) -> FileResults:
     """
@@ -191,7 +190,6 @@ def run_on_directory(
         delayed(run_on_file)(
             path=path,
             short_path=short_path,
-            job_count=job_count,
             retrieval_flags=retrieval_flags,
         )
         for path, short_path in files

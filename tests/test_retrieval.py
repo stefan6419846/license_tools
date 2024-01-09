@@ -261,7 +261,7 @@ class RunOnDirectoryTestCase(TestCase):
         file_results_iterable = iter(file_results)
         paths = [(Path(f"/tmp/file{i}.py"), f"file{i}.py") for i in range(1, 6)]
 
-        def run_on_file(path: Path, short_path: str, job_count: int = 4, retrieval_flags: int = 0) -> Any:
+        def run_on_file(path: Path, short_path: str, retrieval_flags: int = 0) -> Any:
             return next(file_results_iterable)
 
         with mock.patch.object(
@@ -278,7 +278,7 @@ class RunOnDirectoryTestCase(TestCase):
         run_mock.assert_has_calls(
             [
                 mock.call(
-                    path=current_path, short_path=current_short_path, job_count=1, retrieval_flags=42
+                    path=current_path, short_path=current_short_path, retrieval_flags=42
                 )
                 for current_path, current_short_path in paths
             ],
@@ -287,7 +287,7 @@ class RunOnDirectoryTestCase(TestCase):
         self.assertEqual(len(paths), run_mock.call_count, run_mock.call_args_list)
         get_mock.assert_called_once_with("/tmp/dummy/directory", None)
 
-    def test_nested_with_existing_directory(self):
+    def test_nested_with_existing_directory(self) -> None:
         with TemporaryDirectory() as tempdir:
             directory = Path(tempdir)
             directory.joinpath("directory").mkdir()
@@ -299,7 +299,7 @@ class RunOnDirectoryTestCase(TestCase):
                 with tarfile.open(directory / "nested.tar.bz2", "w:bz2") as tar:
                     tar.add(nested_path, arcname=nested_path.name)
 
-            def run_on_file(path: Path, short_path: str, job_count: int = 4, retrieval_flags: int = 0) -> Any:
+            def run_on_file(path: Path, short_path: str, retrieval_flags: int = 0) -> Any:
                 return path
 
             with mock.patch.object(
@@ -311,11 +311,11 @@ class RunOnDirectoryTestCase(TestCase):
                     )
                 )
 
-        result_set = set(results)
-        expected = []
+        result_set: set[Path] = cast(set[Path], set(results))
+        expected: list[tuple[Path, str]] = []
         self.assertEqual(4, len(results), results)
         for name in ['directory/file.txt', 'nested.tar.bz2', 'nested_tar_bz2']:
-            result_set.remove(directory / name)  # type: ignore
+            result_set.remove(directory / name)
             expected.append((directory / name, name))
         self.assertEqual(1, len(result_set), result_set)
         remaining = result_set.pop()
@@ -327,7 +327,7 @@ class RunOnDirectoryTestCase(TestCase):
         run_mock.assert_has_calls(
             [
                 mock.call(
-                    path=current_path, short_path=current_short_path, job_count=1, retrieval_flags=42
+                    path=current_path, short_path=current_short_path, retrieval_flags=42
                 )
                 for current_path, current_short_path in expected
             ],

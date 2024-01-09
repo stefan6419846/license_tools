@@ -177,7 +177,7 @@ class FileResultsTestCase(TestCase):
 
 
 class PackageResultsTestCase(TestCase):
-    def test_rpm(self):
+    def test_rpm(self) -> None:
         url = "https://download.opensuse.org/distribution/leap/15.6/repo/oss/x86_64/libaio1-0.3.109-1.25.x86_64.rpm"
         with NamedTemporaryFile(suffix=".rpm") as rpm_file:
             rpm_path = Path(rpm_file.name)
