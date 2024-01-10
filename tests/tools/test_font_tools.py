@@ -10,7 +10,7 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from unittest import mock, TestCase
 
-from license_tools import font_tools
+from license_tools.tools import font_tools
 from tests.data import get_file
 
 
@@ -31,13 +31,13 @@ class ConvertHeadFlagsTestCase(TestCase):
                 "Font optimized for ClearType; "
                 "Last Resort font"
             ),
-            font_tools.convert_head_flags(2**16 - 1),
+            font_tools.convert_head_flags(2 ** 16 - 1),
         )
 
     def test_some(self) -> None:
         self.assertEqual(
             "Baseline for font at y=0; " "Font converted",
-            font_tools.convert_head_flags(1 + 2**12),
+            font_tools.convert_head_flags(1 + 2 ** 12),
         )
 
 
@@ -70,7 +70,7 @@ class ConvertMacStyleTestCase(TestCase):
     def test_all(self) -> None:
         self.assertEqual(
             "Bold, Italic, Underline, Outline, Shadow, Condensed, Extended",
-            font_tools.convert_mac_style(2**7 - 1),
+            font_tools.convert_mac_style(2 ** 7 - 1),
         )
 
     def test_some(self) -> None:
@@ -316,7 +316,7 @@ class CheckFontTestCase(TestCase):
             return _result
 
         with get_file("Carlito-Regular.ttf") as ttf_path, mock.patch.object(
-            font_tools, "analyze_font", side_effect=analyze_font
+                font_tools, "analyze_font", side_effect=analyze_font
         ):
             result = font_tools.check_font(ttf_path)
         self.assertIsNone(result)

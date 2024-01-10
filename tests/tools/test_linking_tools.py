@@ -11,8 +11,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock, TestCase
 
-from license_tools import linking_tools
-from license_tools.linking_tools import check_shared_objects
+from license_tools.tools import linking_tools
+from license_tools.tools.linking_tools import check_shared_objects
 from tests.data import get_file, LICENSE_PATH, SETUP_PATH
 
 

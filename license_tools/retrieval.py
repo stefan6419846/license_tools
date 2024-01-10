@@ -22,9 +22,9 @@ import requests
 import scancode_config  # type: ignore[import-untyped]
 from joblib import Parallel, delayed  # type: ignore[import-untyped]
 
-from license_tools import font_tools, linking_tools, scancode_tools
+from license_tools.tools import font_tools, linking_tools, scancode_tools
 from license_tools.constants import NOT_REQUESTED
-from license_tools.scancode_tools import FileResults, Licenses, PackageResults
+from license_tools.tools.scancode_tools import FileResults, Licenses, PackageResults
 from license_tools.utils import archive_utils
 
 

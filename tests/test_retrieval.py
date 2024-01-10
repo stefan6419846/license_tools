@@ -19,7 +19,7 @@ import requests
 
 from license_tools import retrieval
 from license_tools.retrieval import RetrievalFlags
-from license_tools.scancode_tools import FileResults
+from license_tools.tools.scancode_tools import FileResults
 from tests.data import (
     SETUP_PATH,
     SETUP_PY_LICENSES,
@@ -105,7 +105,7 @@ class RunOnFileTestCase(TestCase):
     def test_run_on_file__ldd_handling(self) -> None:
         # 1) LDD handling is inactive.
         results_mock, check_mock, stdout = self._run_mocked(
-            flags=15, mock_target="license_tools.linking_tools.check_shared_objects"
+            flags=15, mock_target="license_tools.tools.linking_tools.check_shared_objects"
         )
         check_mock.assert_not_called()
         results_mock.assert_called_once_with(
@@ -125,7 +125,7 @@ class RunOnFileTestCase(TestCase):
                 results_mock, check_mock, stdout = self._run_mocked(
                     flags=31,
                     return_value=result,
-                    mock_target="license_tools.linking_tools.check_shared_objects",
+                    mock_target="license_tools.tools.linking_tools.check_shared_objects",
                 )
                 check_mock.assert_called_once_with(path=SETUP_PATH)
                 results_mock.assert_called_once_with(
@@ -149,7 +149,7 @@ class RunOnFileTestCase(TestCase):
         results_mock, check_mock, stdout = self._run_mocked(
             flags=31,
             return_value=ldd_usr_bin_bc,
-            mock_target="license_tools.linking_tools.check_shared_objects",
+            mock_target="license_tools.tools.linking_tools.check_shared_objects",
         )
         check_mock.assert_called_once_with(path=SETUP_PATH)
         results_mock.assert_called_once_with(
@@ -166,7 +166,7 @@ class RunOnFileTestCase(TestCase):
     def test_run_on_file__font_handling(self) -> None:
         # 1) Font handling is inactive.
         results_mock, check_mock, stdout = self._run_mocked(
-            flags=15, mock_target="license_tools.font_tools.check_font"
+            flags=15, mock_target="license_tools.tools.font_tools.check_font"
         )
         check_mock.assert_not_called()
         results_mock.assert_called_once_with(
@@ -186,7 +186,7 @@ class RunOnFileTestCase(TestCase):
                 results_mock, check_mock, stdout = self._run_mocked(
                     flags=63,
                     return_value=result,
-                    mock_target="license_tools.font_tools.check_font",
+                    mock_target="license_tools.tools.font_tools.check_font",
                 )
                 check_mock.assert_called_once_with(path=SETUP_PATH)
                 results_mock.assert_called_once_with(
@@ -216,7 +216,7 @@ Typographic Subfamily name: Solid
         results_mock, check_mock, stdout = self._run_mocked(
             flags=63,
             return_value=font_awesome,
-            mock_target="license_tools.font_tools.check_font",
+            mock_target="license_tools.tools.font_tools.check_font",
         )
         check_mock.assert_called_once_with(path=SETUP_PATH)
         results_mock.assert_called_once_with(

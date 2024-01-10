@@ -3,6 +3,8 @@
 * Skip symlinks for LDD analysis.
 * Analyze nested archives.
 * Analyze RPM files.
+* Handle more types of ELF binaries.
+* Move tools to dedicated submodule.
 
 # Version 0.5.0 - 2023-12-11
 

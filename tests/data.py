@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Generator
 
 from license_tools.constants import NOT_REQUESTED
-from license_tools.scancode_tools import (
+from license_tools.tools.scancode_tools import (
     FileResults,
     LicenseClue,
     LicenseDetection,

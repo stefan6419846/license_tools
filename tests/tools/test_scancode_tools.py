@@ -12,10 +12,10 @@ from unittest import TestCase
 
 import requests
 
-from license_tools import scancode_tools
+from license_tools.tools import scancode_tools
 from license_tools.constants import NOT_REQUESTED
 from license_tools.retrieval import RetrievalFlags
-from license_tools.scancode_tools import (
+from license_tools.tools.scancode_tools import (
     Copyright,
     Copyrights,
     Emails,
