@@ -11,12 +11,68 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock, TestCase
 
+from license_tools import linking_tools
 from license_tools.linking_tools import check_shared_objects
+from tests.data import get_file, LICENSE_PATH, SETUP_PATH
+
+
+def get_libc_path() -> Path:
+    output = linking_tools.check_shared_objects(Path("/usr/bin/bc"))
+    assert output is not None
+    for line in output.splitlines(keepends=False):
+        if "libc.so" in line:
+            # 	libc.so.6 => /lib64/libc.so.6 (0x00007f281a209000)
+            line = line.split("=>")[1]
+            line = line.strip().split(" ")[0]
+            return Path(line)
+    raise ValueError("Could not determine libc.so location.")
+
+
+class GetFileTypeTestCase(TestCase):
+    def test_get_file_type(self) -> None:
+        self.assertEqual(
+            "Python script, ASCII text executable",
+            linking_tools._get_file_type(SETUP_PATH)
+        )
+        self.assertEqual(
+            "ASCII text",
+            linking_tools._get_file_type(LICENSE_PATH)
+        )
+
+        with get_file("Carlito-Regular.ttf") as path:
+            self.assertEqual(
+                'TrueType Font data, 17 tables, 1st "GDEF", 15 names, Microsoft, language 0x409',
+                linking_tools._get_file_type(path)
+            )
+
+
+class IsElfTestCase(TestCase):
+    def test_is_elf(self) -> None:
+        self.assertFalse(linking_tools.is_elf(SETUP_PATH))
+        self.assertFalse(linking_tools.is_elf(LICENSE_PATH))
+
+        with get_file("Carlito-Regular.ttf") as path:
+            self.assertFalse(linking_tools.is_elf(path))
+
+        self.assertTrue(linking_tools.is_elf(Path("/usr/bin/bc")))
+        self.assertTrue(linking_tools.is_elf(get_libc_path().resolve()))  # Usually a symlink.
+
+
+class GetElfTypeTestCase(TestCase):
+    def test_get_elf_type(self) -> None:
+        self.assertIsNone(linking_tools.get_elf_type(SETUP_PATH))
+        self.assertIsNone(linking_tools.get_elf_type(LICENSE_PATH))
+
+        with get_file("Carlito-Regular.ttf") as path:
+            self.assertIsNone(linking_tools.get_elf_type(path))
+
+        self.assertEqual(linking_tools.ELF_EXE, linking_tools.get_elf_type(Path("/usr/bin/bc")))
+        self.assertEqual(linking_tools.ELF_SHARED, linking_tools.get_elf_type(get_libc_path().resolve()))  # Usually a symlink.
 
 
 class CheckSharedObjectsTestCase(TestCase):
-    def test_so_suffix(self) -> None:
-        path = Path("/tmp/libdummy.so")
+    def test_so(self) -> None:
+        path = get_libc_path().resolve()
         with mock.patch(
             "subprocess.check_output", return_value=b"Test output\nAnother line\n"
         ) as subprocess_mock:
@@ -24,8 +80,8 @@ class CheckSharedObjectsTestCase(TestCase):
         self.assertEqual("Test output\nAnother line\n", result)
         subprocess_mock.assert_called_once_with(["ldd", path], stderr=subprocess.PIPE)
 
-    def test_so_suffix_with_multiple_suffixes(self) -> None:
-        path = Path("/tmp/libdummy.so.42")
+    def test_binary(self) -> None:
+        path = Path("/usr/bin/bc")
         with mock.patch(
             "subprocess.check_output", return_value=b"Test output\nAnother line\n"
         ) as subprocess_mock:
@@ -33,7 +89,7 @@ class CheckSharedObjectsTestCase(TestCase):
         self.assertEqual("Test output\nAnother line\n", result)
         subprocess_mock.assert_called_once_with(["ldd", path], stderr=subprocess.PIPE)
 
-    def test_no_so(self) -> None:
+    def test_python(self) -> None:
         path = Path("/tmp/libdummy.py")
         with mock.patch(
             "subprocess.check_output", return_value=b"Test output\nAnother line\n"
@@ -53,7 +109,9 @@ class CheckSharedObjectsTestCase(TestCase):
             stderr = StringIO()
             with mock.patch(
                 "subprocess.check_output", return_value=b"Test output\nAnother line\n"
-            ) as subprocess_mock, redirect_stderr(stderr):
+            ) as subprocess_mock, redirect_stderr(stderr), mock.patch.object(
+                linking_tools, "is_elf", return_value=True
+            ) as elf_mock:
                 result = check_shared_objects(source)
             self.assertIsNone(result)
             subprocess_mock.assert_not_called()
@@ -61,12 +119,16 @@ class CheckSharedObjectsTestCase(TestCase):
                 f"Ignoring symlink {source} to {target} for shared object analysis.\n",
                 stderr.getvalue(),
             )
+            elf_mock.assert_called_once_with(source)
 
             with mock.patch(
                 "subprocess.check_output", return_value=b"Test output\nAnother line\n"
-            ) as subprocess_mock:
+            ) as subprocess_mock, mock.patch.object(
+                linking_tools, "is_elf", return_value=True
+            ) as elf_mock:
                 result = check_shared_objects(source.resolve())
             self.assertEqual("Test output\nAnother line\n", result)
             subprocess_mock.assert_called_once_with(
                 ["ldd", target], stderr=subprocess.PIPE
             )
+            elf_mock.assert_called_once_with(source.resolve())

@@ -11,6 +11,54 @@ from __future__ import annotations
 import subprocess
 import sys
 from pathlib import Path
+from typing import cast, Literal
+
+from typecode import magic2  # type: ignore[import-untyped]
+
+
+ELF_EXE = "executable"
+ELF_SHARED = "shared object"
+ELF_RELOC = "relocatable"
+ELF_UNKNOWN = "unknown"
+ELF_TYPES = [ELF_EXE, ELF_SHARED, ELF_RELOC]
+ELF_TYPES_TYPE = Literal["executable", "shared object", "relocatable", "unknown"]
+
+
+def _get_file_type(path: Path) -> str:
+    """
+    Get the file type.
+
+    :param: The file to check.
+    :return: The guessed file type.
+    """
+    return cast(str, magic2.file_type(path))
+
+
+def is_elf(path: Path) -> bool:
+    """
+    Check if the given file is an ELF file.
+
+    :param path: The file to check.
+    :return: True if the file is an ELF binary, False otherwise.
+    """
+    file_type = _get_file_type(path).lower()
+    return file_type.startswith("elf") and any(elf_type in file_type for elf_type in ELF_TYPES)
+
+
+def get_elf_type(path: Path) -> ELF_TYPES_TYPE | None:
+    """
+    Get the ELF type of the given file.
+
+    :param path: The file to check.
+    :return: The ELF type of the given file if it is an ELF binary, None otherwise.
+    """
+    if not is_elf(path):
+        return None
+    file_type = _get_file_type(path).lower()
+    for elf_type in ELF_TYPES:
+        if elf_type in file_type:
+            return cast(ELF_TYPES_TYPE, elf_type)
+    return cast(ELF_TYPES_TYPE, ELF_UNKNOWN)
 
 
 def check_shared_objects(path: Path) -> str | None:
@@ -20,8 +68,7 @@ def check_shared_objects(path: Path) -> str | None:
     :param path: The file path to analyze.
     :return: The analysis results if the path points to a shared object, `None` otherwise.
     """
-    # TODO: Handle binary files here as well (like `/usr/bin/bc`).
-    if path.suffix != ".so" and not (path.suffixes and path.suffixes[0] == ".so"):
+    if not is_elf(path):
         return None
     if path.is_symlink():
         # Ignore symlinks as they usually are package-internal and `ldd` does not always like them.
