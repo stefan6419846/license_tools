@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from unittest import TestCase
@@ -39,6 +40,15 @@ class CheckRpmHeadersTestCase(TestCase):
     maxDiff = None
 
     def test_binary(self) -> None:
+        if sys.version_info < (3, 10):
+            file_flags = "[<FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.DOC: 2>, <FileFlags.DOC: 2>]"
+            file_verification_flags = "[<VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.0: 0>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>]"  # noqa: E501
+            required_names_flags = "[<DependencyFlags.SCRIPT_POST|INTERP: 1280>, <DependencyFlags.SCRIPT_POSTUN|INTERP: 4352>, <DependencyFlags.FIND_REQUIRES: 16384>, <DependencyFlags.FIND_REQUIRES: 16384>, <DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>, <DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>, <DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>, <DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>]"  # noqa: E501
+        else:
+            file_flags = "[<FileFlags: 0>, <FileFlags: 0>, <FileFlags: 0>, <FileFlags.DOC: 2>, <FileFlags.DOC: 2>]"
+            file_verification_flags = "[<VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags: 0>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>]"  # noqa: E501
+            required_names_flags = "[<DependencyFlags.INTERP|SCRIPT_POST: 1280>, <DependencyFlags.INTERP|SCRIPT_POSTUN: 4352>, <DependencyFlags.FIND_REQUIRES: 16384>, <DependencyFlags.FIND_REQUIRES: 16384>, <DependencyFlags.LESS|EQUAL|RPMLIB: 16777226>, <DependencyFlags.LESS|EQUAL|RPMLIB: 16777226>, <DependencyFlags.LESS|EQUAL|RPMLIB: 16777226>, <DependencyFlags.LESS|EQUAL|RPMLIB: 16777226>]"  # noqa: E501
+
         url = "https://download.opensuse.org/distribution/leap/15.6/repo/oss/x86_64/libaio1-0.3.109-1.25.x86_64.rpm"
         with NamedTemporaryFile(suffix=".rpm") as rpm_file:
             rpm_path = Path(rpm_file.name)
@@ -47,7 +57,7 @@ class CheckRpmHeadersTestCase(TestCase):
         self.assertEqual(
             r"""
                                                             Header Signatures: b'\x00\x00\x00>\x00\x00\x00\x07\xff\xff\xffp\x00\x00\x00\x10'
-                                              OpenPGP RSA Signature Of Header: b'\x89\x01\x15\x03\x05\x00[\x08R$p\xaf\x9e\x819\xdb|\x82\x01\x08\x8a\xe2\x08\x00\xc2_\x1a\x1f\xc7E>\x9f\x96"(\x0eF4b>\xb4\x00\x99\xb1y\xab\xb1\xa8>\xe4\xe4\xeb\x99\xe2?D`\xd3\x0eS\xc7P{\x88\x8d\xa3dB\xa3\xef\\{\xa3\xf8\x06cg\xc1\x98\xea\x82u\xa4\xb9.r^o\x91\xe2o\x19\x1c\xcc$\xf9\xcd\x1b\x85\x98f[\xa2\xdd!3_\xde\x81\xea`\x99\xeb\x83Y\xd1\xfaw\x81\xf774\xd1\x11\xf6\xbf\x98\xb2\xb1\x84\xf1\x9e^l\x1eY\xc9\x9c\x1c\xed\xc8\xd3[X\xeb\xc7h7\x82V\xab\x80\xd7]\xb0\xdbC\x86\xe2\xc0\x9d\x86\xd0 %\x1e{\x1c\xd394\x89\xabp8\x04GE\xf4Z4(\xeaoF\xec\xe1\x9c&\xd1\x17z\x8dC/\x08\xf0\x0e(\xcc9\x04\xddJ\xb3b\xe4)\x8b\'\xac\x15\xb6\x1a?\xb2\xd9\xdf\xbeJ\xf7\xd8\xfa~*\xaa\xa5S\x8c\xd8\x0c\xd1J\xec<j\xee\xf3\xab9\x10Fe\xaa4I\xf4;\xd4v\x83\xe9BMN\xff\xd3{\xb2\xd1(Py"\x1f\'\'(\xc9?:\xb1\xee\xd9\x0f\x1f\x8c\x9d|P'
+                                              OpenPGP RSA Signature Of Header: b'\x89\x01\x15\x03\x05\x00[\x08R$p\xaf\x9e\x819\xdb|\x82\x01\x08\x8a\xe2\x08\x00\xc2_\x1a\x1f\xc7E>\x9f\x96"(\x0eF4b>\xb4\x00\x99\xb1y\xab\xb1\xa8>\xe4\xe4\xeb\x99\xe2?D`\xd3\x0eS\xc7P{{\x88\x8d\xa3dB\xa3\xef\\{{\xa3\xf8\x06cg\xc1\x98\xea\x82u\xa4\xb9.r^o\x91\xe2o\x19\x1c\xcc$\xf9\xcd\x1b\x85\x98f[\xa2\xdd!3_\xde\x81\xea`\x99\xeb\x83Y\xd1\xfaw\x81\xf774\xd1\x11\xf6\xbf\x98\xb2\xb1\x84\xf1\x9e^l\x1eY\xc9\x9c\x1c\xed\xc8\xd3[X\xeb\xc7h7\x82V\xab\x80\xd7]\xb0\xdbC\x86\xe2\xc0\x9d\x86\xd0 %\x1e{{\x1c\xd394\x89\xabp8\x04GE\xf4Z4(\xeaoF\xec\xe1\x9c&\xd1\x17z\x8dC/\x08\xf0\x0e(\xcc9\x04\xddJ\xb3b\xe4)\x8b\'\xac\x15\xb6\x1a?\xb2\xd9\xdf\xbeJ\xf7\xd8\xfa~*\xaa\xa5S\x8c\xd8\x0c\xd1J\xec<j\xee\xf3\xab9\x10Fe\xaa4I\xf4;\xd4v\x83\xe9BMN\xff\xd3{{\xb2\xd1(Py"\x1f\'\'(\xc9?:\xb1\xee\xd9\x0f\x1f\x8c\x9d|P'
                                                         SHA1 Digest Of Header: dbeb3eb27337e5d21b569b6cc73165320c35164b
                                                       SHA256 Digest Of Header: 3c4d1b9d2da6a1223c2ed6b2187f6c9618982c9526405ab88112fde3a06fe03e
                                                                  Package Name: libaio1
@@ -80,13 +90,13 @@ require the Linux-native async I/O API.
                                                  File Modification Timestamps: [datetime.datetime(2018, 5, 25, 18, 12, 43, tzinfo=datetime.timezone.utc), datetime.datetime(2018, 5, 25, 18, 12, 43, tzinfo=datetime.timezone.utc), datetime.datetime(2018, 5, 25, 18, 12, 44, tzinfo=datetime.timezone.utc), datetime.datetime(2009, 10, 9, 18, 17, 2, tzinfo=datetime.timezone.utc), datetime.datetime(2009, 10, 9, 18, 17, 2, tzinfo=datetime.timezone.utc)]
                                                                     File Hash: ['', 'bf8977f717cdf65b34fdad5e00daec89bdbc9a6ac512887c5cf2e78ff7cc7191', '', '5bbcbb737e60fe9deba08ecbd00920cfcc3403ba2e534c64fdeea49d6bb87509', 'f7b7efb8cb7bf444fe0f8c97f0989308e0a6d54e888c87db501494973d2c656b']
                                                          File Symlink Targets: ['libaio.so.1.0.1', '', '', '', '']
-                                                                   File Flags: [<FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.DOC: 2>, <FileFlags.DOC: 2>]
+                                                                   File Flags: {file_flags}
                                                         File Unix Owner Names: ['root', 'root', 'root', 'root', 'root']
                                                         File Unix Group Names: ['root', 'root', 'root', 'root', 'root']
                                                           Source RPM Filename: libaio-0.3.109-1.25.src.rpm
-                                                      File Verification Flags: [<VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.0: 0>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>]
+                                                      File Verification Flags: {file_verification_flags}
                                                                Provided Names: ['libaio', 'libaio.so.1()(64bit)', 'libaio.so.1(LIBAIO_0.1)(64bit)', 'libaio.so.1(LIBAIO_0.4)(64bit)', 'libaio1', 'libaio1(x86-64)']
-                                                       Required Names (Flags): [<DependencyFlags.SCRIPT_POST|INTERP: 1280>, <DependencyFlags.SCRIPT_POSTUN|INTERP: 4352>, <DependencyFlags.FIND_REQUIRES: 16384>, <DependencyFlags.FIND_REQUIRES: 16384>, <DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>, <DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>, <DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>, <DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>]
+                                                       Required Names (Flags): {required_names_flags}
                                                                Required Names: ['/sbin/ldconfig', '/sbin/ldconfig', 'libc.so.6()(64bit)', 'libc.so.6(GLIBC_2.4)(64bit)', 'rpmlib(CompressedFileNames)', 'rpmlib(FileDigests)', 'rpmlib(PayloadFilesHavePrefix)', 'rpmlib(PayloadIsXz)']
                                                     Required Names (Versions): ['', '', '', '', '3.0.4-1', '4.6.0-1', '4.0-1', '5.2-1']
                                                      RPM Version For Building: 4.14.1
@@ -107,7 +117,7 @@ require the Linux-native async I/O API.
                                      Index Into Directory Names For Basenames: [0, 0, 1, 2, 2]
                                                                     Basenames: ['libaio.so.1', 'libaio.so.1.0.1', 'libaio1', 'COPYING', 'TODO']
                                                               Directory Names: ['/lib64/', '/usr/share/doc/packages/', '/usr/share/doc/packages/libaio1/']
-                                               %{optflags} Value During Build: -fmessage-length=0 -grecord-gcc-switches -O2 -Wall -D_FORTIFY_SOURCE=2 -fstack-protector-strong -funwind-tables -fasynchronous-unwind-tables -fstack-clash-protection -g
+                                               %{{optflags}} Value During Build: -fmessage-length=0 -grecord-gcc-switches -O2 -Wall -D_FORTIFY_SOURCE=2 -fstack-protector-strong -funwind-tables -fasynchronous-unwind-tables -fstack-clash-protection -g
                                                     Distribution-specific URL: obs://build.suse.de/SUSE:SLE-15:GA/standard/77c22af2cb0aefbc84316daac8f5b8ac-libaio
                                                                Payload Format: cpio
                                                       Payload Compressor Name: xz
@@ -123,11 +133,20 @@ Index Into File Dependencies Dictionary Denoting Start Of File's Dependencies: [
                                                   Header String Data Encoding: utf-8
                                Cryptographic Digest of the Compressed Payload: ['f001b298e5add90e4d2fdbc442b92b8aae7beb5fac77159a5baa33fb7217d48a']
                                                      Payload Digest Algorithm: <FileDigestAlgorithm.SHA512: 8>
-"""[1:-1],  # noqa: E501
+"""[1:-1].format(file_flags=file_flags, file_verification_flags=file_verification_flags, required_names_flags=required_names_flags),  # noqa: E501
             results
         )
 
     def test_source(self) -> None:
+        if sys.version_info < (3, 10):
+            file_flags = "[<FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.SPECFILE: 32>]"  # noqa: E501
+            file_verification_flags = "[<VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>]"  # noqa: E501
+            required_names_flags = "[<DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>, <DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>]"
+        else:
+            file_flags = "[<FileFlags: 0>, <FileFlags: 0>, <FileFlags: 0>, <FileFlags: 0>, <FileFlags: 0>, <FileFlags: 0>, <FileFlags: 0>, <FileFlags: 0>, <FileFlags: 0>, <FileFlags: 0>, <FileFlags.SPECFILE: 32>]"  # noqa: E501
+            file_verification_flags = "[<VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>]"  # noqa: E501
+            required_names_flags = "[<DependencyFlags.LESS|EQUAL|RPMLIB: 16777226>, <DependencyFlags.LESS|EQUAL|RPMLIB: 16777226>]"
+
         url = "https://download.opensuse.org/source/distribution/leap/15.6/repo/oss/src/libaio-0.3.109-1.25.src.rpm"
         with NamedTemporaryFile(suffix=".rpm") as rpm_file:
             rpm_path = Path(rpm_file.name)
@@ -136,7 +155,7 @@ Index Into File Dependencies Dictionary Denoting Start Of File's Dependencies: [
         self.assertEqual(
             r"""
                              Header Signatures: b'\x00\x00\x00>\x00\x00\x00\x07\xff\xff\xffp\x00\x00\x00\x10'
-               OpenPGP RSA Signature Of Header: b'\x89\x01\x15\x03\x05\x00[\x08R$p\xaf\x9e\x819\xdb|\x82\x01\x08H\x05\x08\x00\x85wx\x9dG\xe0$\xfe\xf8\xf1*y\xfa\xc1\x0c\xa1-\xc9 B\xed\xf3\xfa\'\x80v\x91\xe1Wl\x02\xaf\x94\x06>^$\xe1\xca\xf3\x06\xc5\xaa\xa6\xa1\x85\x98\xa3\xdc\x00+\x03\xdd\x98\xef\xd2\x1d\x9b*\xb6Bu6J\xad\xf0\x12\xc9\xbb8"\x84\x9e\xbd\x87)\x94\xf3\xb4\x832\x99\xc1k\xf7r\xa3\xbf\xe9\xecA\xaf\x86\x02\xee\xb7\xb36;8\xc5\x19{C\xfat\xdc\xec,\xdc\xef)\x92\xc4\xd3\xcd7\x88\xe0q\x18@\x95\x89n\xc3\x8a\xaah\\\x83\xd4L\xaa.\x00\xf3[\xce\xab\x17*D\xe4\xa4-\x1d-\x89\x15^\x02m\xec"\xca\n\xc4\xb9>\xcbS?\x14\x03\x00\x05#x\xb5\x83f\xc68A\x16\xe2k\x0e\x7f\x9bi\x9a\xe9\x88\xda\xf2j\t!K\xe7d\xa5\xf3\xaa2\xaay\xf2v\'\xb0\x11\xc9\x9an\xf2\x06\xefW6d\xa8\xf1\x85\xc7)\xc1\x05<\xea|\x8cJ\xb2\xc0\xd9\xe7\x10V=\xcd4\xf5:\xff\xf1\x1cL\xe5\xff9_\x14\'\x85u\xcd\xae\x8f\x11J\xf8\xd46'
+               OpenPGP RSA Signature Of Header: b'\x89\x01\x15\x03\x05\x00[\x08R$p\xaf\x9e\x819\xdb|\x82\x01\x08H\x05\x08\x00\x85wx\x9dG\xe0$\xfe\xf8\xf1*y\xfa\xc1\x0c\xa1-\xc9 B\xed\xf3\xfa\'\x80v\x91\xe1Wl\x02\xaf\x94\x06>^$\xe1\xca\xf3\x06\xc5\xaa\xa6\xa1\x85\x98\xa3\xdc\x00+\x03\xdd\x98\xef\xd2\x1d\x9b*\xb6Bu6J\xad\xf0\x12\xc9\xbb8"\x84\x9e\xbd\x87)\x94\xf3\xb4\x832\x99\xc1k\xf7r\xa3\xbf\xe9\xecA\xaf\x86\x02\xee\xb7\xb36;8\xc5\x19{{C\xfat\xdc\xec,\xdc\xef)\x92\xc4\xd3\xcd7\x88\xe0q\x18@\x95\x89n\xc3\x8a\xaah\\\x83\xd4L\xaa.\x00\xf3[\xce\xab\x17*D\xe4\xa4-\x1d-\x89\x15^\x02m\xec"\xca\n\xc4\xb9>\xcbS?\x14\x03\x00\x05#x\xb5\x83f\xc68A\x16\xe2k\x0e\x7f\x9bi\x9a\xe9\x88\xda\xf2j\t!K\xe7d\xa5\xf3\xaa2\xaay\xf2v\'\xb0\x11\xc9\x9an\xf2\x06\xefW6d\xa8\xf1\x85\xc7)\xc1\x05<\xea|\x8cJ\xb2\xc0\xd9\xe7\x10V=\xcd4\xf5:\xff\xf1\x1cL\xe5\xff9_\x14\'\x85u\xcd\xae\x8f\x11J\xf8\xd46'
                          SHA1 Digest Of Header: 42dd9660c0752a72f332b198f09c57a2a27a621e
                        SHA256 Digest Of Header: 453f75a56cd0fec8359b87d82e5423d332a4fe4c4fd2379261eea0d784e07a9a
                                   Package Name: libaio
@@ -171,11 +190,11 @@ require the Linux-native async I/O API.
                   File Modification Timestamps: [datetime.datetime(2011, 3, 24, 8, 43, 41, tzinfo=datetime.timezone.utc), datetime.datetime(2011, 3, 24, 8, 43, 41, tzinfo=datetime.timezone.utc), datetime.datetime(2016, 4, 22, 14, 18, tzinfo=datetime.timezone.utc), datetime.datetime(2016, 4, 22, 14, 18, tzinfo=datetime.timezone.utc), datetime.datetime(2010, 2, 11, 19, 16, 55, tzinfo=datetime.timezone.utc), datetime.datetime(2014, 8, 26, 11, 53, 35, tzinfo=datetime.timezone.utc), datetime.datetime(2009, 11, 20, 14, 31, 19, tzinfo=datetime.timezone.utc), datetime.datetime(2013, 3, 1, 10, 32, 38, tzinfo=datetime.timezone.utc), datetime.datetime(2013, 3, 1, 10, 32, 38, tzinfo=datetime.timezone.utc), datetime.datetime(2016, 4, 22, 14, 18, tzinfo=datetime.timezone.utc), datetime.datetime(2018, 5, 25, 18, 12, 42, tzinfo=datetime.timezone.utc)]
                                      File Hash: ['ab4b71ed9914e09c9470ed193e6049ab251e2f13bc17e7a54f5c74c0965c841e', 'e14215abee7b135f9d0d832e3544b30dc3e7540b0ccec8414ce42b1a47a86986', '9e615a1fe27800756e68017d25c8e029614a72993d27d4ecfe59d410867a0b8f', '2474d6f7378e254d47370b68a992f08ad30e8b522234c283754361accec55aea', 'cb4b2b1a128f9eb1ab6f39660359098950cb1906eb883d8b6ad38e8fa8c319fa', 'aa4d278101271a5a269ca3471402203d70f8da05c42d46c52be1b2e24f95cf59', 'b5cefce0a3cb49f8dca4d00e9480c0d9b45b75863bd44764156e322ee214e794', '76beebbc9cc994a1be1dbe686a4c20d5374462da03ffa512083ccd2dac940c1e', 'e91be00e676f63a54a82699c3e20766248587edc09f84bfd8207743519a8dfca', 'fa8847f11938773bd93ab17bd2b1319bb2fe094561aeaaf75fd840205ff112ff', '6261948d71f6ff1c4c321ddef3bb655196d898ac08b44ec7ec1ee20d9d59dcf6']
                           File Symlink Targets: ['', '', '', '', '', '', '', '', '', '', '']
-                                    File Flags: [<FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.SPECFILE: 32>]
+                                    File Flags: {file_flags}
                          File Unix Owner Names: ['root', 'root', 'root', 'root', 'root', 'root', 'root', 'root', 'root', 'root', 'root']
                          File Unix Group Names: ['root', 'root', 'root', 'root', 'root', 'root', 'root', 'root', 'root', 'root', 'root']
-                       File Verification Flags: [<VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>]
-                        Required Names (Flags): [<DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>, <DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>]
+                       File Verification Flags: {file_verification_flags}
+                        Required Names (Flags): {required_names_flags}
                                 Required Names: ['rpmlib(CompressedFileNames)', 'rpmlib(FileDigests)']
                      Required Names (Versions): ['3.0.4-1', '4.6.0-1']
                       RPM Version For Building: 4.14.1
@@ -198,6 +217,6 @@ require the Linux-native async I/O API.
                    Header String Data Encoding: utf-8
 Cryptographic Digest of the Compressed Payload: ['75c03228af86b5aa125966962a19ec402ab330054264f74a4d877dd357a46c26']
                       Payload Digest Algorithm: <FileDigestAlgorithm.SHA512: 8>
-"""[1:-1],  # noqa: E501
+"""[1:-1].format(file_flags=file_flags, file_verification_flags=file_verification_flags, required_names_flags=required_names_flags),  # noqa: E501
             results
         )
