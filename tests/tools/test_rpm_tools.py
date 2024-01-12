@@ -40,7 +40,7 @@ class CheckRpmHeadersTestCase(TestCase):
     maxDiff = None
 
     def test_binary(self) -> None:
-        if sys.version_info < (3, 10):
+        if sys.version_info < (3, 11):
             file_flags = "[<FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.DOC: 2>, <FileFlags.DOC: 2>]"
             file_verification_flags = "[<VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.0: 0>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>]"  # noqa: E501
             required_names_flags = "[<DependencyFlags.SCRIPT_POST|INTERP: 1280>, <DependencyFlags.SCRIPT_POSTUN|INTERP: 4352>, <DependencyFlags.FIND_REQUIRES: 16384>, <DependencyFlags.FIND_REQUIRES: 16384>, <DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>, <DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>, <DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>, <DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>]"  # noqa: E501
@@ -138,7 +138,7 @@ Index Into File Dependencies Dictionary Denoting Start Of File's Dependencies: [
         )
 
     def test_source(self) -> None:
-        if sys.version_info < (3, 10):
+        if sys.version_info < (3, 11):
             file_flags = "[<FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.0: 0>, <FileFlags.SPECFILE: 32>]"  # noqa: E501
             file_verification_flags = "[<VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>, <VerifyFlags.CAPS|RDEV|MODE|MTIME|GROUP|USER|LINK_TO|SIZE|MD5: -1>]"  # noqa: E501
             required_names_flags = "[<DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>, <DependencyFlags.RPMLIB|EQUAL|LESS: 16777226>]"
