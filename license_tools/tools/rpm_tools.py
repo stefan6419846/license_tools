@@ -12,7 +12,7 @@ import datetime
 import logging
 from enum import IntEnum, IntFlag
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, cast, Dict  # TODO: Remove `Dict` after dropping Python 3.8.
 
 import rpmfile  # type: ignore[import-untyped]
 
@@ -391,7 +391,7 @@ def extract(archive_path: Path, target_path: Path) -> None:
                 target_file.write_bytes(file_object.read())
 
 
-def get_headers(rpm_path: Path) -> dict[str, Any]:
+def get_headers(rpm_path: Path) -> Dict[str, Any]:
     """
     Get the RPM headers.
 
@@ -400,7 +400,7 @@ def get_headers(rpm_path: Path) -> dict[str, Any]:
     """
     with rpmfile.open(rpm_path) as rpm_file:
         headers = rpm_file.headers
-    return cast(dict[str, Any], headers)
+    return cast(Dict[str, Any], headers)
 
 
 class FileFlags(IntFlag):
@@ -559,14 +559,14 @@ def _convert_header_value(key: str, value: Any) -> Any:
     return value
 
 
-def get_nice_headers(rpm_path: Path) -> Any:
+def get_nice_headers(rpm_path: Path) -> Dict[str, Any]:
     """
     Get the RPM headers, but with nicer values and verbose names as keys.
 
     :param rpm_path: The RPM file to analyze.
     :return: The corresponding headers.
     """
-    result: dict[str, str | int] = {}
+    result: Dict[str, Any] = {}
     for key, value in get_headers(rpm_path).items():
         if key in _HEADERS_TO_OMIT:
             logger.warning("Omitting key %s ...", key)
