@@ -11,7 +11,7 @@ from __future__ import annotations
 import shutil
 import zipfile
 from pathlib import Path
-from typing import Protocol
+from typing import Literal, Protocol
 
 from license_tools.tools import rpm_tools
 
@@ -53,7 +53,7 @@ def _unpack_with_shutil(archive_path: Path, target_directory: Path | str) -> Non
     :param archive_path: The archive file to unpack.
     :param target_directory: The directory to unpack to.
     """
-    filter_arg = None
+    filter_arg: Literal["fully_trusted", "tar", "data"] | None = None
     if ".tar" in archive_path.suffixes:
         filter_arg = "data"
     shutil.unpack_archive(filename=archive_path, extract_dir=target_directory, filter=filter_arg)
