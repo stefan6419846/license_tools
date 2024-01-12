@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import shutil
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
@@ -107,7 +108,7 @@ class UnpackRpmFileTestCase(TestCase):
 
 
 class UnpackWithShutilTestCase(TestCase):
-    def test_unpack_with_shutil(self) -> None:
+    def test_tar_gz(self) -> None:
         url = "https://files.pythonhosted.org/packages/1f/7a/8b94bb016069caa12fc9f587b28080ac33b4fbb8ca369b98bc0a4828543e/typing_extensions-4.8.0.tar.gz"
         with download(url, ".tar.gz") as path, TemporaryDirectory() as tempdir:
             directory = Path(tempdir)
@@ -116,6 +117,32 @@ class UnpackWithShutilTestCase(TestCase):
             )
             actual = [x[1] for x in retrieval.get_files_from_directory(directory)]
             self.assertEqual(TYPING_EXTENSION_4_8_0__SOURCE_FILES, actual)
+
+    def test_zip(self) -> None:
+        with TemporaryDirectory() as source, TemporaryDirectory() as tempdir, NamedTemporaryFile() as zip_file:
+            source_path = Path(source)
+            directory = Path(tempdir)
+            source_path.joinpath("test.txt").write_text("abc")
+            source_path.joinpath("directory1").mkdir()
+            source_path.joinpath("directory2").mkdir()
+            source_path.joinpath("directory2", "README").write_text("Hello World")
+            shutil.make_archive(base_name=zip_file.name, format="zip", root_dir=source_path.parent, base_dir=source_path.name)
+
+            archive_utils._unpack_with_shutil(
+                archive_path=Path(f"{zip_file.name}.zip"), target_directory=directory
+            )
+            actual = [x[1] for x in retrieval.get_files_from_directory(directory)]
+            self.assertEqual(
+                [
+                    f"{source_path.name}/directory2/README",
+                    f"{source_path.name}/test.txt"
+                ],
+                actual
+            )
+            self.assertEqual(
+                {"directory1", "directory2", "test.txt"},
+                {x.name for x in directory.joinpath(source_path.name).glob("*")}
+            )
 
 
 class GetHandlerForArchiveTestCase(TestCase):

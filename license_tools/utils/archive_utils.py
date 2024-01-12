@@ -53,7 +53,10 @@ def _unpack_with_shutil(archive_path: Path, target_directory: Path | str) -> Non
     :param archive_path: The archive file to unpack.
     :param target_directory: The directory to unpack to.
     """
-    shutil.unpack_archive(filename=archive_path, extract_dir=target_directory)
+    filter_arg = None
+    if ".tar" in archive_path.suffixes:
+        filter_arg = "data"
+    shutil.unpack_archive(filename=archive_path, extract_dir=target_directory, filter=filter_arg)
 
 
 def get_handler_for_archive(archive_path: Path) -> ArchiveHandler | None:
