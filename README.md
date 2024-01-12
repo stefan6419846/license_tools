@@ -9,8 +9,10 @@ At the moment, this primarily provides some convenience wrappers around the [Sca
 * Use *dataclasses* instead of dictionaries for returning data.
 * Automatically download a specific Python package from PyPI and analyze it.
 * Aggregate how often each license has been used inside the current artifact.
-* Look into shared object files (`*.so*`) to see what they are linking to.
+* Look into shared object files (`*.so*`) and ELF binaries to see what they are linking to (dynamically).
 * Look into font files to easily analyze their metadata.
+* Look into RPM file metadata.
+* Recursively look into nested archives, for example by unpacking the actual upstream source code archives inside RPM (source) files.
 * Make everything available from the terminal.
 * Drop all confusing parameters.
 
