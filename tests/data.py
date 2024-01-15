@@ -37,7 +37,7 @@ def get_file(name: str) -> Generator[Path, None, None]:
 SETUP_PY_LICENSES = Licenses(
     detected_license_expression="apache-2.0 AND (unknown-license-reference AND apache-2.0)",
     detected_license_expression_spdx="Apache-2.0 AND (LicenseRef-scancode-unknown-license-reference AND Apache-2.0)",
-    percentage_of_license_text=20.59,
+    percentage_of_license_text=20.35,
     license_detections=[
         LicenseDetection(
             license_expression="apache-2.0",
@@ -105,8 +105,8 @@ SETUP_PY_LICENSES = Licenses(
             matches=[
                 LicenseMatch(
                     score=95.0,
-                    start_line=47,
-                    end_line=47,
+                    start_line=49,
+                    end_line=49,
                     matched_length=6,
                     match_coverage=100.0,
                     matcher="2-aho",
@@ -121,8 +121,8 @@ SETUP_PY_LICENSES = Licenses(
     license_clues=[
         LicenseClue(
             score=50.0,
-            start_line=53,
-            end_line=53,
+            start_line=55,
+            end_line=55,
             matched_length=3,
             match_coverage=100.0,
             matcher="2-aho",

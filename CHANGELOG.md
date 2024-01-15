@@ -2,7 +2,7 @@
 
 * Skip symlinks for LDD analysis.
 * Analyze nested archives.
-* Analyze RPM files.
+* Analyze more archives, including RPM files.
 * Handle more types of ELF binaries.
 * Move tools to dedicated submodule.
 

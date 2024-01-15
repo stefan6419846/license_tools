@@ -385,7 +385,6 @@ class RunOnPackageArchiveFileTestCase(TestCase):
                 suffix=".rpm",
                 url=url,
                 expected_files=[
-                    "lib64/libaio.so.1",
                     "lib64/libaio.so.1.0.1",
                     "usr/share/doc/packages/libaio1/COPYING",
                     "usr/share/doc/packages/libaio1/TODO",

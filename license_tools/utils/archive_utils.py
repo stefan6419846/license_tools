@@ -9,68 +9,47 @@ Archive handling.
 from __future__ import annotations
 
 import shutil
-import zipfile
 from pathlib import Path
-from typing import Literal, Protocol
+from typing import cast
 
-from license_tools.tools import rpm_tools
+from extractcode import all_kinds  # type: ignore[import-untyped]
+from extractcode.api import extract_archive as _extract_archive, extract_archives as _extract_archives  # type: ignore[import-untyped]
+from extractcode.archive import should_extract as _should_extract  # type: ignore[import-untyped]
 
 
-class ArchiveHandler(Protocol):
+def extract(archive_path: Path, target_directory: Path, recurse: bool = False) -> None:
     """
-    Method interface for an archive handler.
+    Extract the given archive recursively.
+
+    :param archive_path: The archive to unpack.
+    :param target_directory: The target directory to use.
+    :param recurse: Whether to use a recursive approach.
     """
+    if recurse:
+        targets = set()
+        for event in _extract_archives(location=archive_path, all_formats=True, recurse=True):
+            if event.done:
+                shutil.copytree(src=Path(event.target), dst=target_directory, dirs_exist_ok=True)
+                targets.add(Path(event.target))
+        for target in targets:
+            if target.exists():
+                shutil.rmtree(target)
+    else:
+        for _event in _extract_archive(location=archive_path, target=target_directory):
+            pass
 
-    def __call__(self, archive_path: Path, target_directory: Path | str) -> None:
-        ...
 
-
-def _unpack_zip_file(archive_path: Path, target_directory: Path | str) -> None:
+def can_extract(archive_path: Path) -> bool:
     """
-    Unpack the given ZIP file which requires custom handling.
+    Check if the given archive can be extracted.
 
-    :param archive_path: The ZIP file to unpack.
-    :param target_directory: The directory to unpack to.
+    :param archive_path: The path to check for.
+    :return: The check result.
     """
-    with zipfile.ZipFile(archive_path, "r") as zip_file:
-        zip_file.extractall(target_directory)
-
-
-def _unpack_rpm_file(archive_path: Path, target_directory: Path | str) -> None:
-    """
-    Unpack the given RPM file.
-
-    :param archive_path: The RPM file to unpack.
-    :param target_directory: The directory to unpack to.
-    """
-    return rpm_tools.extract(archive_path=archive_path, target_path=Path(target_directory))
-
-
-def _unpack_with_shutil(archive_path: Path, target_directory: Path | str) -> None:
-    """
-    Unpack the given archive file which is supported out-of-the-box.
-
-    :param archive_path: The archive file to unpack.
-    :param target_directory: The directory to unpack to.
-    """
-    filter_arg: Literal["fully_trusted", "tar", "data"] | None = None
-    if ".tar" in archive_path.suffixes:
-        filter_arg = "data"
-    shutil.unpack_archive(filename=archive_path, extract_dir=target_directory, filter=filter_arg)
-
-
-def get_handler_for_archive(archive_path: Path) -> ArchiveHandler | None:
-    """
-    Get the handler for the given archive file.
-
-    :param archive_path: The file to get the handler for.
-    :return: If possible/known, the corresponding handler, otherwise None.
-    """
-    if archive_path.suffix in {".whl", ".jar"}:
-        return _unpack_zip_file
-    if archive_path.suffix == ".rpm":
-        return _unpack_rpm_file
-    if shutil._find_unpack_format(str(archive_path)):  # type: ignore[attr-defined]
-        # TODO: Is there a cleaner API for this?
-        return _unpack_with_shutil
-    return None
+    return cast(
+        bool,
+        _should_extract(
+            location=archive_path,
+            kinds=all_kinds,
+        )
+    )

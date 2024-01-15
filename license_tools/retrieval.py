@@ -122,7 +122,6 @@ def run_on_file(
 
     :param path: The file path to analyze.
     :param short_path: The short path to use for display.
-    :param job_count: The number of parallel jobs to use.
     :param retrieval_flags: Values to retrieve.
     :return: The requested results.
     """
@@ -197,14 +196,13 @@ def run_on_directory(
     yield from results
 
     for path, _ in files:
-        archive_handler = archive_utils.get_handler_for_archive(path)
-        if archive_handler:
+        if archive_utils.can_extract(path):
             name = path.name[:-len("".join(path.suffixes))]
             subdirectory = path.parent / f'{name}_{"_".join(path.suffixes).replace(".", "")}'
             if subdirectory.exists():
                 with TemporaryDirectory(dir=path.parent) as tempdir:
                     subdirectory = Path(tempdir)
-                    archive_handler(archive_path=path, target_directory=subdirectory)
+                    archive_utils.extract(archive_path=path, target_directory=subdirectory)
                     yield from run_on_directory(
                         directory=str(subdirectory),
                         job_count=job_count,
@@ -212,7 +210,7 @@ def run_on_directory(
                         prefix=directory,
                     )
             else:
-                archive_handler(archive_path=path, target_directory=subdirectory)
+                archive_utils.extract(archive_path=path, target_directory=subdirectory)
                 yield from run_on_directory(
                     directory=str(subdirectory),
                     job_count=job_count,
@@ -240,10 +238,9 @@ def run_on_package_archive_file(
             print(f'{archive_path} declares the {rpm_results.declared_license_expression_spdx} license in its metadata.\n')
 
     with TemporaryDirectory() as working_directory:
-        handler = archive_utils.get_handler_for_archive(archive_path=archive_path)
-        if not handler:
+        if not archive_utils.can_extract(archive_path):
             raise ValueError(f'Unsupported archive format: {archive_path}')
-        handler(archive_path=archive_path, target_directory=working_directory)
+        archive_utils.extract(archive_path=archive_path, target_directory=Path(working_directory))
         yield from run_on_directory(
             directory=working_directory,
             job_count=job_count,
