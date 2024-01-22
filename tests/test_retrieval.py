@@ -90,7 +90,14 @@ class RunOnFileTestCase(TestCase):
         return_value: str | None = "",
     ) -> tuple[mock.Mock, mock.Mock, str]:
         stdout = StringIO()
-        file_result = object()
+
+        class DummyFileResult:
+            licenses = None
+
+            def __init__(self, *args: Any, **kwargs: Any) -> None:
+                pass
+
+        file_result = DummyFileResult()
         with mock.patch.object(
             retrieval, "FileResults", return_value=file_result
         ) as results_mock, redirect_stdout(stdout), mock.patch(
@@ -155,11 +162,6 @@ class RunOnFileTestCase(TestCase):
         results_mock.assert_called_once_with(
             path=SETUP_PATH,
             short_path="setup.py",
-            retrieve_licenses=True,
-            retrieve_copyrights=True,
-            retrieve_emails=True,
-            retrieve_file_info=True,
-            retrieve_urls=True,
         )
         self.assertEqual("setup.py\n" + ldd_usr_bin_bc + "\n", stdout)
 
@@ -222,11 +224,6 @@ Typographic Subfamily name: Solid
         results_mock.assert_called_once_with(
             path=SETUP_PATH,
             short_path="setup.py",
-            retrieve_licenses=True,
-            retrieve_copyrights=True,
-            retrieve_emails=True,
-            retrieve_file_info=True,
-            retrieve_urls=True,
         )
         self.assertEqual("setup.py\n" + font_awesome + "\n\n", stdout)
 

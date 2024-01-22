@@ -3,6 +3,8 @@
 * Skip symlinks for LDD analysis.
 * Analyze nested archives.
 * Analyze more archives, including RPM files.
+* Speed-up analysis of packed archive files (will be unpacked in a separate step), ELF binaries and fonts by not scanning the whole binary blob, 
+  but only looking at the metadata (if available).
 * Handle more types of ELF binaries.
 * Move tools to dedicated submodule.
 

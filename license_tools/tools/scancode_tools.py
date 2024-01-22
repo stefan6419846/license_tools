@@ -192,9 +192,9 @@ class Licenses:
     Information on all detected licenses.
     """
 
-    detected_license_expression: str | None
-    detected_license_expression_spdx: str | None
-    percentage_of_license_text: float
+    detected_license_expression: str | None = None
+    detected_license_expression_spdx: str | None = None
+    percentage_of_license_text: float = 0.0
     license_detections: list[LicenseDetection] = dataclass_field(default_factory=list)
     license_clues: list[LicenseClue] = dataclass_field(default_factory=list)
 

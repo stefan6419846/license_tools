@@ -112,6 +112,35 @@ class RetrievalFlags:
         )
 
 
+def _run_on_archive_file(path: Path) -> None:
+    """
+    Run archive-specific analysis.
+
+    :param path: The path to run on.
+    """
+    if path.suffix == ".rpm" or (path.suffixes and ".rpm" in path.suffixes):
+        rpm_results = PackageResults.from_rpm(path)
+        if rpm_results.declared_license_expression_spdx:
+            print(f'{path} declares the {rpm_results.declared_license_expression_spdx} license in its metadata.\n')
+
+
+def _get_dummy_file_results(
+        path: Path,
+        short_path: str
+) -> FileResults:
+    """
+    Get some empty dummy license results, which allows displaying the file in the
+    results, but skipping the actual analysis.
+
+    :param path: The file path to analyze.
+    :param short_path: The short path to use for display.
+    :return: Minimal results.
+    """
+    results = FileResults(path=path, short_path=short_path)
+    results.licenses = Licenses()
+    return results
+
+
 def run_on_file(
     path: Path,
     short_path: str,
@@ -125,17 +154,32 @@ def run_on_file(
     :param retrieval_flags: Values to retrieve.
     :return: The requested results.
     """
+    if archive_utils.can_extract(archive_path=path):
+        # Archive files which can be extracted further are not being analyzed on the
+        # file level. This should improve the extraction speed and avoid possible
+        # memory errors as this skips running string matching on possibly large
+        # archives which are binary blobs anyway and do not provide any real value.
+        # Instead, just have a quick look at their headers if they provide any useful
+        # values.
+        _run_on_archive_file(path=path)
+        return _get_dummy_file_results(path=path, short_path=short_path)
+
     retrieval_kwargs = RetrievalFlags.to_kwargs(flags=retrieval_flags)
 
     # This data is not yet part of the dataclasses above, as it is a custom analysis.
+    # Return early if we got a result here, as these binary files currently do not
+    # provide any additional useful insights in most of the cases, but tend to be
+    # larger binary blobs which just slow down the analysis.
     if retrieval_kwargs.pop("retrieve_ldd_data"):
         results = linking_tools.check_shared_objects(path=path)
         if results:
             print(short_path + "\n" + results)
+            return _get_dummy_file_results(path=path, short_path=short_path)
     if retrieval_kwargs.pop("retrieve_font_data"):
         results = font_tools.check_font(path=path)
         if results:
             print(short_path + "\n" + results + "\n")
+            return _get_dummy_file_results(path=path, short_path=short_path)
 
     # Register this here as each parallel process has its own directory.
     atexit.register(scancode_tools.cleanup, scancode_config.scancode_temp_dir)
@@ -232,10 +276,7 @@ def run_on_package_archive_file(
     :param retrieval_flags: Values to retrieve.
     :return: The requested results.
     """
-    if archive_path.suffix == ".rpm" or (archive_path.suffixes and ".rpm" in archive_path.suffixes):
-        rpm_results = PackageResults.from_rpm(archive_path)
-        if rpm_results.declared_license_expression_spdx:
-            print(f'{archive_path} declares the {rpm_results.declared_license_expression_spdx} license in its metadata.\n')
+    _run_on_archive_file(path=archive_path)
 
     with TemporaryDirectory() as working_directory:
         if not archive_utils.can_extract(archive_path):
