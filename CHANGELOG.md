@@ -1,5 +1,7 @@
 # Development version
 
+# Version 0.6.0 - 2024-01-26
+
 * Skip symlinks for LDD analysis.
 * Analyze nested archives.
 * Analyze more archives, including RPM files.
@@ -7,6 +9,7 @@
   but only looking at the metadata (if available).
 * Handle more types of ELF binaries.
 * Move tools to dedicated submodule.
+* Fix shipping of font data in sdist.
 
 # Version 0.5.0 - 2023-12-11
 
