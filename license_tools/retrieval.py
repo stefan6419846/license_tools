@@ -112,16 +112,28 @@ class RetrievalFlags:
         )
 
 
-def _run_on_archive_file(path: Path) -> None:
+def _run_on_archive_file(path: Path, short_path: str, default_to_none: bool = False) -> FileResults | None:
     """
     Run archive-specific analysis.
 
     :param path: The path to run on.
+    :param short_path: The short path to use for display.
+    :param default_to_none: Return `None` if no results could be determined instead of an empty entry.
+    :return: Explicitly declared results.
     """
+
     if path.suffix == ".rpm" or (path.suffixes and ".rpm" in path.suffixes):
         rpm_results = PackageResults.from_rpm(path)
         if rpm_results.declared_license_expression_spdx:
-            print(f'{path} declares the {rpm_results.declared_license_expression_spdx} license in its metadata.\n')
+            results = _get_dummy_file_results(path=path, short_path=short_path)
+            results.licenses = Licenses(
+                detected_license_expression=rpm_results.declared_license_expression_spdx,
+                detected_license_expression_spdx=rpm_results.declared_license_expression_spdx,
+            )
+            return results
+    if default_to_none:
+        return None
+    return _get_dummy_file_results(path=path, short_path=short_path)
 
 
 def _get_dummy_file_results(
@@ -161,8 +173,10 @@ def run_on_file(
         # archives which are binary blobs anyway and do not provide any real value.
         # Instead, just have a quick look at their headers if they provide any useful
         # values.
-        _run_on_archive_file(path=path)
-        return _get_dummy_file_results(path=path, short_path=short_path)
+        return cast(
+            FileResults,
+            _run_on_archive_file(path=path, short_path=short_path, default_to_none=False)
+        )
 
     retrieval_kwargs = RetrievalFlags.to_kwargs(flags=retrieval_flags)
 
@@ -276,7 +290,9 @@ def run_on_package_archive_file(
     :param retrieval_flags: Values to retrieve.
     :return: The requested results.
     """
-    _run_on_archive_file(path=archive_path)
+    archive_results = _run_on_archive_file(path=archive_path, short_path=archive_path.name, default_to_none=True)
+    if archive_results is not None:
+        yield archive_results
 
     with TemporaryDirectory() as working_directory:
         if not archive_utils.can_extract(archive_path):

@@ -1,5 +1,7 @@
 # Development version
 
+* Move detected licenses from archives to the regular results instead of just printing it.
+
 # Version 0.6.0 - 2024-01-26
 
 * Skip symlinks for LDD analysis.

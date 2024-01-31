@@ -19,7 +19,7 @@ import requests
 
 from license_tools import retrieval
 from license_tools.retrieval import RetrievalFlags
-from license_tools.tools.scancode_tools import FileResults
+from license_tools.tools.scancode_tools import FileResults, Licenses
 from tests.data import (
     SETUP_PATH,
     SETUP_PY_LICENSES,
@@ -334,7 +334,7 @@ class RunOnDirectoryTestCase(TestCase):
 
 
 class RunOnPackageArchiveFileTestCase(TestCase):
-    def _check_call(self, suffix: str, url: str, expected_files: List[str]) -> None:
+    def _check_call(self, suffix: str, url: str, expected_files: List[str], expected_license: str | None = None) -> None:
         with NamedTemporaryFile(suffix=suffix) as archive_file:
             archive_path = Path(archive_file.name)
             archive_path.write_bytes(requests.get(url).content)
@@ -358,7 +358,16 @@ class RunOnPackageArchiveFileTestCase(TestCase):
                         archive_path=archive_path, job_count=2, retrieval_flags=42
                     )
                 )
-            self.assertEqual(directory_result, result)
+
+            expected = directory_result
+            if expected_license:
+                dummy_entry = retrieval._get_dummy_file_results(path=archive_path, short_path=archive_path.name)
+                dummy_entry.licenses = Licenses(
+                    detected_license_expression=expected_license,
+                    detected_license_expression_spdx=expected_license,
+                )
+                expected.insert(0, dummy_entry)
+            self.assertEqual(expected, result)
 
     def test_wheel_file(self) -> None:
         url = "https://files.pythonhosted.org/packages/24/21/7d397a4b7934ff4028987914ac1044d3b7d52712f30e2ac7a2ae5bc86dd0/typing_extensions-4.8.0-py3-none-any.whl"  # noqa: E501
@@ -376,20 +385,15 @@ class RunOnPackageArchiveFileTestCase(TestCase):
 
     def test_rpm(self) -> None:
         url = "https://download.opensuse.org/distribution/leap/15.6/repo/oss/x86_64/libaio1-0.3.109-1.25.x86_64.rpm"
-        stdout = StringIO()
-        with redirect_stdout(stdout):
-            self._check_call(
-                suffix=".rpm",
-                url=url,
-                expected_files=[
-                    "lib64/libaio.so.1.0.1",
-                    "usr/share/doc/packages/libaio1/COPYING",
-                    "usr/share/doc/packages/libaio1/TODO",
-                ],
-            )
-        self.assertRegex(
-            expected_regex=r"^\/tmp\/tmp[^/]+\.rpm declares the LGPL-2\.1-or-later license in its metadata\.\n$",
-            text=stdout.getvalue()
+        self._check_call(
+            suffix=".rpm",
+            url=url,
+            expected_files=[
+                "lib64/libaio.so.1.0.1",
+                "usr/share/doc/packages/libaio1/COPYING",
+                "usr/share/doc/packages/libaio1/TODO",
+            ],
+            expected_license="LGPL-2.1-or-later",
         )
 
 
