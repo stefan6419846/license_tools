@@ -1,7 +1,9 @@
 # Development version
 
+# Version 0.7.0 - 2024-02-12
+
 * Move detected licenses from archives to the regular results instead of just printing it.
-* Replace `NOT_REQUESTED` by `None` as `NOT_REQUESTED` could not be used as a reliable filter when used as library.
+* Replace `NOT_REQUESTED` by `None` as `NOT_REQUESTED` could not be used as a reliable filter within external code.
 * Add support for OTF font files.
 * Cleanup unpacked archives when done with it.
 
