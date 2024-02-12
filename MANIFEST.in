@@ -1,6 +1,8 @@
 include license_tools/py.typed
+include tests/files/*.otf
 include tests/files/*.ttf
 include tests/files/*.woff
 include tests/files/*.woff2
 include tests/files/*.txt
 include tests/files/*.md
+include tests/*/*.py
