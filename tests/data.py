@@ -12,7 +12,6 @@ except ImportError:
 from pathlib import Path
 from typing import Generator
 
-from license_tools.constants import NOT_REQUESTED
 from license_tools.tools.scancode_tools import (
     FileResults,
     LicenseClue,
@@ -165,9 +164,9 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
         retrieve_urls=False,
         retrieve_licenses=False,
         retrieve_file_info=False,
-        copyrights=NOT_REQUESTED,
-        emails=NOT_REQUESTED,
-        urls=NOT_REQUESTED,
+        copyrights=None,
+        emails=None,
+        urls=None,
         licenses=Licenses(
             detected_license_expression="python AND (python AND bsd-new) AND (python AND bsd-new AND bsd-zero)",
             detected_license_expression_spdx="Python-2.0 AND (Python-2.0 AND BSD-3-Clause) AND (Python-2.0 AND BSD-3-Clause AND 0BSD)",
@@ -290,7 +289,7 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
             ],
             license_clues=[],
         ),
-        file_info=NOT_REQUESTED,
+        file_info=None,
     ),
     FileResults(
         path=Path("/tmp/tmpr6n2cx2i/typing_extensions-4.8.0.dist-info/METADATA"),
@@ -300,9 +299,9 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
         retrieve_urls=False,
         retrieve_licenses=False,
         retrieve_file_info=False,
-        copyrights=NOT_REQUESTED,
-        emails=NOT_REQUESTED,
-        urls=NOT_REQUESTED,
+        copyrights=None,
+        emails=None,
+        urls=None,
         licenses=Licenses(
             detected_license_expression="python",
             detected_license_expression_spdx="Python-2.0",
@@ -329,7 +328,7 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
             ],
             license_clues=[],
         ),
-        file_info=NOT_REQUESTED,
+        file_info=None,
     ),
     FileResults(
         path=Path("/tmp/tmpr6n2cx2i/typing_extensions-4.8.0.dist-info/RECORD"),
@@ -339,9 +338,9 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
         retrieve_urls=False,
         retrieve_licenses=False,
         retrieve_file_info=False,
-        copyrights=NOT_REQUESTED,
-        emails=NOT_REQUESTED,
-        urls=NOT_REQUESTED,
+        copyrights=None,
+        emails=None,
+        urls=None,
         licenses=Licenses(
             detected_license_expression=None,
             detected_license_expression_spdx=None,
@@ -349,7 +348,7 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
             license_detections=[],
             license_clues=[],
         ),
-        file_info=NOT_REQUESTED,
+        file_info=None,
     ),
     FileResults(
         path=Path("/tmp/tmpr6n2cx2i/typing_extensions-4.8.0.dist-info/WHEEL"),
@@ -359,9 +358,9 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
         retrieve_urls=False,
         retrieve_licenses=False,
         retrieve_file_info=False,
-        copyrights=NOT_REQUESTED,
-        emails=NOT_REQUESTED,
-        urls=NOT_REQUESTED,
+        copyrights=None,
+        emails=None,
+        urls=None,
         licenses=Licenses(
             detected_license_expression=None,
             detected_license_expression_spdx=None,
@@ -369,7 +368,7 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
             license_detections=[],
             license_clues=[],
         ),
-        file_info=NOT_REQUESTED,
+        file_info=None,
     ),
     FileResults(
         path=Path("/tmp/tmpr6n2cx2i/typing_extensions.py"),
@@ -379,9 +378,9 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
         retrieve_urls=False,
         retrieve_licenses=False,
         retrieve_file_info=False,
-        copyrights=NOT_REQUESTED,
-        emails=NOT_REQUESTED,
-        urls=NOT_REQUESTED,
+        copyrights=None,
+        emails=None,
+        urls=None,
         licenses=Licenses(
             detected_license_expression=None,
             detected_license_expression_spdx=None,
@@ -389,7 +388,7 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
             license_detections=[],
             license_clues=[],
         ),
-        file_info=NOT_REQUESTED,
+        file_info=None,
     ),
 ]
 

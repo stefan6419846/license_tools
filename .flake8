@@ -9,6 +9,7 @@ exclude =
     build,
     dist,
     # Exclude virtual environments.
-    venv*
+    venv*,
+    todo,
 # Custom limit.
 max_line_length = 160

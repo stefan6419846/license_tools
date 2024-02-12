@@ -20,8 +20,6 @@ from commoncode import fileutils  # type: ignore[import-untyped]
 from packagedcode.rpm import RpmArchiveHandler  # type: ignore[import-untyped]
 from scancode import api  # type: ignore[import-untyped]
 
-from license_tools.constants import NOT_REQUESTED
-
 
 @dataclass
 class Author:
@@ -234,11 +232,11 @@ class FileResults:
     retrieve_file_info: bool = False
 
     # Analysis results.
-    copyrights: Copyrights | object = NOT_REQUESTED
-    emails: Emails | object = NOT_REQUESTED
-    urls: Urls | object = NOT_REQUESTED
-    licenses: Licenses | object = NOT_REQUESTED
-    file_info: FileInfo | object = NOT_REQUESTED
+    copyrights: Copyrights | None = None
+    emails: Emails | None = None
+    urls: Urls | None = None
+    licenses: Licenses | None = None
+    file_info: FileInfo | None = None
 
     def __post_init__(self) -> None:
         path_str = str(self.path)

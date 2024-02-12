@@ -12,7 +12,6 @@ from unittest import TestCase
 
 import requests
 
-from license_tools.constants import NOT_REQUESTED
 from license_tools.retrieval import RetrievalFlags
 from license_tools.tools import scancode_tools
 from license_tools.tools.scancode_tools import (
@@ -46,17 +45,22 @@ class FileResultsTestCase(TestCase):
     def assert_not_requested(
         self, result: FileResults, fields: list[str], invert: bool = False
     ) -> None:
-        method = self.assertNotEqual if invert else self.assertEqual
+        method = self.assertIsNotNone if invert else self.assertIsNone
         for field in fields:
             with self.subTest(field=field):
-                method(NOT_REQUESTED, getattr(result, field))
+                method(getattr(result, field))
 
     def test_full(self) -> None:
         flags = cast(Dict[str, bool], RetrievalFlags.all(as_kwargs=True))
         del flags["retrieve_ldd_data"]
         del flags["retrieve_font_data"]
+        self.assertEqual(4, len(flags))
         result = FileResults(
-            path=SETUP_PATH, short_path="setup.py", retrieve_licenses=True, **flags
+            path=SETUP_PATH, short_path="setup.py", retrieve_licenses=True,
+            retrieve_copyrights=flags["retrieve_copyrights"],
+            retrieve_emails=flags["retrieve_emails"],
+            retrieve_urls=flags["retrieve_urls"],
+            retrieve_file_info=flags["retrieve_file_info"],
         )
         self.assertEqual(SETUP_PATH, result.path)
         self.assertEqual("setup.py", result.short_path)

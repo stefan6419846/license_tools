@@ -1,6 +1,7 @@
 # Development version
 
 * Move detected licenses from archives to the regular results instead of just printing it.
+* Replace `NOT_REQUESTED` by `None` as `NOT_REQUESTED` could not be used as a reliable filter when used as library.
 
 # Version 0.6.0 - 2024-01-26
 

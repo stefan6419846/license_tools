@@ -22,7 +22,6 @@ import requests
 import scancode_config  # type: ignore[import-untyped]
 from joblib import Parallel, delayed  # type: ignore[import-untyped]
 
-from license_tools.constants import NOT_REQUESTED
 from license_tools.tools import font_tools, linking_tools, scancode_tools
 from license_tools.tools.scancode_tools import FileResults, Licenses, PackageResults
 from license_tools.utils import archive_utils
@@ -199,7 +198,11 @@ def run_on_file(
     atexit.register(scancode_tools.cleanup, scancode_config.scancode_temp_dir)
 
     return FileResults(
-        path=path, short_path=short_path, retrieve_licenses=True, **retrieval_kwargs
+        path=path, short_path=short_path, retrieve_licenses=True,
+        retrieve_copyrights=retrieval_kwargs["retrieve_copyrights"],
+        retrieve_emails=retrieval_kwargs["retrieve_emails"],
+        retrieve_urls=retrieval_kwargs["retrieve_urls"],
+        retrieve_file_info=retrieval_kwargs["retrieve_file_info"],
     )
 
 
@@ -494,9 +497,9 @@ def run(
     # Display the file-level results.
     max_path_length = max(len(result.short_path) for result in results)
     for result in results:
-        if result.licenses == NOT_REQUESTED:
+        if result.licenses is None:
             continue
-        licenses = cast(Licenses, result.licenses)
+        licenses = result.licenses
         scores = licenses.get_scores_of_detected_license_expression_spdx()
         print(
             f"{result.short_path:>{max_path_length}}",
