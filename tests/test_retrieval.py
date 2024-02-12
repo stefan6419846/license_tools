@@ -308,17 +308,74 @@ class RunOnDirectoryTestCase(TestCase):
                     )
                 )
 
+            self.assertSetEqual(
+                {'directory', 'nested_tar_bz2', 'nested.tar.bz2'},
+                {path.name for path in directory.glob('*')}
+            )
+
         result_set: Set[Path] = cast(Set[Path], set(results))
         expected: List[Tuple[Path, str]] = []
         self.assertEqual(4, len(results), results)
-        for name in ['directory/file.txt', 'nested.tar.bz2', 'nested_tar_bz2']:
+        for name in ["directory/file.txt", "nested.tar.bz2", "nested_tar_bz2"]:
             result_set.remove(directory / name)
             expected.append((directory / name, name))
         self.assertEqual(1, len(result_set), result_set)
         remaining = result_set.pop()
         self.assertEqual(directory, remaining.parent.parent.parent)
         self.assertEqual(nested_path.name, remaining.parent.name)
-        self.assertEqual('LICENSE', remaining.name)
+        self.assertEqual("LICENSE", remaining.name)
+        expected.append((remaining, "/".join(str(remaining).rsplit("/", maxsplit=3)[1:])))
+
+        run_mock.assert_has_calls(
+            [
+                mock.call(
+                    path=current_path, short_path=current_short_path, retrieval_flags=42
+                )
+                for current_path, current_short_path in expected
+            ],
+            any_order=False,
+        )
+        self.assertEqual(len(expected), run_mock.call_count, run_mock.call_args_list)
+
+    def test_nested_without_existing_directory(self) -> None:
+        with TemporaryDirectory() as tempdir:
+            directory = Path(tempdir)
+            directory.joinpath("directory").mkdir()
+            directory.joinpath("directory", "file.txt").write_text("MIT-0")
+            with TemporaryDirectory() as nested_directory:
+                nested_path = Path(nested_directory)
+                nested_path.joinpath("LICENSE").write_text("This is my license.")
+                with tarfile.open(directory / "nested.tar.bz2", "w:bz2") as tar:
+                    tar.add(nested_path, arcname=nested_path.name)
+
+            def run_on_file(path: Path, short_path: str, retrieval_flags: int = 0) -> Any:
+                return path
+
+            with mock.patch.object(
+                retrieval, "run_on_file", side_effect=run_on_file
+            ) as run_mock:
+                results = list(
+                    retrieval.run_on_directory(
+                        tempdir, job_count=1, retrieval_flags=42
+                    )
+                )
+
+            self.assertSetEqual(
+                {'directory', 'nested.tar.bz2'},
+                {path.name for path in directory.glob('*')}
+            )
+
+        result_set: Set[Path] = cast(Set[Path], set(results))
+        expected: List[Tuple[Path, str]] = []
+        self.assertEqual(3, len(results), results)
+        for name in ["directory/file.txt", "nested.tar.bz2"]:
+            result_set.remove(directory / name)
+            expected.append((directory / name, name))
+        self.assertEqual(1, len(result_set), result_set)
+        remaining = result_set.pop()
+        self.assertEqual(directory, remaining.parent.parent.parent)
+        self.assertEqual(nested_path.name, remaining.parent.name)
+        self.assertEqual("LICENSE", remaining.name)
         expected.append((remaining, "/".join(str(remaining).rsplit("/", maxsplit=3)[1:])))
 
         run_mock.assert_has_calls(

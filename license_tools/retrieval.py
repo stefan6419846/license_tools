@@ -25,6 +25,7 @@ from joblib import Parallel, delayed  # type: ignore[import-untyped]
 from license_tools.tools import font_tools, linking_tools, scancode_tools
 from license_tools.tools.scancode_tools import FileResults, Licenses, PackageResults
 from license_tools.utils import archive_utils
+from license_tools.utils.path_utils import TemporaryDirectoryWithFixedName
 
 
 class RetrievalFlags:
@@ -260,20 +261,10 @@ def run_on_directory(
         if archive_utils.can_extract(path):
             name = path.name[:-len("".join(path.suffixes))]
             subdirectory = path.parent / f'{name}_{"_".join(path.suffixes).replace(".", "")}'
-            if subdirectory.exists():
-                with TemporaryDirectory(dir=path.parent) as tempdir:
-                    subdirectory = Path(tempdir)
-                    archive_utils.extract(archive_path=path, target_directory=subdirectory)
-                    yield from run_on_directory(
-                        directory=str(subdirectory),
-                        job_count=job_count,
-                        retrieval_flags=retrieval_flags,
-                        prefix=directory,
-                    )
-            else:
-                archive_utils.extract(archive_path=path, target_directory=subdirectory)
+            with TemporaryDirectoryWithFixedName(directory=subdirectory, fallback_to_random_if_exists=True) as target_directory:
+                archive_utils.extract(archive_path=path, target_directory=target_directory)
                 yield from run_on_directory(
-                    directory=str(subdirectory),
+                    directory=str(target_directory),
                     job_count=job_count,
                     retrieval_flags=retrieval_flags,
                     prefix=directory,
