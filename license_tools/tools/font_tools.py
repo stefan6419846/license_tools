@@ -188,7 +188,7 @@ _TTF_HEAD_IDS = {
     "glyphDataFormat": ("Glyph Data Format", identity),
 }
 
-KNOWN_FONT_EXTENSIONS = {".ttf", ".woff", ".woff2"}
+KNOWN_FONT_EXTENSIONS = {".otf", ".ttf", ".woff", ".woff2"}
 
 FONT_VALUE_TYPE = Union[str, int, datetime.datetime]
 

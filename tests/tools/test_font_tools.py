@@ -299,6 +299,61 @@ class AnalyzeFontTestCase(TestCase):
             result,
         )
 
+    def test_otf_file(self) -> None:
+        with get_file("Font Awesome 6 Free-Regular-400.otf") as path:
+            result = font_tools.analyze_font(path)
+
+        self.assertEqual(
+            {
+                "head": OrderedDict(
+                    [
+                        ("Font Table Version", 1.0),
+                        ("Font Revision", 773.01171875),
+                        ("Checksum", 1579975067),
+                        ("Magic number", 1594834165),
+                        (
+                            "Flags",
+                            "Baseline for font at y=0; Left sidebearing point at x=0; Force ppem to integer values",
+                        ),
+                        ("Units per em", 512),
+                        ("Created", "2023-11-29 22:27:59"),
+                        ("Modified", "2023-11-29 22:27:59"),
+                        ("xMin", 0),
+                        ("yMin", -64),
+                        ("xMax", 640),
+                        ("yMax", 448),
+                        ("Mac Style", "%"),
+                        ("Smallest readable size in pixels", 8),
+                        (
+                            "Font direction hint",
+                            "Strongly left to right, but also contains neutrals",
+                        ),
+                        ("Index to Loc format", "Short offsets (Offset16)"),
+                        ("Glyph Data Format", 0),
+                    ]
+                ),
+                "name": OrderedDict(
+                    [
+                        ("Copyright notice", "Copyright (c) Font Awesome"),
+                        ("Font family name", "Font Awesome 6 Free Regular"),
+                        ("Font subfamily name", "Regular"),
+                        ("Unique font identifier", "Font Awesome 6 Free Regular-6.5.1"),
+                        ("Full font name", "Font Awesome 6 Free Regular"),
+                        (
+                            "Version string",
+                            "Version 773.01171875 (Font Awesome version: 6.5.1)",
+                        ),
+                        ("PostScript name", "FontAwesome6Free-Regular"),
+                        ("Description", "The web's most popular icon set and toolkit."),
+                        ("URL Vendor", "https://fontawesome.com"),
+                        ("Typographic Family name", "Font Awesome 6 Free"),
+                        ("Typographic Subfamily name", "Regular"),
+                    ]
+                ),
+            },
+            result,
+        )
+
 
 class CheckFontTestCase(TestCase):
     def test_no_known_font_type(self) -> None:
