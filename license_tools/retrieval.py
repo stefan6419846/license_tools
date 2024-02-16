@@ -22,7 +22,7 @@ import requests
 import scancode_config  # type: ignore[import-untyped]
 from joblib import Parallel, delayed  # type: ignore[import-untyped]
 
-from license_tools.tools import font_tools, linking_tools, scancode_tools
+from license_tools.tools import font_tools, linking_tools, pip_tools, scancode_tools
 from license_tools.tools.scancode_tools import FileResults, Licenses, PackageResults
 from license_tools.utils import archive_utils
 from license_tools.utils.path_utils import TemporaryDirectoryWithFixedName
@@ -39,6 +39,7 @@ class RetrievalFlags:
     URLS = 8
     LDD_DATA = 16
     FONT_DATA = 32
+    PYTHON_METADATA = 64
 
     @classmethod
     def to_int(
@@ -49,6 +50,7 @@ class RetrievalFlags:
         retrieve_urls: bool = False,
         retrieve_ldd_data: bool = False,
         retrieve_font_data: bool = False,
+        retrieve_python_metadata: bool = False,
     ) -> int:
         """
         Convert the given boolean parameter values to a single integer flag value.
@@ -59,6 +61,7 @@ class RetrievalFlags:
         :param retrieve_urls: Whether to retrieve URLs.
         :param retrieve_ldd_data: Whether to retrieve linking data for shared objects.
         :param retrieve_font_data: Whether to retrieve font data.
+        :param retrieve_python_metadata: Whether to retrieve Python package metadata.
         :return: The flags derived from the given parameters.
         """
         return (
@@ -68,6 +71,7 @@ class RetrievalFlags:
             + cls.URLS * retrieve_urls
             + cls.LDD_DATA * retrieve_ldd_data
             + cls.FONT_DATA * retrieve_font_data
+            + cls.PYTHON_METADATA * retrieve_python_metadata
         )
 
     @classmethod
@@ -78,7 +82,7 @@ class RetrievalFlags:
         :param: If enabled, return kwargs instead of the integer value.
         :return: The value for all flags enabled.
         """
-        value = cls.to_int(True, True, True, True, True, True)
+        value = cls.to_int(True, True, True, True, True, True, True)
         if as_kwargs:
             return cls.to_kwargs(value)
         return value
@@ -109,6 +113,7 @@ class RetrievalFlags:
             retrieve_urls=cls.is_set(flags=flags, flag=cls.URLS),
             retrieve_ldd_data=cls.is_set(flags=flags, flag=cls.LDD_DATA),
             retrieve_font_data=cls.is_set(flags=flags, flag=cls.FONT_DATA),
+            retrieve_python_metadata=cls.is_set(flags=flags, flag=cls.PYTHON_METADATA),
         )
 
 
@@ -292,6 +297,10 @@ def run_on_package_archive_file(
         if not archive_utils.can_extract(archive_path):
             raise ValueError(f'Unsupported archive format: {archive_path}')
         archive_utils.extract(archive_path=archive_path, target_directory=Path(working_directory))
+
+        if RetrievalFlags.is_set(flags=retrieval_flags, flag=RetrievalFlags.PYTHON_METADATA):
+            print(pip_tools.check_metadata(path=working_directory) + "\n")
+
         yield from run_on_directory(
             directory=working_directory,
             job_count=job_count,
@@ -401,6 +410,7 @@ def run(
     retrieve_urls: bool = False,
     retrieve_ldd_data: bool = False,
     retrieve_font_data: bool = False,
+    retrieve_python_metadata: bool = False,
 ) -> list[FileResults]:
     """
     Run the analysis for the given input definition.
@@ -421,6 +431,7 @@ def run(
     :param retrieve_urls: Whether to retrieve URLs.
     :param retrieve_ldd_data: Whether to retrieve linking data for shared objects.
     :param retrieve_font_data: Whether to retrieve font data.
+    :param retrieve_python_metadata: Whether to retrieve Python package metadata.
     :return: The requested results.
     """
     # Remove the temporary directory of the main thread.
@@ -438,6 +449,7 @@ def run(
         retrieve_urls=retrieve_urls,
         retrieve_ldd_data=retrieve_ldd_data,
         retrieve_font_data=retrieve_font_data,
+        retrieve_python_metadata=bool(retrieve_python_metadata and package_definition),
     )
 
     # Run the analysis itself.

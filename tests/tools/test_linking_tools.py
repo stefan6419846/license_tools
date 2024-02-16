@@ -13,7 +13,8 @@ from unittest import mock, TestCase
 
 from license_tools.tools import linking_tools
 from license_tools.tools.linking_tools import check_shared_objects
-from tests.data import get_file, LICENSE_PATH, SETUP_PATH
+from tests import get_file
+from tests.data import LICENSE_PATH, SETUP_PATH
 
 
 def get_libc_path() -> Path:

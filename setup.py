@@ -27,6 +27,7 @@ setuptools.setup(
         "typecode-libmagic",
         "joblib",
         "fontTools[woff]",
+        "pip-licenses-lib",
     ],
     extras_require={
         "dev": [

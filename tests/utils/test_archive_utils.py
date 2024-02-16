@@ -5,34 +5,22 @@
 from __future__ import annotations
 
 import shutil
-from contextlib import contextmanager
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
-from typing import Generator
 from unittest import TestCase
-
-import requests
 
 from license_tools import retrieval
 from license_tools.utils import archive_utils
+from tests import get_from_url
 from tests.data import (
-    TYPING_EXTENSION_4_8_0__SOURCE_FILES,
-    TYPING_EXTENSION_4_8_0__WHEEL_FILES,
+    JSON__20231013__JAR, LIBAIO1__0_3_109_1_25__RPM, LIBAIO1__0_3_109_1_25__SRC_RPM, TYPING_EXTENSION_4_8_0__SOURCE_FILES,
+    TYPING_EXTENSION_4_8_0__WHEEL_FILES, TYPING_EXTENSIONS__4_8_0__SDIST, TYPING_EXTENSIONS__4_8_0__WHEEL,
 )
-
-
-@contextmanager
-def download(url: str, suffix: str) -> Generator[Path, None, None]:
-    with NamedTemporaryFile(suffix=suffix) as temp_file:
-        path = Path(temp_file.name)
-        path.write_bytes(requests.get(url).content)
-        yield path
 
 
 class ArchiveUtilsTestCase(TestCase):
     def test_jar(self) -> None:
-        url = "https://repo1.maven.org/maven2/org/json/json/20231013/json-20231013.jar"
-        with download(url, ".jar") as path, TemporaryDirectory() as tempdir:
+        with get_from_url(JSON__20231013__JAR) as path, TemporaryDirectory() as tempdir:
             directory = Path(tempdir)
             self.assertTrue(archive_utils.can_extract(path))
             archive_utils.extract(archive_path=path, target_directory=directory)
@@ -76,8 +64,7 @@ class ArchiveUtilsTestCase(TestCase):
             )
 
     def test_wheel(self) -> None:
-        url = "https://files.pythonhosted.org/packages/24/21/7d397a4b7934ff4028987914ac1044d3b7d52712f30e2ac7a2ae5bc86dd0/typing_extensions-4.8.0-py3-none-any.whl"  # noqa: E501
-        with download(url, ".whl") as path, TemporaryDirectory() as tempdir:
+        with get_from_url(TYPING_EXTENSIONS__4_8_0__WHEEL) as path, TemporaryDirectory() as tempdir:
             directory = Path(tempdir)
             self.assertTrue(archive_utils.can_extract(path))
             archive_utils.extract(archive_path=path, target_directory=directory)
@@ -85,8 +72,7 @@ class ArchiveUtilsTestCase(TestCase):
             self.assertEqual(TYPING_EXTENSION_4_8_0__WHEEL_FILES, actual)
 
     def test_rpm_file(self) -> None:
-        url = "https://download.opensuse.org/distribution/leap/15.6/repo/oss/x86_64/libaio1-0.3.109-1.25.x86_64.rpm"
-        with download(url, ".rpm") as path, TemporaryDirectory() as tempdir:
+        with get_from_url(LIBAIO1__0_3_109_1_25__RPM) as path, TemporaryDirectory() as tempdir:
             directory = Path(tempdir)
             self.assertTrue(archive_utils.can_extract(path))
             archive_utils.extract(archive_path=path, target_directory=directory)
@@ -101,8 +87,7 @@ class ArchiveUtilsTestCase(TestCase):
             )
 
     def test_tar_gz(self) -> None:
-        url = "https://files.pythonhosted.org/packages/1f/7a/8b94bb016069caa12fc9f587b28080ac33b4fbb8ca369b98bc0a4828543e/typing_extensions-4.8.0.tar.gz"
-        with download(url, ".tar.gz") as path, TemporaryDirectory() as tempdir:
+        with get_from_url(TYPING_EXTENSIONS__4_8_0__SDIST) as path, TemporaryDirectory() as tempdir:
             directory = Path(tempdir)
             self.assertTrue(archive_utils.can_extract(path))
             archive_utils.extract(archive_path=path, target_directory=directory)
@@ -145,8 +130,7 @@ class ArchiveUtilsTestCase(TestCase):
         self.assertFalse(archive_utils.can_extract(Path("/home/bin/run.exe")))
 
     def test_nested(self) -> None:
-        url = "https://download.opensuse.org/source/distribution/leap/15.6/repo/oss/src/libaio-0.3.109-1.25.src.rpm"
-        with download(url, ".rpm") as path:
+        with get_from_url(LIBAIO1__0_3_109_1_25__SRC_RPM) as path:
             with TemporaryDirectory() as tempdir:
                 directory = Path(tempdir)
                 self.assertTrue(archive_utils.can_extract(path))

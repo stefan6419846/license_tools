@@ -6,20 +6,18 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from tempfile import NamedTemporaryFile, TemporaryDirectory
+from tempfile import TemporaryDirectory
 from unittest import TestCase
-
-import requests
 
 from license_tools import retrieval
 from license_tools.tools import rpm_tools
-from tests.utils.test_archive_utils import download
+from tests import get_from_url
+from tests.data import LIBAIO1__0_3_109_1_25__RPM, LIBAIO1__0_3_109_1_25__SRC_RPM
 
 
 class ExtractTestCase(TestCase):
     def test_unpack_rpm_file(self) -> None:
-        url = "https://download.opensuse.org/distribution/leap/15.6/repo/oss/x86_64/libaio1-0.3.109-1.25.x86_64.rpm"
-        with download(url, ".rpm") as path, TemporaryDirectory() as tempdir:
+        with get_from_url(LIBAIO1__0_3_109_1_25__RPM) as path, TemporaryDirectory() as tempdir:
             directory = Path(tempdir)
             rpm_tools.extract(
                 archive_path=path, target_path=directory
@@ -49,10 +47,7 @@ class CheckRpmHeadersTestCase(TestCase):
             file_verification_flags = "[<VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags: 0>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>]"  # noqa: E501
             required_names_flags = "[<DependencyFlags.INTERP|SCRIPT_POST: 1280>, <DependencyFlags.INTERP|SCRIPT_POSTUN: 4352>, <DependencyFlags.FIND_REQUIRES: 16384>, <DependencyFlags.FIND_REQUIRES: 16384>, <DependencyFlags.LESS|EQUAL|RPMLIB: 16777226>, <DependencyFlags.LESS|EQUAL|RPMLIB: 16777226>, <DependencyFlags.LESS|EQUAL|RPMLIB: 16777226>, <DependencyFlags.LESS|EQUAL|RPMLIB: 16777226>]"  # noqa: E501
 
-        url = "https://download.opensuse.org/distribution/leap/15.6/repo/oss/x86_64/libaio1-0.3.109-1.25.x86_64.rpm"
-        with NamedTemporaryFile(suffix=".rpm") as rpm_file:
-            rpm_path = Path(rpm_file.name)
-            rpm_path.write_bytes(requests.get(url).content)
+        with get_from_url(LIBAIO1__0_3_109_1_25__RPM) as rpm_path:
             results = rpm_tools.check_rpm_headers(rpm_path)
         self.assertEqual(
             r"""
@@ -147,10 +142,7 @@ Index Into File Dependencies Dictionary Denoting Start Of File's Dependencies: [
             file_verification_flags = "[<VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>, <VerifyFlags.MD5|SIZE|LINK_TO|USER|GROUP|MTIME|MODE|RDEV|CAPS: 511>]"  # noqa: E501
             required_names_flags = "[<DependencyFlags.LESS|EQUAL|RPMLIB: 16777226>, <DependencyFlags.LESS|EQUAL|RPMLIB: 16777226>]"
 
-        url = "https://download.opensuse.org/source/distribution/leap/15.6/repo/oss/src/libaio-0.3.109-1.25.src.rpm"
-        with NamedTemporaryFile(suffix=".rpm") as rpm_file:
-            rpm_path = Path(rpm_file.name)
-            rpm_path.write_bytes(requests.get(url).content)
+        with get_from_url(LIBAIO1__0_3_109_1_25__SRC_RPM) as rpm_path:
             results = rpm_tools.check_rpm_headers(rpm_path)
         self.assertEqual(
             r"""

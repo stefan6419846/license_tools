@@ -10,8 +10,6 @@ from tempfile import mkdtemp, NamedTemporaryFile
 from typing import cast, Dict
 from unittest import TestCase
 
-import requests
-
 from license_tools.retrieval import RetrievalFlags
 from license_tools.tools import scancode_tools
 from license_tools.tools.scancode_tools import (
@@ -25,7 +23,8 @@ from license_tools.tools.scancode_tools import (
     PackageResults, Party, Url,
     Urls,
 )
-from tests.data import LICENSE_PATH, SETUP_PATH, SETUP_PY_LICENSES
+from tests import get_from_url
+from tests.data import LIBAIO1__0_3_109_1_25__RPM, LICENSE_PATH, SETUP_PATH, SETUP_PY_LICENSES
 
 
 class LicensesTestCase(TestCase):
@@ -54,6 +53,7 @@ class FileResultsTestCase(TestCase):
         flags = cast(Dict[str, bool], RetrievalFlags.all(as_kwargs=True))
         del flags["retrieve_ldd_data"]
         del flags["retrieve_font_data"]
+        del flags["retrieve_python_metadata"]
         self.assertEqual(4, len(flags))
         result = FileResults(
             path=SETUP_PATH, short_path="setup.py", retrieve_licenses=True,
@@ -182,10 +182,7 @@ class FileResultsTestCase(TestCase):
 
 class PackageResultsTestCase(TestCase):
     def test_rpm(self) -> None:
-        url = "https://download.opensuse.org/distribution/leap/15.6/repo/oss/x86_64/libaio1-0.3.109-1.25.x86_64.rpm"
-        with NamedTemporaryFile(suffix=".rpm") as rpm_file:
-            rpm_path = Path(rpm_file.name)
-            rpm_path.write_bytes(requests.get(url).content)
+        with get_from_url(LIBAIO1__0_3_109_1_25__RPM) as rpm_path:
             results = PackageResults.from_rpm(rpm_path)
         self.assertEqual(
             PackageResults(

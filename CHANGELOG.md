@@ -1,5 +1,8 @@
 # Development version
 
+* Add option to display Python package metadata.
+* Refactor tests to download each external artifact only once.
+
 # Version 0.7.0 - 2024-02-12
 
 * Move detected licenses from archives to the regular results instead of just printing it.

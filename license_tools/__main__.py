@@ -94,6 +94,13 @@ def main() -> None:
         default=False,
         help="Retrieve font metadata.",
     )
+    parser.add_argument(
+        "--retrieve-python-metadata",
+        action="store_true",
+        required=False,
+        default=False,
+        help="Retrieve Python package metadata.",
+    )
 
     arguments = parser.parse_args()
 
@@ -111,6 +118,7 @@ def main() -> None:
         retrieve_urls=arguments.retrieve_urls,
         retrieve_ldd_data=arguments.retrieve_ldd_data,
         retrieve_font_data=arguments.retrieve_font_data,
+        retrieve_python_metadata=arguments.retrieve_python_metadata,
     )
 
 

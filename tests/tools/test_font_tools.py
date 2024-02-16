@@ -11,7 +11,7 @@ from tempfile import NamedTemporaryFile
 from unittest import mock, TestCase
 
 from license_tools.tools import font_tools
-from tests.data import get_file
+from tests import get_file
 
 
 class ConvertHeadFlagsTestCase(TestCase):

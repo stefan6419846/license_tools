@@ -4,7 +4,9 @@
 
 from __future__ import annotations
 
+import copy
 import os
+import re
 import subprocess
 import sys
 import tarfile
@@ -15,18 +17,17 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import Any, cast, Dict, Generator, List, Set, Tuple  # TODO: Remove `Set` and `Tuple` after dropping Python 3.8.
 from unittest import mock, TestCase
 
-import requests
-
 from license_tools import retrieval
 from license_tools.retrieval import RetrievalFlags
 from license_tools.tools.scancode_tools import FileResults, Licenses
+from tests import Download, get_from_url
 from tests.data import (
-    SETUP_PATH,
+    LIBAIO1__0_3_109_1_25__RPM, SETUP_PATH,
     SETUP_PY_LICENSES,
     TYPING_EXTENSION_4_8_0__EXPECTED_OUTPUT,
     TYPING_EXTENSION_4_8_0__LICENSES,
     TYPING_EXTENSION_4_8_0__SOURCE_FILES,
-    TYPING_EXTENSION_4_8_0__WHEEL_FILES,
+    TYPING_EXTENSION_4_8_0__WHEEL_FILES, TYPING_EXTENSIONS__4_8_0__SDIST, TYPING_EXTENSIONS__4_8_0__WHEEL,
 )
 
 
@@ -38,7 +39,7 @@ class RetrievalFlagsTestCase(TestCase):
         )
 
     def test_all(self) -> None:
-        self.assertEqual(63, RetrievalFlags.all())
+        self.assertEqual(127, RetrievalFlags.all())
         self.assertDictEqual(
             dict(
                 retrieve_copyrights=True,
@@ -47,6 +48,7 @@ class RetrievalFlagsTestCase(TestCase):
                 retrieve_urls=True,
                 retrieve_ldd_data=True,
                 retrieve_font_data=True,
+                retrieve_python_metadata=True,
             ),
             cast(Dict[str, bool], RetrievalFlags.all(as_kwargs=True)),
         )
@@ -66,6 +68,7 @@ class RetrievalFlagsTestCase(TestCase):
                 retrieve_urls=False,
                 retrieve_ldd_data=False,
                 retrieve_font_data=False,
+                retrieve_python_metadata=False,
             ),
             RetrievalFlags.to_kwargs(0),
         )
@@ -77,6 +80,7 @@ class RetrievalFlagsTestCase(TestCase):
                 retrieve_urls=False,
                 retrieve_ldd_data=True,
                 retrieve_font_data=False,
+                retrieve_python_metadata=False,
             ),
             RetrievalFlags.to_kwargs(21),
         )
@@ -391,11 +395,8 @@ class RunOnDirectoryTestCase(TestCase):
 
 
 class RunOnPackageArchiveFileTestCase(TestCase):
-    def _check_call(self, suffix: str, url: str, expected_files: List[str], expected_license: str | None = None) -> None:
-        with NamedTemporaryFile(suffix=suffix) as archive_file:
-            archive_path = Path(archive_file.name)
-            archive_path.write_bytes(requests.get(url).content)
-
+    def _check_call(self, download: Download, expected_files: List[str], expected_license: str | None = None) -> None:
+        with get_from_url(download) as archive_path:
             directory_result = [object(), object(), object()]
 
             def run_on_directory(
@@ -427,24 +428,18 @@ class RunOnPackageArchiveFileTestCase(TestCase):
             self.assertEqual(expected, result)
 
     def test_wheel_file(self) -> None:
-        url = "https://files.pythonhosted.org/packages/24/21/7d397a4b7934ff4028987914ac1044d3b7d52712f30e2ac7a2ae5bc86dd0/typing_extensions-4.8.0-py3-none-any.whl"  # noqa: E501
         self._check_call(
-            suffix=".whl", url=url, expected_files=TYPING_EXTENSION_4_8_0__WHEEL_FILES
+            download=TYPING_EXTENSIONS__4_8_0__WHEEL, expected_files=TYPING_EXTENSION_4_8_0__WHEEL_FILES,
         )
 
     def test_non_wheel_file(self) -> None:
-        url = "https://files.pythonhosted.org/packages/1f/7a/8b94bb016069caa12fc9f587b28080ac33b4fbb8ca369b98bc0a4828543e/typing_extensions-4.8.0.tar.gz"
         self._check_call(
-            suffix=".tar.gz",
-            url=url,
-            expected_files=TYPING_EXTENSION_4_8_0__SOURCE_FILES,
+            download=TYPING_EXTENSIONS__4_8_0__SDIST, expected_files=TYPING_EXTENSION_4_8_0__SOURCE_FILES,
         )
 
     def test_rpm(self) -> None:
-        url = "https://download.opensuse.org/distribution/leap/15.6/repo/oss/x86_64/libaio1-0.3.109-1.25.x86_64.rpm"
         self._check_call(
-            suffix=".rpm",
-            url=url,
+            download=LIBAIO1__0_3_109_1_25__RPM,
             expected_files=[
                 "lib64/libaio.so.1.0.1",
                 "usr/share/doc/packages/libaio1/COPYING",
@@ -455,7 +450,7 @@ class RunOnPackageArchiveFileTestCase(TestCase):
 
 
 class RunOnDownloadedArchiveFileTestCase(TestCase):
-    def _check_call(self, suffix: str, url: str) -> None:
+    def _check_call(self, download: Download) -> None:
         directory_result = [object(), object(), object()]
 
         def run_on_package_archive_file(
@@ -463,7 +458,7 @@ class RunOnDownloadedArchiveFileTestCase(TestCase):
         ) -> Generator[Any, None, None]:
             self.assertEqual(2, job_count)
             self.assertEqual(42, retrieval_flags)
-            self.assertEqual(suffix, archive_path.name[-len(suffix):])
+            self.assertEqual(download.suffix, archive_path.name[-len(download.suffix):])
             yield from directory_result
 
         with mock.patch.object(
@@ -473,18 +468,16 @@ class RunOnDownloadedArchiveFileTestCase(TestCase):
         ):
             result = list(
                 retrieval.run_on_downloaded_archive_file(
-                    download_url=url, job_count=2, retrieval_flags=42
+                    download_url=download.url, job_count=2, retrieval_flags=42
                 )
             )
         self.assertEqual(directory_result, result)
 
     def test_wheel_file(self) -> None:
-        url = "https://files.pythonhosted.org/packages/24/21/7d397a4b7934ff4028987914ac1044d3b7d52712f30e2ac7a2ae5bc86dd0/typing_extensions-4.8.0-py3-none-any.whl"  # noqa: E501
-        self._check_call(suffix=".whl", url=url)
+        self._check_call(download=TYPING_EXTENSIONS__4_8_0__WHEEL)
 
     def test_non_wheel_file(self) -> None:
-        url = "https://files.pythonhosted.org/packages/1f/7a/8b94bb016069caa12fc9f587b28080ac33b4fbb8ca369b98bc0a4828543e/typing_extensions-4.8.0.tar.gz"
-        self._check_call(suffix=".tar.gz", url=url)
+        self._check_call(download=TYPING_EXTENSIONS__4_8_0__SDIST)
 
 
 class RunOnDownloadedPackageFileTestCase(TestCase):
@@ -494,7 +487,7 @@ class RunOnDownloadedPackageFileTestCase(TestCase):
         archive_result = [object(), object(), object()]
 
         def run_on_package_archive_file(
-            archive_path: Path, job_count: int, retrieval_flags: int
+            archive_path: Path, job_count: int, retrieval_flags: int, retrieve_python_metadata: bool = False
         ) -> Generator[Any, None, None]:
             self.assertEqual(3, job_count)
             self.assertEqual(42, retrieval_flags)
@@ -663,6 +656,37 @@ class RunTestCase(TestCase):
         )
         self.assertEqual(TYPING_EXTENSION_4_8_0__LICENSES, result)
         self.assertEqual(TYPING_EXTENSION_4_8_0__EXPECTED_OUTPUT, str(stdout))
+
+    def test_package_definition__with_metadata(self) -> None:
+        self.maxDiff = None
+        with self.record_stdout() as stdout:
+            result = retrieval.run(
+                package_definition="typing_extensions==4.8.0",
+                index_url="https://pypi.org/simple",
+                retrieve_python_metadata=True,
+            )
+
+        expected_result = copy.deepcopy(TYPING_EXTENSION_4_8_0__LICENSES)
+        for entry in expected_result:
+            entry.path = Path("dummy")
+            entry.retrieve_licenses = True
+        for entry in result:
+            entry.path = Path("dummy")
+        self.assertEqual(expected_result, result)
+
+        expected_output = """              Name: typing_extensions
+           Version: 4.8.0
+      License file: /tmp/dummy/typing_extensions-4.8.0.dist-info/LICENSE
+      Requirements:
+          Homepage: https://github.com/python/typing_extensions
+            Author: "Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Michael Lee" <levkivskyi@gmail.com>
+        Maintainer: UNKNOWN
+           License: UNKNOWN
+           Summary: Backported and Experimental Type Hints for Python 3.8+
+License classifier: Python Software Foundation License
+
+""" + TYPING_EXTENSION_4_8_0__EXPECTED_OUTPUT
+        self.assertEqual(expected_output, re.sub(pattern=r"/tmp/tmp[^/]+", repl="/tmp/dummy", string=str(stdout)))
 
     def test_directory(self) -> None:
         with TemporaryDirectory() as directory:
