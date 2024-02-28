@@ -1,5 +1,9 @@
 # Development version
 
+
+
+# Version 0.8.0 - 2024-02-28
+
 * Add option to display Python package metadata.
 * Refactor tests to download each external artifact only once.
 * Add example output to README.
