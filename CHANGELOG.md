@@ -2,6 +2,7 @@
 
 * Add option to display Python package metadata.
 * Refactor tests to download each external artifact only once.
+* Add example output to README.
 
 # Version 0.7.0 - 2024-02-12
 
