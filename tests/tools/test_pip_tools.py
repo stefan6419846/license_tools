@@ -78,7 +78,6 @@ License classifier: BSD License
 """[1:-1], result)
 
     def test_check_metadata__egg_info(self) -> None:
-        self.maxDiff = None
         with get_from_url(JWCRYPTO__1_5_6__TAR_GZ) as path, TemporaryDirectory() as tempdir:
             directory = Path(tempdir)
             archive_utils.extract(
