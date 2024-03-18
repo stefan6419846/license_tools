@@ -11,7 +11,7 @@ from unittest import TestCase
 from license_tools.tools import pip_tools
 from license_tools.utils import archive_utils
 from tests import get_from_url
-from tests.data import PYPDF__3_17_4__WHEEL
+from tests.data import JWCRYPTO__1_5_6__TAR_GZ, PYPDF__3_17_4__WHEEL
 
 
 class AnalyzeMetadataTestCase(TestCase):
@@ -22,22 +22,22 @@ class AnalyzeMetadataTestCase(TestCase):
                 archive_path=path, target_directory=directory
             )
 
-            result1 = pip_tools.analyze_metadata(directory / 'pypdf-3.17.4.dist-info')
-            result1.pop('distribution')
+            result1 = pip_tools.analyze_metadata(directory / "pypdf-3.17.4.dist-info")
+            result1.pop("distribution")
             result2 = pip_tools.analyze_metadata(directory)
-            result2.pop('distribution')
+            result2.pop("distribution")
             self.assertEqual(result1, result2)
 
     def test_invalid(self) -> None:
         with TemporaryDirectory() as tempdir:
             directory = Path(tempdir)
-            directory.joinpath('other').mkdir()
+            directory.joinpath("other").mkdir()
             with self.assertRaises(StopIteration):
                 pip_tools.analyze_metadata(directory)
 
 
 class CheckMetadataTestCase(TestCase):
-    def test_check_metadata(self) -> None:
+    def test_check_metadata__dist_info(self) -> None:
         with get_from_url(PYPDF__3_17_4__WHEEL) as path, TemporaryDirectory() as tempdir:
             directory = Path(tempdir)
             archive_utils.extract(
@@ -75,4 +75,27 @@ class CheckMetadataTestCase(TestCase):
            License: UNKNOWN
            Summary: A pure-python PDF library capable of splitting, merging, cropping, and transforming PDF files
 License classifier: BSD License
+"""[1:-1], result)
+
+    def test_check_metadata__egg_info(self) -> None:
+        self.maxDiff = None
+        with get_from_url(JWCRYPTO__1_5_6__TAR_GZ) as path, TemporaryDirectory() as tempdir:
+            directory = Path(tempdir)
+            archive_utils.extract(
+                archive_path=path, target_directory=directory
+            )
+            result = pip_tools.check_metadata(directory)
+            self.assertEqual(f"""
+              Name: jwcrypto
+           Version: 1.5.4
+      License file: {tempdir}/jwcrypto-1.5.4/LICENSE
+      Requirements:
+                     * cryptography>=3.4
+                     * typing_extensions>=4.5.0
+          Homepage: https://github.com/latchset/jwcrypto
+            Author: UNKNOWN
+        Maintainer: JWCrypto Project Contributors
+           License: LGPLv3+
+           Summary: Implementation of JOSE Web standards
+License classifier:
 """[1:-1], result)

@@ -40,8 +40,11 @@ def analyze_metadata(path: Path | str) -> dict[str, str | list[str] | set[str] |
     :return: The package metadata.
     """
     path = Path(path)
-    if not path.suffix == ".dist-info":
-        path = next(path.glob("*.dist-info"))
+    if path.suffix not in {".dist-info", ".egg-info"}:
+        try:
+            path = next(path.glob("*.dist-info"))
+        except StopIteration:
+            path = next(path.rglob("*.egg-info"))
     distribution = PathDistribution(path)
     return get_package_info(distribution)
 

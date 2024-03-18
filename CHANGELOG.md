@@ -1,6 +1,6 @@
 # Development version
 
-
+* Add support for `.egg-info` files for retrieving Python metadata.
 
 # Version 0.8.0 - 2024-02-28
 

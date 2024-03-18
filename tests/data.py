@@ -49,6 +49,12 @@ PYPDF__3_17_4__WHEEL = Download(
     suffix=".whl",
 )
 
+JWCRYPTO__1_5_6__TAR_GZ = Download(
+    url="https://files.pythonhosted.org/packages/13/f8/7b0a3e7ad80c04b8a020fa3061e4df8987a7d3c92f9ddc6552e4e908706b/jwcrypto-1.5.4.tar.gz",
+    name="jwcrypto-1.5.4.tar.gz",
+    suffix=".tar.gz",
+)
+
 JSON__20231013__JAR = Download(
     url="https://repo1.maven.org/maven2/org/json/json/20231013/json-20231013.jar",
     name="json-20231013.jar",
