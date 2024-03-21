@@ -11,7 +11,7 @@ from unittest import TestCase
 from license_tools.tools import pip_tools
 from license_tools.utils import archive_utils
 from tests import get_from_url
-from tests.data import JWCRYPTO__1_5_6__TAR_GZ, PYPDF__3_17_4__WHEEL
+from tests.data import JWCRYPTO__1_5_4__TAR_GZ, PYPDF__3_17_4__WHEEL
 
 
 class AnalyzeMetadataTestCase(TestCase):
@@ -78,7 +78,7 @@ License classifier: BSD License
 """[1:-1], result)
 
     def test_check_metadata__egg_info(self) -> None:
-        with get_from_url(JWCRYPTO__1_5_6__TAR_GZ) as path, TemporaryDirectory() as tempdir:
+        with get_from_url(JWCRYPTO__1_5_4__TAR_GZ) as path, TemporaryDirectory() as tempdir:
             directory = Path(tempdir)
             archive_utils.extract(
                 archive_path=path, target_directory=directory
