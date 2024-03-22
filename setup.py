@@ -28,6 +28,7 @@ setuptools.setup(
         "joblib",
         "fontTools[woff]",
         "pip-licenses-lib",
+        "requests",
     ],
     extras_require={
         "dev": [
@@ -35,7 +36,6 @@ setuptools.setup(
             "flake8-bugbear",
             "pep8-naming",
             "mypy",
-            "requests",
             "types-requests",
             "importlib_resources; python_version<'3.9'",
         ],
