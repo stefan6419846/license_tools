@@ -155,9 +155,11 @@ class LicenseMatch:
     match_coverage: float
     matcher: str
     license_expression: str
+    spdx_license_expression: str
     rule_identifier: str
     rule_relevance: int
     rule_url: str | None
+    from_file: str | None
     matched_text: str | None = None
 
 
@@ -177,6 +179,7 @@ class LicenseDetection:
     """
 
     license_expression: str
+    license_expression_spdx: str
     identifier: str
     matches: list[LicenseMatch] = dataclass_field(default_factory=list)
 
@@ -207,7 +210,11 @@ class Licenses:
     def get_scores_of_detected_license_expression_spdx(self) -> list[float]:
         scores = []
         for detection in self.license_detections:
-            if detection.license_expression == self.detected_license_expression:
+            if (
+                detection.license_expression == self.detected_license_expression
+                or detection.license_expression_spdx
+                == self.detected_license_expression_spdx
+            ):
                 for match in detection.matches:
                     scores.append(match.score)
                 return scores
@@ -294,7 +301,9 @@ class PackageResults:
     name: str | None = None
     namespace: str | None = None
     notice_text: str | None = None
-    other_license_detections: list[LicenseDetection] = dataclass_field(default_factory=list)
+    other_license_detections: list[LicenseDetection] = dataclass_field(
+        default_factory=list
+    )
     other_license_expression: str | None = None
     other_license_expression_spdx: str | None = None
     parties: list[Party] = dataclass_field(default_factory=list)
@@ -326,12 +335,12 @@ class PackageResults:
         ]
 
     @classmethod
-    def from_rpm(cls, path: Path) -> 'PackageResults':
+    def from_rpm(cls, path: Path) -> "PackageResults":
         # Drop some keys which we do not handle for now.
         data = next(RpmArchiveHandler.parse(path)).to_dict()
-        data.pop('dependencies', None)
-        data.pop('extra_data', None)
-        data.pop('file_references', None)
+        data.pop("dependencies", None)
+        data.pop("extra_data", None)
+        data.pop("file_references", None)
         return cls(**data)
 
 
