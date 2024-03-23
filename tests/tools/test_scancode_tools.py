@@ -198,13 +198,15 @@ class PackageResultsTestCase(TestCase):
                 homepage_url='http://kernel.org/pub/linux/libs/aio/', keywords=[],
                 license_detections=[
                     LicenseDetection(
-                        license_expression='lgpl-2.1-plus', identifier='lgpl_2_1_plus-d0bddf88-13b4-4982-bdf5-ce866a0e8394',
+                        license_expression='lgpl-2.1-plus', license_expression_spdx='LGPL-2.1-or-later',
+                        identifier='lgpl_2_1_plus-d0bddf88-13b4-4982-bdf5-ce866a0e8394',
                         matches=[
                             LicenseMatch(
                                 score=100.0, start_line=1, end_line=1, matched_length=3, match_coverage=100.0, matcher='1-hash',
                                 license_expression='lgpl-2.1-plus', rule_identifier='lgpl-2.1-plus_64.RULE', rule_relevance=100,
                                 rule_url='https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/lgpl-2.1-plus_64.RULE',
-                                matched_text='LGPL-2.1+'
+                                matched_text='LGPL-2.1+',
+                                spdx_license_expression='LGPL-2.1-or-later', from_file=None,
                             )
                         ]
                     )
