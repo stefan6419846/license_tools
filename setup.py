@@ -23,7 +23,7 @@ setuptools.setup(
     include_package_data=True,
     python_requires=">=3.8, <4",
     install_requires=[
-        "scancode-toolkit",
+        "scancode-toolkit>=32.1.0",
         "typecode-libmagic",
         "joblib",
         "fontTools[woff]",
