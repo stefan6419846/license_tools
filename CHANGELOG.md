@@ -1,6 +1,7 @@
 # Development version
 
 * Add support for `.egg-info` files for retrieving Python metadata.
+* Fix compatibility with `scancode_toolkit==32.1.0`. This is the minimum supported version now as well.
 
 # Version 0.8.0 - 2024-02-28
 
