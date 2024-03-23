@@ -66,11 +66,12 @@ JSON__20231013__JAR = Download(
 SETUP_PY_LICENSES = Licenses(
     detected_license_expression="apache-2.0 AND (unknown-license-reference AND apache-2.0)",
     detected_license_expression_spdx="Apache-2.0 AND (LicenseRef-scancode-unknown-license-reference AND Apache-2.0)",
-    percentage_of_license_text=20.0,
+    percentage_of_license_text=19.66,
     license_detections=[
         LicenseDetection(
             license_expression="apache-2.0",
-            identifier="apache_2_0-627405aa-ea35-7b6c-9436-402113a6866a",
+            license_expression_spdx="Apache-2.0",
+            identifier="apache_2_0-1e5a86d5-35db-eb02-fd60-5cbcf1ec1d21",
             matches=[
                 LicenseMatch(
                     score=100.0,
@@ -80,9 +81,11 @@ SETUP_PY_LICENSES = Licenses(
                     match_coverage=100.0,
                     matcher="1-spdx-id",
                     license_expression="apache-2.0",
-                    rule_identifier="spdx-license-identifier-apache-2.0-8b7d7ba520c6ab392deaea36b8b1f018b637027e",
+                    spdx_license_expression="Apache-2.0",
+                    rule_identifier="spdx-license-identifier-apache_2_0-5dcda840588b4f07f49f2c0100924ebca7bc0649",
                     rule_relevance=100,
                     rule_url=None,
+                    from_file=None,
                 ),
                 LicenseMatch(
                     score=100.0,
@@ -92,14 +95,17 @@ SETUP_PY_LICENSES = Licenses(
                     match_coverage=100.0,
                     matcher="2-aho",
                     license_expression="apache-2.0",
+                    spdx_license_expression="Apache-2.0",
                     rule_identifier="apache-2.0_1251.RULE",
                     rule_relevance=100,
                     rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/apache-2.0_1251.RULE",
+                    from_file=None,
                 ),
             ],
         ),
         LicenseDetection(
             license_expression="unknown-license-reference AND apache-2.0",
+            license_expression_spdx="LicenseRef-scancode-unknown-license-reference AND Apache-2.0",
             identifier="unknown_license_reference_and_apache_2_0-1a5d5a31-4478-b9fc-43db-706bd5353d3d",
             matches=[
                 LicenseMatch(
@@ -110,9 +116,11 @@ SETUP_PY_LICENSES = Licenses(
                     match_coverage=100.0,
                     matcher="2-aho",
                     license_expression="unknown-license-reference",
+                    spdx_license_expression="LicenseRef-scancode-unknown-license-reference",
                     rule_identifier="unknown-license-reference_331.RULE",
                     rule_relevance=80,
                     rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/unknown-license-reference_331.RULE",
+                    from_file=None,
                 ),
                 LicenseMatch(
                     score=100.0,
@@ -122,14 +130,17 @@ SETUP_PY_LICENSES = Licenses(
                     match_coverage=100.0,
                     matcher="2-aho",
                     license_expression="apache-2.0",
+                    spdx_license_expression="Apache-2.0",
                     rule_identifier="apache-2.0_65.RULE",
                     rule_relevance=100,
                     rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/apache-2.0_65.RULE",
+                    from_file=None,
                 ),
             ],
         ),
         LicenseDetection(
             license_expression="apache-2.0",
+            license_expression_spdx="Apache-2.0",
             identifier="apache_2_0-e267f9d9-ae62-e9c9-9cc2-8cd0a1e4928f",
             matches=[
                 LicenseMatch(
@@ -140,9 +151,11 @@ SETUP_PY_LICENSES = Licenses(
                     match_coverage=100.0,
                     matcher="2-aho",
                     license_expression="apache-2.0",
+                    spdx_license_expression="Apache-2.0",
                     rule_identifier="pypi_apache_no-version.RULE",
                     rule_relevance=95,
                     rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/pypi_apache_no-version.RULE",
+                    from_file=None,
                 )
             ],
         ),
@@ -156,9 +169,11 @@ SETUP_PY_LICENSES = Licenses(
             match_coverage=100.0,
             matcher="2-aho",
             license_expression="free-unknown",
+            spdx_license_expression="LicenseRef-scancode-free-unknown",
             rule_identifier="free-unknown_88.RULE",
             rule_relevance=50,
             rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/free-unknown_88.RULE",
+            from_file=None,
         )
     ],
 )
@@ -204,6 +219,7 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
             license_detections=[
                 LicenseDetection(
                     license_expression="python",
+                    license_expression_spdx="Python-2.0",
                     identifier="python-0a1026f6-4441-3a49-a425-36ae51b9b171",
                     matches=[
                         LicenseMatch(
@@ -214,9 +230,11 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
                             match_coverage=20.38,
                             matcher="3-seq",
                             license_expression="python",
+                            spdx_license_expression="Python-2.0",
                             rule_identifier="python_43.RULE",
                             rule_relevance=100,
                             rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/python_43.RULE",
+                            from_file=None,
                         ),
                         LicenseMatch(
                             score=100.0,
@@ -226,14 +244,17 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
                             match_coverage=100.0,
                             matcher="2-aho",
                             license_expression="python",
+                            spdx_license_expression="Python-2.0",
                             rule_identifier="python_16.RULE",
                             rule_relevance=100,
                             rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/python_16.RULE",
+                            from_file=None,
                         ),
                     ],
                 ),
                 LicenseDetection(
                     license_expression="python AND bsd-new",
+                    license_expression_spdx="Python-2.0 AND BSD-3-Clause",
                     identifier="python_and_bsd_new-ef6a0b00-3e20-7b5f-60ad-13fd68dfafaa",
                     matches=[
                         LicenseMatch(
@@ -244,9 +265,11 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
                             match_coverage=100.0,
                             matcher="2-aho",
                             license_expression="unknown-license-reference",
+                            spdx_license_expression="LicenseRef-scancode-unknown-license-reference",
                             rule_identifier="lead-in_unknown_30.RULE",
                             rule_relevance=100,
                             rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/lead-in_unknown_30.RULE",
+                            from_file=None,
                         ),
                         LicenseMatch(
                             score=100.0,
@@ -256,9 +279,11 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
                             match_coverage=100.0,
                             matcher="2-aho",
                             license_expression="python",
+                            spdx_license_expression="Python-2.0",
                             rule_identifier="python_34.RULE",
                             rule_relevance=100,
                             rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/python_34.RULE",
+                            from_file=None,
                         ),
                         LicenseMatch(
                             score=99.0,
@@ -268,14 +293,17 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
                             match_coverage=100.0,
                             matcher="2-aho",
                             license_expression="bsd-new",
+                            spdx_license_expression="BSD-3-Clause",
                             rule_identifier="bsd-new_26.RULE",
                             rule_relevance=99,
                             rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/bsd-new_26.RULE",
+                            from_file=None,
                         ),
                     ],
                 ),
                 LicenseDetection(
                     license_expression="python AND bsd-new AND bsd-zero",
+                    license_expression_spdx="Python-2.0 AND BSD-3-Clause AND 0BSD",
                     identifier="python_and_bsd_new_and_bsd_zero-c0222c9a-2a19-8ee7-903b-cebffd111794",
                     matches=[
                         LicenseMatch(
@@ -286,9 +314,11 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
                             match_coverage=78.37,
                             matcher="3-seq",
                             license_expression="python",
+                            spdx_license_expression="Python-2.0",
                             rule_identifier="python_70.RULE",
                             rule_relevance=100,
                             rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/python_70.RULE",
+                            from_file=None,
                         ),
                         LicenseMatch(
                             score=99.0,
@@ -298,9 +328,11 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
                             match_coverage=100.0,
                             matcher="2-aho",
                             license_expression="bsd-new",
+                            spdx_license_expression="BSD-3-Clause",
                             rule_identifier="bsd-new_26.RULE",
                             rule_relevance=99,
                             rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/bsd-new_26.RULE",
+                            from_file=None,
                         ),
                         LicenseMatch(
                             score=100.0,
@@ -310,9 +342,11 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
                             match_coverage=100.0,
                             matcher="2-aho",
                             license_expression="bsd-zero",
+                            spdx_license_expression="0BSD",
                             rule_identifier="bsd-zero.LICENSE",
                             rule_relevance=100,
                             rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/licenses/bsd-zero.LICENSE",
+                            from_file=None,
                         ),
                     ],
                 ),
@@ -339,6 +373,7 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
             license_detections=[
                 LicenseDetection(
                     license_expression="python",
+                    license_expression_spdx="Python-2.0",
                     identifier="python-03cf89ce-88f1-7600-71f7-302015c97123",
                     matches=[
                         LicenseMatch(
@@ -349,9 +384,11 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
                             match_coverage=100.0,
                             matcher="2-aho",
                             license_expression="python",
+                            spdx_license_expression="Python-2.0",
                             rule_identifier="pypi_python_software_foundation_license2.RULE",
                             rule_relevance=99,
                             rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/pypi_python_software_foundation_license2.RULE",  # noqa: E501
+                            from_file=None,
                         )
                     ],
                 )
