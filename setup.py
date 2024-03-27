@@ -32,6 +32,7 @@ setuptools.setup(
     ],
     extras_require={
         "dev": [
+            "codespell",
             "flake8",
             "flake8-bugbear",
             "pep8-naming",

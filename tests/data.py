@@ -66,7 +66,7 @@ JSON__20231013__JAR = Download(
 SETUP_PY_LICENSES = Licenses(
     detected_license_expression="apache-2.0 AND (unknown-license-reference AND apache-2.0)",
     detected_license_expression_spdx="Apache-2.0 AND (LicenseRef-scancode-unknown-license-reference AND Apache-2.0)",
-    percentage_of_license_text=19.66,
+    percentage_of_license_text=19.55,
     license_detections=[
         LicenseDetection(
             license_expression="apache-2.0",
@@ -145,8 +145,8 @@ SETUP_PY_LICENSES = Licenses(
             matches=[
                 LicenseMatch(
                     score=95.0,
-                    start_line=50,
-                    end_line=50,
+                    start_line=51,
+                    end_line=51,
                     matched_length=6,
                     match_coverage=100.0,
                     matcher="2-aho",
@@ -163,8 +163,8 @@ SETUP_PY_LICENSES = Licenses(
     license_clues=[
         LicenseClue(
             score=50.0,
-            start_line=56,
-            end_line=56,
+            start_line=57,
+            end_line=57,
             matched_length=3,
             match_coverage=100.0,
             matcher="2-aho",

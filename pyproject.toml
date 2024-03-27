@@ -3,3 +3,7 @@ requires = [
     'setuptools',
     'wheel',
 ]
+
+[tool.codespell]
+check-hidden = true
+skip = './.git*,./.mypy_cache/*,./todo/*'
