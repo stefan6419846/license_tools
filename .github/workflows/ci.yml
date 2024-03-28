@@ -40,7 +40,7 @@ jobs:
           python -m pip install .[dev,extended_rpm]
       - name: test
         run: 
-          coverage --branch -m unittest discover --verbose --start-directory tests/
+          coverage run --branch -m unittest discover --verbose --start-directory tests/
       - name: coverage
         run:
           coverage report
