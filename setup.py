@@ -29,10 +29,12 @@ setuptools.setup(
         "fontTools[woff]",
         "pip-licenses-lib",
         "requests",
+        "tomli",
     ],
     extras_require={
         "dev": [
             "codespell",
+            "coverage",
             "flake8",
             "flake8-bugbear",
             "pep8-naming",

@@ -8,3 +8,4 @@ fontTools[woff]==4.50.0
 pip-licenses-lib==0.2.1
 rpmfile==2.0.0
 requests==2.31.0
+tomli==2.0.1

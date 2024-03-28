@@ -22,7 +22,7 @@ import requests
 import scancode_config  # type: ignore[import-untyped]
 from joblib import Parallel, delayed  # type: ignore[import-untyped]
 
-from license_tools.tools import font_tools, linking_tools, pip_tools, scancode_tools
+from license_tools.tools import cargo_tools, font_tools, linking_tools, pip_tools, scancode_tools
 from license_tools.tools.scancode_tools import FileResults, Licenses, PackageResults
 from license_tools.utils import archive_utils
 from license_tools.utils.path_utils import TemporaryDirectoryWithFixedName
@@ -182,6 +182,9 @@ def run_on_file(
             FileResults,
             _run_on_archive_file(path=path, short_path=short_path, default_to_none=False)
         )
+    if path.name.startswith("Cargo.toml"):
+        print(short_path)
+        print(cargo_tools.check_metadata(path=path) + "\n")
 
     retrieval_kwargs = RetrievalFlags.to_kwargs(flags=retrieval_flags)
 

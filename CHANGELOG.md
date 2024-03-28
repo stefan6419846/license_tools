@@ -1,5 +1,9 @@
 # Development version
 
+* Add handling for Rust crates:
+  * Automatically download the packages referenced in a given `Cargo.lock` file.
+  * Parse the metadata of `Cargo.toml` files.
+
 # Version 0.9.0 - 2024-03-23
 
 * Add support for `.egg-info` files for retrieving Python metadata.

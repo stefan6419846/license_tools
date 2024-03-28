@@ -19,15 +19,19 @@ from unittest import mock, TestCase
 
 from license_tools import retrieval
 from license_tools.retrieval import RetrievalFlags
-from license_tools.tools.scancode_tools import FileResults, Licenses
+from license_tools.tools.scancode_tools import FileResults, LicenseDetection, LicenseMatch, Licenses
 from tests import Download, get_from_url
 from tests.data import (
-    LIBAIO1__0_3_109_1_25__RPM, SETUP_PATH,
+    BASE64__0_22_0__CARGO_TOML,
+    LIBAIO1__0_3_109_1_25__RPM,
+    SETUP_PATH,
     SETUP_PY_LICENSES,
     TYPING_EXTENSION_4_8_0__EXPECTED_OUTPUT,
     TYPING_EXTENSION_4_8_0__LICENSES,
     TYPING_EXTENSION_4_8_0__SOURCE_FILES,
-    TYPING_EXTENSION_4_8_0__WHEEL_FILES, TYPING_EXTENSIONS__4_8_0__SDIST, TYPING_EXTENSIONS__4_8_0__WHEEL,
+    TYPING_EXTENSION_4_8_0__WHEEL_FILES,
+    TYPING_EXTENSIONS__4_8_0__SDIST,
+    TYPING_EXTENSIONS__4_8_0__WHEEL,
 )
 
 
@@ -230,6 +234,66 @@ Typographic Subfamily name: Solid
             short_path="setup.py",
         )
         self.assertEqual("setup.py\n" + font_awesome + "\n\n", stdout)
+
+    def test_cargo_toml(self) -> None:
+        with get_from_url(BASE64__0_22_0__CARGO_TOML) as source_path, TemporaryDirectory() as directory:
+            cargo_toml_path = Path(directory) / "Cargo.toml"
+            cargo_toml_path.write_bytes(source_path.read_bytes())
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                result = retrieval.run_on_file(path=cargo_toml_path, short_path="/path/to/Cargo.toml")
+
+            self.assertEqual(
+                """
+/path/to/Cargo.toml
+        Name: base64
+     Version: 0.22.0
+     Authors:
+               * Alice Maz <alice@alicemaz.com>
+               * Marshall Pierce <marshall@mpierce.org>
+ Description: encodes and decodes base64 as bytes or utf8
+  Repository: https://github.com/marshallpierce/rust-base64
+      README: README.md
+    Keywords:
+               * base64
+               * decode
+               * encode
+               * no_std
+               * utf8
+  Categories: encoding
+     License: MIT OR Apache-2.0
+
+"""[1:],
+                stdout.getvalue()
+            )
+            self.assertEqual(
+                FileResults(
+                    path=cargo_toml_path, short_path='/path/to/Cargo.toml', retrieve_copyrights=False, retrieve_emails=False, retrieve_urls=False,
+                    retrieve_licenses=True, retrieve_file_info=False, copyrights=None, emails=None, urls=None,
+                    licenses=Licenses(
+                        detected_license_expression='mit OR apache-2.0', detected_license_expression_spdx='MIT OR Apache-2.0',
+                        percentage_of_license_text=2.55,
+                        license_detections=[
+                            LicenseDetection(
+                                license_expression='mit OR apache-2.0', license_expression_spdx='MIT OR Apache-2.0',
+                                identifier='mit_or_apache_2_0-719f8427-422e-8023-c20e-9f8dd0af13b9',
+                                matches=[
+                                    LicenseMatch(
+                                        score=100.0, start_line=11, end_line=11, matched_length=6, match_coverage=100.0, matcher='2-aho',
+                                        license_expression='mit OR apache-2.0', spdx_license_expression='MIT OR Apache-2.0',
+                                        rule_identifier='mit_or_apache-2.0_14.RULE', rule_relevance=100,
+                                        rule_url='https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/mit_or_apache-2.0_14.RULE',
+                                        from_file=None, matched_text=None
+                                    )
+                                ]
+                            )
+                        ],
+                        license_clues=[]
+                    ),
+                    file_info=None
+                ),
+                result
+            )
 
 
 class GetFilesFromDirectoryTestCase(TestCase):

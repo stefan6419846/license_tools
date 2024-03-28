@@ -17,8 +17,6 @@ except ImportError:
     # Python 3.8
     from importlib_resources import files, as_file  # type: ignore[unused-ignore,import-not-found,no-redef]
 
-import requests
-
 
 CACHE_DIRECTORY = Path(mkdtemp())
 
@@ -36,7 +34,9 @@ def _get_or_download(download: Download) -> Path:
     path = CACHE_DIRECTORY / download.name
     if path.is_file():
         return path
-    path.write_bytes(requests.get(url=download.url).content)
+    from license_tools.utils.download_utils import get_session
+    session = get_session()
+    path.write_bytes(session.get(url=download.url).content)
     return path
 
 

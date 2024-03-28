@@ -16,7 +16,9 @@ I wrote this tool to simplify the initial scanning steps for third-party package
 * Look into font files to easily analyze their metadata.
 * Look into RPM file metadata.
 * Look into Python package metadata.
+* Look into Rust crate metadata.
 * Recursively look into nested archives, for example by unpacking the actual upstream source code archives inside RPM (source) files.
+* Download the package versions declared inside a `Cargo.lock` file.
 * Make everything available from the terminal.
 
 ## Installation

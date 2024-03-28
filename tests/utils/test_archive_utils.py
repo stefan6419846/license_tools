@@ -13,7 +13,7 @@ from license_tools import retrieval
 from license_tools.utils import archive_utils
 from tests import get_from_url
 from tests.data import (
-    JSON__20231013__JAR, LIBAIO1__0_3_109_1_25__RPM, LIBAIO1__0_3_109_1_25__SRC_RPM, TYPING_EXTENSION_4_8_0__SOURCE_FILES,
+    BASE64__0_22_0__CRATE, JSON__20231013__JAR, LIBAIO1__0_3_109_1_25__RPM, LIBAIO1__0_3_109_1_25__SRC_RPM, TYPING_EXTENSION_4_8_0__SOURCE_FILES,
     TYPING_EXTENSION_4_8_0__WHEEL_FILES, TYPING_EXTENSIONS__4_8_0__SDIST, TYPING_EXTENSIONS__4_8_0__WHEEL,
 )
 
@@ -93,6 +93,56 @@ class ArchiveUtilsTestCase(TestCase):
             archive_utils.extract(archive_path=path, target_directory=directory)
             actual = [x[1] for x in retrieval.get_files_from_directory(directory)]
             self.assertEqual(TYPING_EXTENSION_4_8_0__SOURCE_FILES, actual)
+
+    def test_rust_crate(self) -> None:
+        with get_from_url(BASE64__0_22_0__CRATE) as path, TemporaryDirectory() as tempdir:
+            directory = Path(tempdir)
+            self.assertTrue(archive_utils.can_extract(path))
+            archive_utils.extract(archive_path=path, target_directory=directory)
+            actual = [x[1] for x in retrieval.get_files_from_directory(directory)]
+            self.assertEqual(
+                [
+                    "base64-0.22.0/.cargo_vcs_info.json",
+                    "base64-0.22.0/.circleci/config.yml",
+                    "base64-0.22.0/.github/ISSUE_TEMPLATE/general-purpose-issue.md",
+                    "base64-0.22.0/.gitignore",
+                    "base64-0.22.0/Cargo.lock",
+                    "base64-0.22.0/Cargo.toml",
+                    "base64-0.22.0/Cargo.toml.orig",
+                    "base64-0.22.0/LICENSE-APACHE",
+                    "base64-0.22.0/LICENSE-MIT",
+                    "base64-0.22.0/README.md",
+                    "base64-0.22.0/RELEASE-NOTES.md",
+                    "base64-0.22.0/benches/benchmarks.rs",
+                    "base64-0.22.0/clippy.toml",
+                    "base64-0.22.0/examples/base64.rs",
+                    "base64-0.22.0/icon_CLion.svg",
+                    "base64-0.22.0/src/alphabet.rs",
+                    "base64-0.22.0/src/chunked_encoder.rs",
+                    "base64-0.22.0/src/decode.rs",
+                    "base64-0.22.0/src/display.rs",
+                    "base64-0.22.0/src/encode.rs",
+                    "base64-0.22.0/src/engine/general_purpose/decode.rs",
+                    "base64-0.22.0/src/engine/general_purpose/decode_suffix.rs",
+                    "base64-0.22.0/src/engine/general_purpose/mod.rs",
+                    "base64-0.22.0/src/engine/mod.rs",
+                    "base64-0.22.0/src/engine/naive.rs",
+                    "base64-0.22.0/src/engine/tests.rs",
+                    "base64-0.22.0/src/lib.rs",
+                    "base64-0.22.0/src/prelude.rs",
+                    "base64-0.22.0/src/read/decoder.rs",
+                    "base64-0.22.0/src/read/decoder_tests.rs",
+                    "base64-0.22.0/src/read/mod.rs",
+                    "base64-0.22.0/src/tests.rs",
+                    "base64-0.22.0/src/write/encoder.rs",
+                    "base64-0.22.0/src/write/encoder_string_writer.rs",
+                    "base64-0.22.0/src/write/encoder_tests.rs",
+                    "base64-0.22.0/src/write/mod.rs",
+                    "base64-0.22.0/tests/encode.rs",
+                    "base64-0.22.0/tests/tests.rs",
+                ],
+                actual
+            )
 
     def test_zip(self) -> None:
         with TemporaryDirectory() as source, TemporaryDirectory() as tempdir, NamedTemporaryFile() as zip_file:

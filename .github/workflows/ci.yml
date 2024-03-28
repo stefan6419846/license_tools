@@ -40,7 +40,10 @@ jobs:
           python -m pip install .[dev,extended_rpm]
       - name: test
         run: 
-          python -m unittest discover --verbose --start-directory tests/
+          coverage --branch -m unittest discover --verbose --start-directory tests/
+      - name: coverage
+        run:
+          coverage report
       - name: lint
         run:
           flake8

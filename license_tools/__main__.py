@@ -102,7 +102,36 @@ def main() -> None:
         help="Retrieve Python package metadata.",
     )
 
+    parser.add_argument(
+        "--cargo-lock-download",
+        action="store_true",
+        required=False,
+        default=False,
+        help="Instead of analyzing the files, download the packages for a Cargo.lock file.",
+    )
+    parser.add_argument(
+        "--cargo-lock",
+        type=str,
+        required=False,
+        default=None,
+        help="Path to the Cargo.lock file to use with `--cargo-lock-download`."
+    )
+    parser.add_argument(
+        "--target-directory",
+        type=str,
+        required=False,
+        default=None,
+        help="Path to write the Cargo crate files to when using the `--cargo-lock-download` option."
+    )
+
     arguments = parser.parse_args()
+
+    if arguments.cargo_lock_download:
+        from license_tools.tools import cargo_tools
+        return cargo_tools.download_from_lock_file(
+            lock_path=arguments.cargo_lock,
+            target_directory=arguments.target_directory
+        )
 
     retrieval.run(
         directory=arguments.directory,

@@ -9,6 +9,9 @@ Tools related to pip.
 from __future__ import annotations
 
 from pathlib import Path
+
+from license_tools.utils import rendering_utils
+
 try:
     from importlib.metadata import Distribution, PathDistribution
 except ImportError:
@@ -57,20 +60,6 @@ def check_metadata(path: Path | str) -> str:
     :return: The rendered dictionary-like representation of the relevant fields.
     """
     metadata = analyze_metadata(path)
-    maximum_length = max(map(len, _VERBOSE_NAMES.values()))
-    rendered = []
-    for key, value in metadata.items():
-        if key not in _VERBOSE_NAMES:
-            continue
-        if key in {"licensefile", "license_classifier", "requires"} and isinstance(value, (list, set)):
-            if len(value) == 1:
-                value = value.pop()
-                rendered.append(f"{_VERBOSE_NAMES.get(key):>{maximum_length}}: {value}")
-            elif not value:
-                rendered.append(f"{_VERBOSE_NAMES.get(key):>{maximum_length}}:")
-            else:
-                value = "\n" + "\n".join(map(lambda x: " " * maximum_length + f"   * {x}", sorted(value)))
-                rendered.append(f"{_VERBOSE_NAMES.get(key):>{maximum_length}}:{value}")
-        else:
-            rendered.append(f"{_VERBOSE_NAMES.get(key):>{maximum_length}}: {value}")
-    return "\n".join(rendered)
+    return rendering_utils.render_dictionary(
+        dictionary=metadata, verbose_names_mapping=_VERBOSE_NAMES, multi_value_keys={"licensefile", "license_classifier", "requires"}
+    )
