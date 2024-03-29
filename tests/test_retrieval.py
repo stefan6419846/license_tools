@@ -553,6 +553,7 @@ class RunOnDownloadedPackageFileTestCase(TestCase):
         def run_on_package_archive_file(
             archive_path: Path, job_count: int, retrieval_flags: int, retrieve_python_metadata: bool = False
         ) -> Generator[Any, None, None]:
+            self.assertEqual("typing_extensions-4.8.0-py3-none-any.whl", archive_path.name)
             self.assertEqual(3, job_count)
             self.assertEqual(42, retrieval_flags)
             self.assertEqual(31584, len(archive_path.read_bytes()))
@@ -569,6 +570,37 @@ class RunOnDownloadedPackageFileTestCase(TestCase):
                     index_url="https://pypi.org/simple",
                     job_count=3,
                     retrieval_flags=42,
+                )
+            )
+            self.assertEqual(archive_result, result)
+        self.assertEqual("", stderr.getvalue())
+
+    def test_prefer_source_distribution(self) -> None:
+        stderr = StringIO()
+
+        archive_result = [object(), object(), object()]
+
+        def run_on_package_archive_file(
+            archive_path: Path, job_count: int, retrieval_flags: int, retrieve_python_metadata: bool = False
+        ) -> Generator[Any, None, None]:
+            self.assertEqual("typing_extensions-4.8.0.tar.gz", archive_path.name)
+            self.assertEqual(3, job_count)
+            self.assertEqual(42, retrieval_flags)
+            self.assertEqual(71456, len(archive_path.read_bytes()))
+            yield from archive_result
+
+        with redirect_stderr(stderr), mock.patch.object(
+            retrieval,
+            "run_on_package_archive_file",
+            side_effect=run_on_package_archive_file,
+        ):
+            result = list(
+                retrieval.run_on_downloaded_package_file(
+                    package_definition="typing_extensions==4.8.0",
+                    index_url="https://pypi.org/simple",
+                    job_count=3,
+                    retrieval_flags=42,
+                    prefer_sdist=True,
                 )
             )
             self.assertEqual(archive_result, result)
@@ -717,6 +749,7 @@ class RunTestCase(TestCase):
             index_url="https://example.org/simple",
             retrieval_flags=0,
             job_count=4,
+            prefer_sdist=False,
         )
         self.assertEqual(TYPING_EXTENSION_4_8_0__LICENSES, result)
         self.assertEqual(TYPING_EXTENSION_4_8_0__EXPECTED_OUTPUT, str(stdout))

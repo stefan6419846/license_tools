@@ -65,6 +65,14 @@ def main() -> None:
         help="PyPI index URL to use.",
     )
     parser.add_argument(
+        "--prefer-sdist",
+        action="store_true",
+        default=False,
+        required=False,
+        help="Prefer/download the sdist over wheels on PyPI.",
+    )
+
+    parser.add_argument(
         "--jobs",
         action="store",
         type=int,
@@ -171,6 +179,7 @@ def main() -> None:
         package_definition=arguments.package,
         download_url=arguments.url,
         index_url=arguments.index_url,
+        prefer_sdist=arguments.prefer_sdist,
         job_count=arguments.jobs,
         retrieve_copyrights=arguments.retrieve_copyrights,
         retrieve_emails=arguments.retrieve_emails,

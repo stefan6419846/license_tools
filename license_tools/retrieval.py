@@ -350,6 +350,7 @@ def run_on_downloaded_package_file(
     index_url: str | None = None,
     job_count: int = 4,
     retrieval_flags: int = 0,
+    prefer_sdist: bool = False,
 ) -> Generator[FileResults, None, None]:
     """
     Run the analysis for the given package definition.
@@ -358,6 +359,7 @@ def run_on_downloaded_package_file(
     :param index_url: The PyPI index URL to use. Uses the default one from the `.pypirc` file if unset.
     :param job_count: The number of parallel jobs to use.
     :param retrieval_flags: Values to retrieve.
+    :param prefer_sdist: Download the source distribution instead of the wheel.
     :return: The requested results.
     """
     with TemporaryDirectory() as download_directory:
@@ -373,6 +375,8 @@ def run_on_downloaded_package_file(
         ]
         if index_url:
             command += ["--index-url", index_url]
+        if prefer_sdist:
+            command += ["--no-binary", ":all:"]
         try:
             subprocess.run(
                 command, stderr=subprocess.PIPE, stdout=subprocess.PIPE, check=True
@@ -406,6 +410,7 @@ def run(
     package_definition: str | None = None,
     download_url: str | None = None,
     index_url: str | None = None,
+    prefer_sdist: bool = False,
     job_count: int = 4,
     retrieve_copyrights: bool = False,
     retrieve_emails: bool = False,
@@ -427,6 +432,7 @@ def run(
     :param package_definition: The package definition to run for.
     :param download_url: The package URL to download and run on.
     :param index_url: The PyPI index URL to use. Uses the default one from the `.pypirc` file if unset.
+    :param prefer_sdist: For PyPI downloads, prefer/use the source distribution over/instead of the wheel.
     :param job_count: The number of parallel jobs to use.
     :param retrieve_copyrights: Whether to retrieve copyright information.
     :param retrieve_emails: Whether to retrieve e-mails.
@@ -463,6 +469,7 @@ def run(
                 index_url=index_url,
                 retrieval_flags=retrieval_flags,
                 job_count=job_count,
+                prefer_sdist=prefer_sdist,
             )
         )
     elif directory:
