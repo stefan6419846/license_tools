@@ -43,6 +43,7 @@ jobs:
       - name: coverage preparations
         run: |
           SITECUSTOMIZE_PATH="$(python -m site --user-site)/sitecustomize.py"
+          touch $SITECUSTOMIZE_PATH
           echo "try:" >> $SITECUSTOMIZE_PATH
           echo "    import coverage" >> $SITECUSTOMIZE_PATH
           echo "    coverage.process_startup()" >> $SITECUSTOMIZE_PATH
