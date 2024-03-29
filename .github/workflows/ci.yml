@@ -42,7 +42,9 @@ jobs:
       # https://stackoverflow.com/questions/17395015/
       - name: coverage preparations
         run: |
-          SITECUSTOMIZE_PATH="$(python -m site --user-site)/sitecustomize.py"
+          SITE_PACKAGES="$(python -m site --user-site)"
+          SITECUSTOMIZE_PATH="$SITE_PACKAGES/sitecustomize.py"
+          mkdir -p $SITE_PACKAGES
           touch $SITECUSTOMIZE_PATH
           echo "try:" >> $SITECUSTOMIZE_PATH
           echo "    import coverage" >> $SITECUSTOMIZE_PATH
