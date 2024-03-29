@@ -5,8 +5,29 @@
 from __future__ import annotations
 
 import argparse
+import logging
+from typing import cast
 
-from license_tools import retrieval
+
+def log_level_type(value: str | int) -> int:
+    """
+    Verify and convert a log level to an integer value.
+
+    :param value: The value to validate/convert.
+    :return: The corresponding integer value.
+    """
+    if isinstance(value, int):
+        return value
+    return cast(int, getattr(logging, value.upper()))
+
+
+def configure_logging(level: int) -> None:
+    """
+    Configure the logging for the application.
+
+    :param level: The log level to use.
+    """
+    logging.basicConfig(level=level)
 
 
 def main() -> None:
@@ -124,7 +145,16 @@ def main() -> None:
         help="Path to write the Cargo crate files to when using the `--cargo-lock-download` option."
     )
 
+    parser.add_argument(
+        "--log-level",
+        type=log_level_type,
+        required=False,
+        default=logging.WARNING,
+        help="Log level to use (name or integer). Defaults to ≥ warning."
+    )
+
     arguments = parser.parse_args()
+    configure_logging(level=arguments.log_level)
 
     if arguments.cargo_lock_download:
         from license_tools.tools import cargo_tools
@@ -133,6 +163,7 @@ def main() -> None:
             target_directory=arguments.target_directory
         )
 
+    from license_tools import retrieval
     retrieval.run(
         directory=arguments.directory,
         file_path=arguments.file,

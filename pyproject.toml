@@ -7,3 +7,9 @@ requires = [
 [tool.codespell]
 check-hidden = true
 skip = './.git*,./.mypy_cache/*,./todo/*'
+
+[tool.coverage.run]
+branch = true
+source = [
+    'license_tools',
+]
