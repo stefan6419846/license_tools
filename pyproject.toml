@@ -10,6 +10,7 @@ skip = './.git*,./.mypy_cache/*,./todo/*'
 
 [tool.coverage.run]
 branch = true
+parallel = true  # Due to `joblib` for `MainTestCase.test_retrieval`
 source = [
     'license_tools',
 ]
