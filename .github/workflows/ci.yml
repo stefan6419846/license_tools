@@ -63,7 +63,7 @@ jobs:
           flake8
       - name: mypy
         run:
-          mypy --strict license_tools/ tests/
+          mypy
       # Enable after https://github.com/codespell-project/codespell/issues/3387 and
       # https://github.com/codespell-project/codespell/issues/3381 are resolved.
 #      - name: codespell

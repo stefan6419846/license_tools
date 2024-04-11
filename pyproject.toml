@@ -94,3 +94,8 @@ parallel = true  # Due to `joblib` for `MainTestCase.test_retrieval`
 source = [
     "license_tools",
 ]
+
+[tool.mypy]
+strict = true
+files = "license_tools,tests"
+exclude = ["^tests/files/setup\\.py$"]
