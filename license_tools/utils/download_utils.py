@@ -27,18 +27,41 @@ USER_AGENT = f"https://github.com/stefan6419846/license_tools version {VERSION}"
 
 
 class ChecksumError(ValueError):
+    """
+    Error indicating a wrong checksum.
+    """
+
     pass
 
 
 @dataclass
 class Download:
+    """
+    Configuration for one file download.
+    """
+
     url: str
+    """
+    The download URL.
+    """
+
     filename: str
+    """
+    The target filename.
+    """
+
     sha256: str | None = None
+    """
+    The expected SHA256 checksum.
+    """
 
     def verify_checksum(self, data: bytes) -> None:
         """
         Check if the checksum of the given data matches the expected one.
+
+        Raises :class:`~ChecksumError` if something is wrong.
+
+        :param data: The data to check.
         """
         if self.sha256 is not None:
             digest = hashlib.sha256(data).hexdigest()
@@ -50,6 +73,10 @@ class Download:
 
 
 class DownloadError(ValueError):
+    """
+    Error indicating some (generic) download failure.
+    """
+
     pass
 
 
