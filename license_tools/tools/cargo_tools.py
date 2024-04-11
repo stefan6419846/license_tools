@@ -80,11 +80,31 @@ def check_metadata(path: Path | str) -> str:
 
 @dataclass
 class PackageVersion:
+    """
+    Container for holding a package version.
+    """
+
     name: str
+    """
+    The package name.
+    """
+
     version: str
+    """
+    The package version.
+    """
+
     checksum: str
+    """
+    The package checksum.
+    """
 
     def to_download(self) -> Download:
+        """
+        Generate the corresponding download URL.
+
+        :return: The corresponding download.
+        """
         return Download(
             url=f"https://crates.io/api/v1/crates/{self.name}/{self.version}/download",
             filename=f"{self.name}_{self.version}.crate",
