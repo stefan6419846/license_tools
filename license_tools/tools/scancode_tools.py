@@ -345,6 +345,8 @@ class LicenseMatch:
 class LicenseClue(LicenseMatch):
     """
     Enriched matching information about a license.
+
+    Currently the same as :class:`~LicenseMatch`.
     """
 
     pass
