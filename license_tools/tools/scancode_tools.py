@@ -573,7 +573,7 @@ class PackageResults:
     """
     URL to the issue or bug tracker.
     """
-    
+
     code_view_url: str | None = None
     """
     An URL where th ecode can be browsed online.
@@ -654,7 +654,7 @@ class PackageResults:
 
     notice_text: str | None = None
     """
-    Corresponding notice text.    
+    Corresponding notice text.
     """
 
     other_license_detections: list[LicenseDetection] = dataclass_field(
