@@ -361,7 +361,7 @@ class LicenseDetection:
     The detected license expression.
     """
 
-    spdx_license_expression: str
+    license_expression_spdx: str
     """
     The detected license expression in SPDX format.
     """
