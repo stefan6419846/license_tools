@@ -7,6 +7,7 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
@@ -77,6 +78,7 @@ class MainTestCase(TestCase):
         self.assertEqual(TYPING_EXTENSION_4_8_0__EXPECTED_OUTPUT, result.stdout.decode("UTF-8"))
 
     def test_cargo_lock_download(self) -> None:
+        time.sleep(1)
         with TemporaryDirectory() as target_directory, TemporaryDirectory() as source_directory:
             cargo_lock = Path(source_directory) / "Cargo.lock"
             cargo_lock.write_text(EXAMPLE_CARGO_LOCK_FILE)
@@ -100,6 +102,7 @@ class MainTestCase(TestCase):
             )
 
     def test_logging(self) -> None:
+        time.sleep(1)
         with TemporaryDirectory() as target_directory, TemporaryDirectory() as source_directory:
             cargo_lock = Path(source_directory) / "Cargo.lock"
             cargo_lock.write_text(EXAMPLE_CARGO_LOCK_FILE__ONE_PACKAGE_ONLY)

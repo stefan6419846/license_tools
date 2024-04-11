@@ -15,8 +15,8 @@ from license_tools.tools.scancode_tools import (
 )
 
 
-SETUP_PATH = Path(__file__).parent.parent / "setup.py"
-LICENSE_PATH = SETUP_PATH.parent / "LICENSE.txt"
+SETUP_PATH = Path(__file__).parent / "files" / "setup.py"
+LICENSE_PATH = Path(__file__).parent.parent / "LICENSE.txt"
 
 
 TYPING_EXTENSIONS__4_8_0__WHEEL = Download(

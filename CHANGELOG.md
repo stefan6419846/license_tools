@@ -5,6 +5,7 @@
   * Parse the metadata of `Cargo.toml` files.
 * Allow setting the log level for the CLI.
 * Add option to prefer/download source distributions from PyPI instead of wheels.
+* Migrate from `setup.py` to `pyproject.toml`.
 
 # Version 0.9.0 - 2024-03-23
 
