@@ -1,6 +1,8 @@
 # Development version
 
-* Add handling for Rust crates:
+# Version 0.10.0 - 2024-04-19
+
+* Add handling for Rust crates
   * Automatically download the packages referenced in a given `Cargo.lock` file.
   * Parse the metadata of `Cargo.toml` files.
 * Allow setting the log level for the CLI.
