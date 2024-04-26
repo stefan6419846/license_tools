@@ -5,8 +5,6 @@
 from __future__ import annotations
 
 import subprocess
-from contextlib import redirect_stderr
-from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock, TestCase
@@ -107,18 +105,18 @@ class CheckSharedObjectsTestCase(TestCase):
             source = directory.joinpath("libdummy.so")
             source.symlink_to(target=target)
 
-            stderr = StringIO()
             with mock.patch(
                 "subprocess.check_output", return_value=b"Test output\nAnother line\n"
-            ) as subprocess_mock, redirect_stderr(stderr), mock.patch.object(
+            ) as subprocess_mock, mock.patch.object(
+                linking_tools.logger, "warning"
+            ) as warning_mock, mock.patch.object(
                 linking_tools, "is_elf", return_value=True
             ) as elf_mock:
                 result = check_shared_objects(source)
             self.assertIsNone(result)
             subprocess_mock.assert_not_called()
-            self.assertEqual(
-                f"Ignoring symlink {source} to {target} for shared object analysis.\n",
-                stderr.getvalue(),
+            warning_mock.assert_called_once_with(
+                "Ignoring symlink %s to %s for shared object analysis.", source, target
             )
             elf_mock.assert_called_once_with(source)
 

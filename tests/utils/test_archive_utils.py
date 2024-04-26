@@ -9,8 +9,8 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from unittest import TestCase
 
-from license_tools import retrieval
 from license_tools.utils import archive_utils
+from license_tools.utils.path_utils import get_files_from_directory
 from tests import get_from_url
 from tests.data import (
     BASE64__0_22_0__CRATE, JSON__20231013__JAR, LIBAIO1__0_3_109_1_25__RPM, LIBAIO1__0_3_109_1_25__SRC_RPM, TYPING_EXTENSION_4_8_0__SOURCE_FILES,
@@ -24,7 +24,7 @@ class ArchiveUtilsTestCase(TestCase):
             directory = Path(tempdir)
             self.assertTrue(archive_utils.can_extract(path))
             archive_utils.extract(archive_path=path, target_directory=directory)
-            actual = [x[1] for x in retrieval.get_files_from_directory(directory)]
+            actual = [x[1] for x in get_files_from_directory(directory)]
             self.assertEqual(
                 [
                     "META-INF/MANIFEST.MF",
@@ -68,7 +68,7 @@ class ArchiveUtilsTestCase(TestCase):
             directory = Path(tempdir)
             self.assertTrue(archive_utils.can_extract(path))
             archive_utils.extract(archive_path=path, target_directory=directory)
-            actual = [x[1] for x in retrieval.get_files_from_directory(directory)]
+            actual = [x[1] for x in get_files_from_directory(directory)]
             self.assertEqual(TYPING_EXTENSION_4_8_0__WHEEL_FILES, actual)
 
     def test_rpm_file(self) -> None:
@@ -76,7 +76,7 @@ class ArchiveUtilsTestCase(TestCase):
             directory = Path(tempdir)
             self.assertTrue(archive_utils.can_extract(path))
             archive_utils.extract(archive_path=path, target_directory=directory)
-            actual = [x[1] for x in retrieval.get_files_from_directory(directory)]
+            actual = [x[1] for x in get_files_from_directory(directory)]
             self.assertEqual(
                 [
                     "lib64/libaio.so.1.0.1",
@@ -91,7 +91,7 @@ class ArchiveUtilsTestCase(TestCase):
             directory = Path(tempdir)
             self.assertTrue(archive_utils.can_extract(path))
             archive_utils.extract(archive_path=path, target_directory=directory)
-            actual = [x[1] for x in retrieval.get_files_from_directory(directory)]
+            actual = [x[1] for x in get_files_from_directory(directory)]
             self.assertEqual(TYPING_EXTENSION_4_8_0__SOURCE_FILES, actual)
 
     def test_rust_crate(self) -> None:
@@ -99,7 +99,7 @@ class ArchiveUtilsTestCase(TestCase):
             directory = Path(tempdir)
             self.assertTrue(archive_utils.can_extract(path))
             archive_utils.extract(archive_path=path, target_directory=directory)
-            actual = [x[1] for x in retrieval.get_files_from_directory(directory)]
+            actual = [x[1] for x in get_files_from_directory(directory)]
             self.assertEqual(
                 [
                     "base64-0.22.0/.cargo_vcs_info.json",
@@ -163,7 +163,7 @@ class ArchiveUtilsTestCase(TestCase):
 
             self.assertTrue(archive_utils.can_extract(zip_path))
             archive_utils.extract(archive_path=zip_path, target_directory=directory)
-            actual = [x[1] for x in retrieval.get_files_from_directory(directory)]
+            actual = [x[1] for x in get_files_from_directory(directory)]
             self.assertEqual(
                 [
                     f"{source_path.name}/directory2/README",
@@ -189,7 +189,7 @@ class ArchiveUtilsTestCase(TestCase):
                     target_directory=directory,
                     recurse=True,
                 )
-                actual = [x[1] for x in retrieval.get_files_from_directory(directory)]
+                actual = [x[1] for x in get_files_from_directory(directory)]
                 self.assertEqual(
                     [
                         "00_arches.patch",
@@ -305,7 +305,7 @@ class ArchiveUtilsTestCase(TestCase):
                     target_directory=directory,
                     recurse=False,
                 )
-                actual = [x[1] for x in retrieval.get_files_from_directory(directory)]
+                actual = [x[1] for x in get_files_from_directory(directory)]
                 self.assertEqual(
                     [
                         "00_arches.patch",
@@ -329,7 +329,7 @@ class ArchiveUtilsTestCase(TestCase):
                     recurse=False,
                 )
                 actual = [
-                    x[1] for x in retrieval.get_files_from_directory(tar_bz2_directory)
+                    x[1] for x in get_files_from_directory(tar_bz2_directory)
                 ]
                 self.assertEqual(
                     [

@@ -8,12 +8,15 @@ Tools related to binary linking.
 
 from __future__ import annotations
 
+import logging
 import subprocess
-import sys
 from pathlib import Path
 from typing import cast, Literal
 
 from typecode import magic2  # type: ignore[import-untyped]
+
+logger = logging.getLogger(__name__)
+del logging
 
 
 ELF_EXE = "executable"
@@ -72,8 +75,8 @@ def check_shared_objects(path: Path) -> str | None:
         return None
     if path.is_symlink():
         # Ignore symlinks as they usually are package-internal and `ldd` does not always like them.
-        sys.stderr.write(
-            f"Ignoring symlink {path} to {path.resolve()} for shared object analysis.\n",
+        logger.warning(
+            "Ignoring symlink %s to %s for shared object analysis.", path, path.resolve()
         )
         return None
     output = subprocess.check_output(["ldd", path], stderr=subprocess.PIPE)

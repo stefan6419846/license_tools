@@ -9,7 +9,31 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
 
-from license_tools.utils.path_utils import TemporaryDirectoryWithFixedName
+from license_tools.utils.path_utils import get_files_from_directory, TemporaryDirectoryWithFixedName
+
+
+class GetFilesFromDirectoryTestCase(TestCase):
+    def test_get_files_from_directory(self) -> None:
+        with TemporaryDirectory() as temporary_directory:
+            directory = Path(temporary_directory)
+
+            directory.joinpath("module1.py").touch()
+            directory.joinpath("module2.py").touch()
+            directory.joinpath("submodule").mkdir(parents=True)
+            directory.joinpath("submodule").joinpath("nested.py").touch()
+            directory.joinpath("empty").joinpath("sub").mkdir(parents=True)
+            directory.joinpath("empty").joinpath("sub").joinpath("hello.py").touch()
+
+            result = list(get_files_from_directory(temporary_directory))
+            self.assertListEqual(
+                [
+                    (directory / "empty" / "sub" / "hello.py", "empty/sub/hello.py"),
+                    (directory / "module1.py", "module1.py"),
+                    (directory / "module2.py", "module2.py"),
+                    (directory / "submodule" / "nested.py", "submodule/nested.py"),
+                ],
+                result,
+            )
 
 
 class TemporaryDirectoryWithFixedNameTestCase(TestCase):

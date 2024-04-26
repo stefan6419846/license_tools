@@ -5,8 +5,6 @@
 from __future__ import annotations
 
 import re
-from contextlib import redirect_stdout
-from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock, TestCase
@@ -16,6 +14,7 @@ from license_tools.tools.cargo_tools import PackageVersion
 from license_tools.utils.download_utils import Download
 from tests import get_from_url
 from tests.data import BASE64__0_22_0__CARGO_TOML, CRYPTOGRAPHY__42_0_0__CARGO_LOCK
+
 
 EXPECTED_METADATA = {
     "authors": ["Alice Maz <alice@alicemaz.com>", "Marshall Pierce <marshall@mpierce.org>"],
@@ -135,8 +134,7 @@ class PackageVersionTestCase(TestCase):
 class GetPackageVersionsTestCase(TestCase):
     def test_get_package_versions(self) -> None:
         with get_from_url(CRYPTOGRAPHY__42_0_0__CARGO_LOCK) as path:
-            stdout = StringIO()
-            with redirect_stdout(stdout):
+            with mock.patch.object(cargo_tools.logger, "warning") as warning_mock:
                 package_versions = list(cargo_tools.get_package_versions(path))
         self.assertEqual(
             [
@@ -190,17 +188,37 @@ class GetPackageVersionsTestCase(TestCase):
             ],
             package_versions,
         )
-        self.assertEqual(
-            """
-Skipping {'name': 'cryptography-cffi', 'version': '0.1.0', 'dependencies': ['cc', 'openssl-sys', 'pyo3']}
-Skipping {'name': 'cryptography-key-parsing', 'version': '0.1.0', 'dependencies': ['asn1', 'cfg-if', 'cryptography-x509', 'openssl', 'openssl-sys']}
-Skipping {'name': 'cryptography-openssl', 'version': '0.1.0', 'dependencies': ['foreign-types', 'foreign-types-shared', 'openssl', 'openssl-sys']}
-Skipping {'name': 'cryptography-rust', 'version': '0.1.0', 'dependencies': ['asn1', 'cc', 'cfg-if', 'cryptography-cffi', 'cryptography-key-parsing', 'cryptography-openssl', 'cryptography-x509', 'cryptography-x509-verification', 'foreign-types-shared', 'once_cell', 'openssl', 'openssl-sys', 'pem', 'pyo3', 'self_cell']}
-Skipping {'name': 'cryptography-x509', 'version': '0.1.0', 'dependencies': ['asn1']}
-Skipping {'name': 'cryptography-x509-verification', 'version': '0.1.0', 'dependencies': ['asn1', 'cryptography-x509', 'once_cell', 'pem']}
-"""[1:],  # noqa: E501
-            stdout.getvalue()
+
+        warning_mock.assert_has_calls(
+            [
+                mock.call('Skipping %s', {'name': 'cryptography-cffi', 'version': '0.1.0', 'dependencies': ['cc', 'openssl-sys', 'pyo3']}),
+                mock.call(
+                    'Skipping %s',
+                    {'name': 'cryptography-key-parsing', 'version': '0.1.0', 'dependencies': ['asn1', 'cfg-if', 'cryptography-x509', 'openssl', 'openssl-sys']}
+                ),
+                mock.call(
+                    'Skipping %s',
+                    {'name': 'cryptography-openssl', 'version': '0.1.0', 'dependencies': ['foreign-types', 'foreign-types-shared', 'openssl', 'openssl-sys']}
+                ),
+                mock.call(
+                    'Skipping %s',
+                    {
+                        'name': 'cryptography-rust', 'version': '0.1.0',
+                        'dependencies': [
+                            'asn1', 'cc', 'cfg-if', 'cryptography-cffi', 'cryptography-key-parsing', 'cryptography-openssl', 'cryptography-x509',
+                            'cryptography-x509-verification', 'foreign-types-shared', 'once_cell', 'openssl', 'openssl-sys', 'pem', 'pyo3', 'self_cell'
+                        ]
+                    }
+                ),
+                mock.call('Skipping %s', {'name': 'cryptography-x509', 'version': '0.1.0', 'dependencies': ['asn1']}),
+                mock.call(
+                    'Skipping %s',
+                    {'name': 'cryptography-x509-verification', 'version': '0.1.0', 'dependencies': ['asn1', 'cryptography-x509', 'once_cell', 'pem']}
+                )
+            ],
+            any_order=False
         )
+        self.assertEqual(6, warning_mock.call_count, warning_mock.call_args_list)
 
 
 class DownloadFromLockFileTestCase(TestCase):

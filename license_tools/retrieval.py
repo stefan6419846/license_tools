@@ -11,21 +11,20 @@ from __future__ import annotations
 import atexit
 import math
 import shutil
-import subprocess
-import sys
 from collections import defaultdict
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
-from typing import cast, Generator
+from typing import BinaryIO, cast, Generator
 
-import requests
 import scancode_config  # type: ignore[import-untyped]
 from joblib import Parallel, delayed  # type: ignore[import-untyped]
 
 from license_tools.tools import cargo_tools, font_tools, linking_tools, pip_tools, scancode_tools
+from license_tools.tools.pip_tools import download_package
 from license_tools.tools.scancode_tools import FileResults, Licenses, PackageResults
 from license_tools.utils import archive_utils
-from license_tools.utils.path_utils import TemporaryDirectoryWithFixedName
+from license_tools.utils.download_utils import download_file
+from license_tools.utils.path_utils import get_files_from_directory, TemporaryDirectoryWithFixedName
 
 
 class RetrievalFlags:
@@ -40,6 +39,7 @@ class RetrievalFlags:
     LDD_DATA = 16
     FONT_DATA = 32
     PYTHON_METADATA = 64
+    CARGO_METADATA = 128
 
     @classmethod
     def to_int(
@@ -51,6 +51,7 @@ class RetrievalFlags:
         retrieve_ldd_data: bool = False,
         retrieve_font_data: bool = False,
         retrieve_python_metadata: bool = False,
+        retrieve_cargo_metadata: bool = False,
     ) -> int:
         """
         Convert the given boolean parameter values to a single integer flag value.
@@ -62,6 +63,7 @@ class RetrievalFlags:
         :param retrieve_ldd_data: Whether to retrieve linking data for shared objects.
         :param retrieve_font_data: Whether to retrieve font data.
         :param retrieve_python_metadata: Whether to retrieve Python package metadata.
+        :param retrieve_cargo_metadata: Whether to retrieve Cargo metadata.
         :return: The flags derived from the given parameters.
         """
         return (
@@ -72,6 +74,7 @@ class RetrievalFlags:
             + cls.LDD_DATA * retrieve_ldd_data
             + cls.FONT_DATA * retrieve_font_data
             + cls.PYTHON_METADATA * retrieve_python_metadata
+            + cls.CARGO_METADATA * retrieve_cargo_metadata
         )
 
     @classmethod
@@ -82,7 +85,7 @@ class RetrievalFlags:
         :param: If enabled, return kwargs instead of the integer value.
         :return: The value for all flags enabled.
         """
-        value = cls.to_int(True, True, True, True, True, True, True)
+        value = cls.to_int(True, True, True, True, True, True, True, True)
         if as_kwargs:
             return cls.to_kwargs(value)
         return value
@@ -114,6 +117,7 @@ class RetrievalFlags:
             retrieve_ldd_data=cls.is_set(flags=flags, flag=cls.LDD_DATA),
             retrieve_font_data=cls.is_set(flags=flags, flag=cls.FONT_DATA),
             retrieve_python_metadata=cls.is_set(flags=flags, flag=cls.PYTHON_METADATA),
+            retrieve_cargo_metadata=cls.is_set(flags=flags, flag=cls.CARGO_METADATA),
         )
 
 
@@ -182,11 +186,12 @@ def run_on_file(
             FileResults,
             _run_on_archive_file(path=path, short_path=short_path, default_to_none=False)
         )
-    if path.name.startswith("Cargo.toml"):
-        print(short_path)
-        print(cargo_tools.check_metadata(path=path) + "\n")
 
     retrieval_kwargs = RetrievalFlags.to_kwargs(flags=retrieval_flags)
+
+    if path.name.startswith("Cargo.toml") and retrieval_kwargs.pop("retrieve_cargo_metadata"):
+        print(short_path)
+        print(cargo_tools.check_metadata(path=path) + "\n")
 
     # This data is not yet part of the dataclasses above, as it is a custom analysis.
     # Return early if we got a result here, as these binary files currently do not
@@ -213,30 +218,6 @@ def run_on_file(
         retrieve_urls=retrieval_kwargs["retrieve_urls"],
         retrieve_file_info=retrieval_kwargs["retrieve_file_info"],
     )
-
-
-def get_files_from_directory(
-    directory: str | Path,
-    prefix: str | None = None,
-) -> Generator[tuple[Path, str], None, None]:
-    """
-    Get the files from the given directory, recursively.
-
-    :param directory: The directory to walk through.
-    :param prefix: Custom prefix to use.
-    :return: For each file, the complete Path object as well as the path string
-             relative to the given directory.
-    """
-    directory_string = str(directory) if prefix is None else prefix
-    common_prefix_length = len(directory_string) + int(
-        not directory_string.endswith("/")
-    )
-
-    for path in sorted(Path(directory).rglob("*"), key=str):
-        if path.is_dir():
-            continue
-        distribution_path = str(path)[common_prefix_length:]
-        yield path, distribution_path
 
 
 def run_on_directory(
@@ -335,9 +316,7 @@ def run_on_downloaded_archive_file(
     suffixes = Path(download_url.rsplit("/", maxsplit=1)[1]).suffixes
     suffix = "".join(suffixes)
     with NamedTemporaryFile(suffix=suffix) as downloaded_file:
-        response = requests.get(url=download_url)
-        downloaded_file.write(response.content)
-        downloaded_file.seek(0)
+        download_file(url=download_url, file_object=cast(BinaryIO, downloaded_file))
         yield from run_on_package_archive_file(
             archive_path=Path(downloaded_file.name),
             job_count=job_count,
@@ -363,30 +342,12 @@ def run_on_downloaded_package_file(
     :return: The requested results.
     """
     with TemporaryDirectory() as download_directory:
-        command = [
-            sys.executable,
-            "-m",
-            "pip",
-            "download",
-            "--no-deps",
-            package_definition,
-            "--dest",
-            download_directory,
-        ]
-        if index_url:
-            command += ["--index-url", index_url]
-        if prefer_sdist:
-            command += ["--no-binary", ":all:"]
-        try:
-            subprocess.run(
-                command, stderr=subprocess.PIPE, stdout=subprocess.PIPE, check=True
-            )
-        except subprocess.CalledProcessError as exception:
-            if exception.stdout:
-                sys.stdout.write(exception.stdout.decode("UTF-8"))
-            if exception.stderr:
-                sys.stderr.write(exception.stderr.decode("UTF-8"))
-            raise
+        download_package(
+            package_definition=package_definition,
+            download_directory=download_directory,
+            index_url=index_url,
+            prefer_sdist=prefer_sdist,
+        )
         name = list(Path(download_directory).glob("*"))[0]
         yield from run_on_package_archive_file(
             archive_path=name.resolve(),
@@ -419,6 +380,7 @@ def run(
     retrieve_ldd_data: bool = False,
     retrieve_font_data: bool = False,
     retrieve_python_metadata: bool = False,
+    retrieve_cargo_metadata: bool = False,
 ) -> list[FileResults]:
     """
     Run the analysis for the given input definition.
@@ -441,6 +403,7 @@ def run(
     :param retrieve_ldd_data: Whether to retrieve linking data for shared objects.
     :param retrieve_font_data: Whether to retrieve font data.
     :param retrieve_python_metadata: Whether to retrieve Python package metadata.
+    :param retrieve_cargo_metadata: Whether to retrieve Cargo metadata.
     :return: The requested results.
     """
     # Remove the temporary directory of the main thread.
@@ -459,6 +422,7 @@ def run(
         retrieve_ldd_data=retrieve_ldd_data,
         retrieve_font_data=retrieve_font_data,
         retrieve_python_metadata=bool(retrieve_python_metadata and package_definition),
+        retrieve_cargo_metadata=retrieve_cargo_metadata,
     )
 
     # Run the analysis itself.

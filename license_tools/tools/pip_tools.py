@@ -8,6 +8,8 @@ Tools related to pip.
 
 from __future__ import annotations
 
+import subprocess
+import sys
 from pathlib import Path
 
 from license_tools.utils import rendering_utils
@@ -63,3 +65,43 @@ def check_metadata(path: Path | str) -> str:
     return rendering_utils.render_dictionary(
         dictionary=metadata, verbose_names_mapping=_VERBOSE_NAMES, multi_value_keys={"licensefile", "license_classifier", "requires"}
     )
+
+
+def download_package(
+        package_definition: str,
+        download_directory: Path | str,
+        index_url: str | None = None,
+        prefer_sdist: bool = False
+) -> None:
+    """
+    Download the given package and save it to the given directory.
+
+    :param package_definition: The Python package definition to download.
+    :param download_directory: The directory to download the package to.
+    :param index_url: The PyPI index URL to use. Uses the default one from the `.pypirc` file if unset.
+    :param prefer_sdist: Download the source distribution instead of the wheel.
+    """
+    command = [
+        sys.executable,
+        "-m",
+        "pip",
+        "download",
+        "--no-deps",
+        package_definition,
+        "--dest",
+        download_directory,
+    ]
+    if index_url:
+        command += ["--index-url", index_url]
+    if prefer_sdist:
+        command += ["--no-binary", ":all:"]
+    try:
+        subprocess.run(
+            command, capture_output=True, text=True, check=True
+        )
+    except subprocess.CalledProcessError as exception:
+        if exception.stdout:
+            sys.stdout.write(exception.stdout)
+        if exception.stderr:
+            sys.stderr.write(exception.stderr)
+        raise

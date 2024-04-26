@@ -9,8 +9,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
 
-from license_tools import retrieval
 from license_tools.tools import rpm_tools
+from license_tools.utils.path_utils import get_files_from_directory
 from tests import get_from_url
 from tests.data import LIBAIO1__0_3_109_1_25__RPM, LIBAIO1__0_3_109_1_25__SRC_RPM
 
@@ -22,7 +22,7 @@ class ExtractTestCase(TestCase):
             rpm_tools.extract(
                 archive_path=path, target_path=directory
             )
-            actual = [x[1] for x in retrieval.get_files_from_directory(directory)]
+            actual = [x[1] for x in get_files_from_directory(directory)]
             self.assertEqual(
                 [
                     "lib64/libaio.so.1",

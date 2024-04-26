@@ -8,6 +8,7 @@ Tools related to Cargo/Rust.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Generator
@@ -16,6 +17,9 @@ import tomli
 
 from license_tools.utils import download_utils, rendering_utils
 from license_tools.utils.download_utils import Download
+
+logger = logging.getLogger(__name__)
+del logging
 
 
 # https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -122,7 +126,7 @@ def get_package_versions(lock_path: Path | str) -> Generator[PackageVersion, Non
     data = read_toml(Path(lock_path))
     for package in data["package"]:
         if package.get("source") != "registry+https://github.com/rust-lang/crates.io-index":
-            print("Skipping", package)
+            logger.warning("Skipping %s", package)
             continue
         yield PackageVersion(name=package["name"], version=package["version"], checksum=package["checksum"])
 

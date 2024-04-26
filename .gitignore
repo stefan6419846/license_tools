@@ -1,5 +1,6 @@
 # Custom
 todo/
+outputs/
 *.rpm
 
 # Byte-compiled / optimized / DLL files

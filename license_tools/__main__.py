@@ -130,6 +130,13 @@ def main() -> None:
         default=False,
         help="Retrieve Python package metadata.",
     )
+    parser.add_argument(
+        "--retrieve-cargo-metadata",
+        action="store_true",
+        required=False,
+        default=False,
+        help="Retrieve Cargo/Rust package metadata.",
+    )
 
     parser.add_argument(
         "--cargo-lock-download",
@@ -188,6 +195,7 @@ def main() -> None:
         retrieve_ldd_data=arguments.retrieve_ldd_data,
         retrieve_font_data=arguments.retrieve_font_data,
         retrieve_python_metadata=arguments.retrieve_python_metadata,
+        retrieve_cargo_metadata=arguments.retrieve_cargo_metadata,
     )
 
 

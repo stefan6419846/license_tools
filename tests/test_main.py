@@ -12,8 +12,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
 
-from license_tools import retrieval
 from license_tools.__main__ import log_level_type
+from license_tools.utils.path_utils import get_files_from_directory
 from tests.data import TYPING_EXTENSION_4_8_0__EXPECTED_OUTPUT
 
 
@@ -91,7 +91,7 @@ class MainTestCase(TestCase):
             self.assertEqual(b"", result.stderr)
             self.assertEqual(b"", result.stdout)
 
-            actual = [x[1] for x in retrieval.get_files_from_directory(target_directory)]
+            actual = [x[1] for x in get_files_from_directory(target_directory)]
             self.assertEqual(
                 [
                     "autocfg_1.1.0.crate",
@@ -124,5 +124,5 @@ class MainTestCase(TestCase):
             )
             self.assertEqual(b"", result.stdout)
 
-            actual = [x[1] for x in retrieval.get_files_from_directory(target_directory)]
+            actual = [x[1] for x in get_files_from_directory(target_directory)]
             self.assertEqual(["autocfg_1.1.0.crate"], actual)

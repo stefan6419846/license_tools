@@ -7,7 +7,31 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 from tempfile import mkdtemp
-from typing import Any, Type
+from typing import Any, Generator, Type
+
+
+def get_files_from_directory(
+    directory: str | Path,
+    prefix: str | None = None,
+) -> Generator[tuple[Path, str], None, None]:
+    """
+    Get the files from the given directory, recursively.
+
+    :param directory: The directory to walk through.
+    :param prefix: Custom prefix to use.
+    :return: For each file, the complete Path object as well as the path string
+             relative to the given directory.
+    """
+    directory_string = str(directory) if prefix is None else prefix
+    common_prefix_length = len(directory_string) + int(
+        not directory_string.endswith("/")
+    )
+
+    for path in sorted(Path(directory).rglob("*"), key=str):
+        if path.is_dir():
+            continue
+        short_path = str(path)[common_prefix_length:]
+        yield path, short_path
 
 
 class TemporaryDirectoryWithFixedName:

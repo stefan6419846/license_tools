@@ -7,10 +7,8 @@ from __future__ import annotations
 import copy
 import os
 import re
-import subprocess
-import sys
 import tarfile
-from contextlib import contextmanager, redirect_stderr, redirect_stdout
+from contextlib import contextmanager, redirect_stdout
 from io import StringIO
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
@@ -20,6 +18,7 @@ from unittest import mock, TestCase
 from license_tools import retrieval
 from license_tools.retrieval import RetrievalFlags
 from license_tools.tools.scancode_tools import FileResults, LicenseDetection, LicenseMatch, Licenses
+from license_tools.utils.path_utils import get_files_from_directory
 from tests import Download, get_from_url
 from tests.data import (
     BASE64__0_22_0__CARGO_TOML,
@@ -43,7 +42,7 @@ class RetrievalFlagsTestCase(TestCase):
         )
 
     def test_all(self) -> None:
-        self.assertEqual(127, RetrievalFlags.all())
+        self.assertEqual(255, RetrievalFlags.all())
         self.assertDictEqual(
             dict(
                 retrieve_copyrights=True,
@@ -53,6 +52,7 @@ class RetrievalFlagsTestCase(TestCase):
                 retrieve_ldd_data=True,
                 retrieve_font_data=True,
                 retrieve_python_metadata=True,
+                retrieve_cargo_metadata=True,
             ),
             cast(Dict[str, bool], RetrievalFlags.all(as_kwargs=True)),
         )
@@ -73,6 +73,7 @@ class RetrievalFlagsTestCase(TestCase):
                 retrieve_ldd_data=False,
                 retrieve_font_data=False,
                 retrieve_python_metadata=False,
+                retrieve_cargo_metadata=False,
             ),
             RetrievalFlags.to_kwargs(0),
         )
@@ -85,6 +86,7 @@ class RetrievalFlagsTestCase(TestCase):
                 retrieve_ldd_data=True,
                 retrieve_font_data=False,
                 retrieve_python_metadata=False,
+                retrieve_cargo_metadata=False,
             ),
             RetrievalFlags.to_kwargs(21),
         )
@@ -239,9 +241,15 @@ Typographic Subfamily name: Solid
         with get_from_url(BASE64__0_22_0__CARGO_TOML) as source_path, TemporaryDirectory() as directory:
             cargo_toml_path = Path(directory) / "Cargo.toml"
             cargo_toml_path.write_bytes(source_path.read_bytes())
+
             stdout = StringIO()
             with redirect_stdout(stdout):
-                result = retrieval.run_on_file(path=cargo_toml_path, short_path="/path/to/Cargo.toml")
+                retrieval.run_on_file(path=cargo_toml_path, short_path="/path/to/Cargo.toml")
+            self.assertEqual("", stdout.getvalue())
+
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                result = retrieval.run_on_file(path=cargo_toml_path, short_path="/path/to/Cargo.toml", retrieval_flags=RetrievalFlags.CARGO_METADATA)
 
             self.assertEqual(
                 """
@@ -293,30 +301,6 @@ Typographic Subfamily name: Solid
                     file_info=None
                 ),
                 result
-            )
-
-
-class GetFilesFromDirectoryTestCase(TestCase):
-    def test_get_files_from_directory(self) -> None:
-        with TemporaryDirectory() as temporary_directory:
-            directory = Path(temporary_directory)
-
-            directory.joinpath("module1.py").touch()
-            directory.joinpath("module2.py").touch()
-            directory.joinpath("submodule").mkdir(parents=True)
-            directory.joinpath("submodule").joinpath("nested.py").touch()
-            directory.joinpath("empty").joinpath("sub").mkdir(parents=True)
-            directory.joinpath("empty").joinpath("sub").joinpath("hello.py").touch()
-
-            result = list(retrieval.get_files_from_directory(temporary_directory))
-            self.assertListEqual(
-                [
-                    (directory / "empty" / "sub" / "hello.py", "empty/sub/hello.py"),
-                    (directory / "module1.py", "module1.py"),
-                    (directory / "module2.py", "module2.py"),
-                    (directory / "submodule" / "nested.py", "submodule/nested.py"),
-                ],
-                result,
             )
 
 
@@ -468,7 +452,7 @@ class RunOnPackageArchiveFileTestCase(TestCase):
             ) -> Generator[Any, None, None]:
                 self.assertEqual(2, job_count)
                 self.assertEqual(42, retrieval_flags)
-                actual = [x[1] for x in retrieval.get_files_from_directory(directory)]
+                actual = [x[1] for x in get_files_from_directory(directory)]
                 self.assertListEqual(expected_files, actual)
                 yield from directory_result
 
@@ -546,8 +530,6 @@ class RunOnDownloadedArchiveFileTestCase(TestCase):
 
 class RunOnDownloadedPackageFileTestCase(TestCase):
     def test_valid_package_name(self) -> None:
-        stderr = StringIO()
-
         archive_result = [object(), object(), object()]
 
         def run_on_package_archive_file(
@@ -559,7 +541,7 @@ class RunOnDownloadedPackageFileTestCase(TestCase):
             self.assertEqual(31584, len(archive_path.read_bytes()))
             yield from archive_result
 
-        with redirect_stderr(stderr), mock.patch.object(
+        with mock.patch.object(
             retrieval,
             "run_on_package_archive_file",
             side_effect=run_on_package_archive_file,
@@ -573,11 +555,8 @@ class RunOnDownloadedPackageFileTestCase(TestCase):
                 )
             )
             self.assertEqual(archive_result, result)
-        self.assertEqual("", stderr.getvalue())
 
     def test_prefer_source_distribution(self) -> None:
-        stderr = StringIO()
-
         archive_result = [object(), object(), object()]
 
         def run_on_package_archive_file(
@@ -589,7 +568,7 @@ class RunOnDownloadedPackageFileTestCase(TestCase):
             self.assertEqual(71456, len(archive_path.read_bytes()))
             yield from archive_result
 
-        with redirect_stderr(stderr), mock.patch.object(
+        with mock.patch.object(
             retrieval,
             "run_on_package_archive_file",
             side_effect=run_on_package_archive_file,
@@ -604,104 +583,6 @@ class RunOnDownloadedPackageFileTestCase(TestCase):
                 )
             )
             self.assertEqual(archive_result, result)
-        self.assertEqual("", stderr.getvalue())
-
-    def test_invalid_package_name(self) -> None:
-        stdout, stderr = StringIO(), StringIO()
-
-        archive_result = [object(), object(), object()]
-        with redirect_stdout(stdout), redirect_stderr(stderr), mock.patch.object(
-            retrieval, "run_on_package_archive_file", return_value=iter(archive_result)
-        ):
-            with self.assertRaises(subprocess.CalledProcessError):
-                list(
-                    retrieval.run_on_downloaded_package_file(
-                        package_definition="typing_extensions==1234567890",
-                        index_url="https://pypi.org/simple",
-                        job_count=2,
-                        retrieval_flags=13,
-                    )
-                )
-
-        stderr_string = stderr.getvalue()
-        self.assertEqual("", stdout.getvalue())
-        self.assertIn(
-            "ERROR: Could not find a version that satisfies the requirement typing_extensions==1234567890 (from versions: ",
-            stderr_string,
-        )
-        self.assertIn(
-            "\nERROR: No matching distribution found for typing_extensions==1234567890\n",
-            stderr_string,
-        )
-
-    def test_index_url_handling(self) -> None:
-        directories = []
-
-        def check_output(
-            command: list[str | Path], *args: Any, **kwargs: Any
-        ) -> "subprocess.CompletedProcess[bytes]":
-            directory = command[command.index("--dest") + 1]
-            directories.append(directory)
-            Path(directory).joinpath("dummy.py").touch()
-            return subprocess.CompletedProcess(args=args, returncode=0, stdout=b"")
-
-        with mock.patch.object(
-            retrieval, "run_on_package_archive_file", return_value=[]
-        ), mock.patch("subprocess.run", side_effect=check_output) as subprocess_mock:
-            list(
-                retrieval.run_on_downloaded_package_file(
-                    package_definition="testing", job_count=1, retrieval_flags=13
-                )
-            )
-            list(
-                retrieval.run_on_downloaded_package_file(
-                    package_definition="testing",
-                    job_count=2,
-                    retrieval_flags=37,
-                    index_url="DUMMY",
-                )
-            )
-
-            subprocess_mock.assert_has_calls(
-                [
-                    mock.call(
-                        [
-                            sys.executable,
-                            "-m",
-                            "pip",
-                            "download",
-                            "--no-deps",
-                            "testing",
-                            "--dest",
-                            directories[0],
-                        ],
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        check=True,
-                    ),
-                    mock.call(
-                        [
-                            sys.executable,
-                            "-m",
-                            "pip",
-                            "download",
-                            "--no-deps",
-                            "testing",
-                            "--dest",
-                            directories[1],
-                            "--index-url",
-                            "DUMMY",
-                        ],
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        check=True,
-                    ),
-                ],
-                any_order=False,
-            )
-            self.assertEqual(
-                2, subprocess_mock.call_count, subprocess_mock.call_args_list
-            )
 
 
 class CheckThatExactlyOneValueIsSetTestCase(TestCase):

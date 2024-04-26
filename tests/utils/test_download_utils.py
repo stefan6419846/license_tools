@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import datetime
+from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
@@ -12,9 +13,9 @@ from unittest import mock, TestCase
 
 import requests
 
-from license_tools import retrieval
 from license_tools.utils import download_utils
 from license_tools.utils.download_utils import ChecksumError, Download, DownloadError
+from license_tools.utils.path_utils import get_files_from_directory
 
 
 class DownloadTestCase(TestCase):
@@ -42,12 +43,50 @@ class GetSessionTestCase(TestCase):
         self.assertIn("https://github.com/stefan6419846/license_tools version ", session.headers["User-Agent"])
 
 
-class DownloadFile(TestCase):
+class DownloadFileTestCase(TestCase):
+    def test_not_okay(self) -> None:
+        session = download_utils.get_session()
+        response = requests.Response()
+        response.status_code = 404
+        file_object = BytesIO()
+        with (
+                mock.patch.object(download_utils, "get_session", return_value=session),
+                mock.patch.object(session, "get", return_value=response)
+        ):
+            with self.assertRaisesRegex(
+                    expected_exception=DownloadError,
+                    expected_regex=r"^Download not okay\? http://localhost <Response \[404\]>$"
+            ):
+                download_utils.download_file(
+                    url="http://localhost",
+                    file_object=file_object,
+                )
+        self.assertEqual(b"", file_object.getvalue())
+
+    def test_valid(self) -> None:
+        session = download_utils.get_session()
+        response = requests.Response()
+        response.status_code = 200
+        response._content = b"Hello World!\n"
+        file_object = BytesIO()
+
+        with (
+            mock.patch.object(download_utils, "get_session", return_value=session),
+            mock.patch.object(session, "get", return_value=response)
+        ):
+            download_utils.download_file(
+                url="http://localhost",
+                file_object=file_object,
+            )
+        self.assertEqual(b"Hello World!\n", file_object.getvalue())
+
+
+class DownloadFileToDirectoryTestCase(TestCase):
     def test_reuse_session(self) -> None:
         session = download_utils.get_session()
         with mock.patch.object(download_utils, "get_session") as session_mock:
             try:
-                download_utils.download_file(
+                download_utils.download_file_to_directory(
                     download=Download(url="http://localhost", filename="dummy"),
                     directory=Path("/dummy"),
                     session=session
@@ -58,7 +97,7 @@ class DownloadFile(TestCase):
 
         with mock.patch.object(download_utils, "get_session") as session_mock:
             try:
-                download_utils.download_file(
+                download_utils.download_file_to_directory(
                     download=Download(url="http://localhost", filename="dummy"),
                     directory=Path("/dummy"),
                 )
@@ -75,7 +114,7 @@ class DownloadFile(TestCase):
                     expected_exception=DownloadError,
                     expected_regex=r"^Download not okay\? http://localhost <Response \[404\]>$"
             ):
-                download_utils.download_file(
+                download_utils.download_file_to_directory(
                     download=Download(url="http://localhost", filename="dummy"),
                     directory=Path("/dummy"),
                     session=session,
@@ -92,7 +131,7 @@ class DownloadFile(TestCase):
                     expected_exception=ChecksumError,
                     expected_regex=r"^Checksum mismatch: Got 03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340, expected INVALID!$"
             ):
-                download_utils.download_file(
+                download_utils.download_file_to_directory(
                     download=Download(url="http://localhost", filename="dummy", sha256="INVALID"),
                     directory=Path("/dummy"),
                     session=session,
@@ -105,7 +144,7 @@ class DownloadFile(TestCase):
         response._content = b"Hello World!\n"
 
         with mock.patch.object(session, "get", return_value=response), TemporaryDirectory() as directory:
-            download_utils.download_file(
+            download_utils.download_file_to_directory(
                 download=Download(url="http://localhost", filename="test.txt", sha256="03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340"),
                 directory=Path(directory),
                 session=session,
@@ -148,7 +187,7 @@ class DownloadOneFilePerSecondTestCase(TestCase):
                     expected_regex=r"^Checksum mismatch: Got 03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340, expected INVALID!$"
             ):
                 download_utils.download_one_file_per_second(downloads=self.downloads, directory=Path(directory))
-            actual = [x[1] for x in retrieval.get_files_from_directory(directory)]
+            actual = [x[1] for x in get_files_from_directory(directory)]
             self.assertEqual(["file1.txt"], actual)
             self.assertEqual(
                 b"Hello World!\n",
@@ -165,7 +204,7 @@ class DownloadOneFilePerSecondTestCase(TestCase):
 
         with mock.patch.object(self.session, "get", side_effect=get), TemporaryDirectory() as directory:
             download_utils.download_one_file_per_second(downloads=self.downloads, directory=Path(directory))
-            actual = [x[1] for x in retrieval.get_files_from_directory(directory)]
+            actual = [x[1] for x in get_files_from_directory(directory)]
             self.assertEqual(["file1.txt", "file2.txt", "file3.txt"], actual)
             for name in actual:
                 self.assertEqual(

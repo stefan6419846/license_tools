@@ -13,6 +13,7 @@ import logging
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import BinaryIO
 
 import requests
 
@@ -91,9 +92,24 @@ def get_session() -> requests.Session:
     return session
 
 
-def download_file(download: Download, directory: Path, session: requests.Session | None = None) -> None:
+def download_file(url: str, file_object: BinaryIO) -> None:
     """
-    Download the given file.
+    Download the given file to the given file object.
+
+    :param url: The download URL to use.
+    :param file_object: The binary file to download to. Reset after writing.
+    """
+    session = get_session()
+    response = session.get(url)
+    if not response.ok:
+        raise DownloadError(f"Download not okay? {url} {response}")
+    file_object.write(response.content)
+    file_object.seek(0)
+
+
+def download_file_to_directory(download: Download, directory: Path, session: requests.Session | None = None) -> None:
+    """
+    Download the given file to the given directory.
 
     :param download: Download to perform.
     :param directory: Directory to download to.
@@ -120,5 +136,5 @@ def download_one_file_per_second(downloads: list[Download], directory: Path) -> 
     """
     session = get_session()
     for download in downloads:
-        download_file(download=download, directory=directory, session=session)
+        download_file_to_directory(download=download, directory=directory, session=session)
         time.sleep(1)
