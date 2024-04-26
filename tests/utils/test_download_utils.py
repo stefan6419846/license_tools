@@ -49,10 +49,8 @@ class DownloadFileTestCase(TestCase):
         response = requests.Response()
         response.status_code = 404
         file_object = BytesIO()
-        with (
-                mock.patch.object(download_utils, "get_session", return_value=session),
-                mock.patch.object(session, "get", return_value=response)
-        ):
+        with mock.patch.object(download_utils, "get_session", return_value=session), \
+                mock.patch.object(session, "get", return_value=response):
             with self.assertRaisesRegex(
                     expected_exception=DownloadError,
                     expected_regex=r"^Download not okay\? http://localhost <Response \[404\]>$"
@@ -70,10 +68,8 @@ class DownloadFileTestCase(TestCase):
         response._content = b"Hello World!\n"
         file_object = BytesIO()
 
-        with (
-            mock.patch.object(download_utils, "get_session", return_value=session),
-            mock.patch.object(session, "get", return_value=response)
-        ):
+        with mock.patch.object(download_utils, "get_session", return_value=session), \
+                mock.patch.object(session, "get", return_value=response):
             download_utils.download_file(
                 url="http://localhost",
                 file_object=file_object,
