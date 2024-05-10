@@ -9,7 +9,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
 
-from license_tools.utils.path_utils import get_files_from_directory, TemporaryDirectoryWithFixedName
+from license_tools.utils.path_utils import get_files_from_directory, DirectoryWithFixedNameContext
 
 
 class GetFilesFromDirectoryTestCase(TestCase):
@@ -36,10 +36,10 @@ class GetFilesFromDirectoryTestCase(TestCase):
             )
 
 
-class TemporaryDirectoryWithFixedNameTestCase(TestCase):
+class DirectoryWithFixedNameContextTestCase(TestCase):
     def test_normal(self) -> None:
         with TemporaryDirectory() as tempdir:
-            with TemporaryDirectoryWithFixedName(Path(tempdir) / "foo") as target:
+            with DirectoryWithFixedNameContext(Path(tempdir) / "foo") as target:
                 self.assertTrue(target.is_dir())
             self.assertFalse(target.is_dir())
 
@@ -50,7 +50,7 @@ class TemporaryDirectoryWithFixedNameTestCase(TestCase):
                     expected_exception=FileNotFoundError,
                     expected_regex=fr"^\[Errno 2\] No such file or directory: '{re.escape(str(target_name))}'$"
             ):
-                with TemporaryDirectoryWithFixedName(Path(tempdir) / "foo" / "bar") as target:
+                with DirectoryWithFixedNameContext(Path(tempdir) / "foo" / "bar") as target:
                     self.assertTrue(target.is_dir())
 
     def test_already_existing(self) -> None:
@@ -61,13 +61,13 @@ class TemporaryDirectoryWithFixedNameTestCase(TestCase):
                     expected_exception=FileExistsError,
                     expected_regex=fr"^\[Errno 17\] File exists: '{re.escape(str(target_name))}'$"
             ):
-                with TemporaryDirectoryWithFixedName(Path(tempdir) / "foo", fallback_to_random_if_exists=False) as target:
+                with DirectoryWithFixedNameContext(Path(tempdir) / "foo", fallback_to_random_if_exists=False) as target:
                     self.assertTrue(target.is_dir())
 
         with TemporaryDirectory() as tempdir:
             target_name = Path(tempdir) / "foo"
             target_name.mkdir()
-            with TemporaryDirectoryWithFixedName(Path(tempdir) / "foo", fallback_to_random_if_exists=True) as target:
+            with DirectoryWithFixedNameContext(Path(tempdir) / "foo", fallback_to_random_if_exists=True) as target:
                 self.assertTrue(target.is_dir())
                 self.assertNotEqual(target_name, target)
 
@@ -78,6 +78,12 @@ class TemporaryDirectoryWithFixedNameTestCase(TestCase):
                     expected_exception=FileNotFoundError,
                     expected_regex=fr"^\[Errno 2\] No such file or directory: '{re.escape(str(target_name))}'$"
             ):
-                with TemporaryDirectoryWithFixedName(Path(tempdir) / "foo") as target:
+                with DirectoryWithFixedNameContext(Path(tempdir) / "foo") as target:
                     self.assertTrue(target.is_dir())
                     target.rmdir()
+
+    def test_do_not_delete_afterwards(self) -> None:
+        with TemporaryDirectory() as tempdir:
+            with DirectoryWithFixedNameContext(Path(tempdir) / "foo", delete_afterwards=False) as target:
+                self.assertTrue(target.is_dir())
+            self.assertTrue(target.is_dir())

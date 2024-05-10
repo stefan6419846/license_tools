@@ -24,7 +24,7 @@ from license_tools.tools.pip_tools import download_package
 from license_tools.tools.scancode_tools import FileResults, Licenses, PackageResults
 from license_tools.utils import archive_utils
 from license_tools.utils.download_utils import download_file
-from license_tools.utils.path_utils import get_files_from_directory, TemporaryDirectoryWithFixedName
+from license_tools.utils.path_utils import DirectoryWithFixedNameContext, get_files_from_directory
 
 
 class RetrievalFlags:
@@ -225,6 +225,8 @@ def run_on_directory(
     job_count: int = 4,
     retrieval_flags: int = 0,
     prefix: str | None = None,
+    allow_random_directory_for_archive: bool = True,
+    delete_unpacked_archive_directories: bool = True,
 ) -> Generator[FileResults, None, None]:
     """
     Run the analysis on the given directory.
@@ -233,6 +235,8 @@ def run_on_directory(
     :param job_count: The number of parallel jobs to use.
     :param retrieval_flags: Values to retrieve.
     :param prefix: Custom prefix to use.
+    :param allow_random_directory_for_archive: Allow a random directory for unpacking archives.
+    :param delete_unpacked_archive_directories: Delete the directories of unpacked archives afterwards.
     :return: The requested results per file.
     """
     files = list(get_files_from_directory(directory, prefix))
@@ -250,7 +254,11 @@ def run_on_directory(
         if archive_utils.can_extract(path):
             name = path.name[:-len("".join(path.suffixes))]
             subdirectory = path.parent / f'{name}_{"_".join(path.suffixes).replace(".", "")}'
-            with TemporaryDirectoryWithFixedName(directory=subdirectory, fallback_to_random_if_exists=True) as target_directory:
+            with DirectoryWithFixedNameContext(
+                    directory=subdirectory,
+                    fallback_to_random_if_exists=allow_random_directory_for_archive,
+                    delete_afterwards=delete_unpacked_archive_directories,
+            ) as target_directory:
                 archive_utils.extract(archive_path=path, target_directory=target_directory)
                 yield from run_on_directory(
                     directory=str(target_directory),

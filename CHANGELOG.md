@@ -3,6 +3,7 @@
 * Prefer logging over printing.
 * Move download functionality to dedicated methods.
 * Make `Cargo.toml` metadata parsing optional.
+* Add library-only option to keep unpacked archive directories.
 
 # Version 0.10.0 - 2024-04-19
 

@@ -336,17 +336,43 @@ class RunOnDirectoryTestCase(TestCase):
         self.assertEqual(len(paths), run_mock.call_count, run_mock.call_args_list)
         get_mock.assert_called_once_with("/tmp/dummy/directory", None)
 
+    @classmethod
+    def _generate_tar_bz2_archive(cls, directory: Path) -> Path:
+        with TemporaryDirectory() as nested_directory:
+            nested_path = Path(nested_directory)
+            nested_path.joinpath("LICENSE").write_text("This is my license.")
+            with tarfile.open(directory / "nested.tar.bz2", "w:bz2") as tar:
+                tar.add(nested_path, arcname=nested_path.name)
+        return nested_path
+
+    def _test_nested(
+            self, result_set: Set[Path], directory: Path, nested_path: Path, expected: List[Tuple[Path, str]], run_mock: mock.Mock
+    ) -> None:
+        self.assertEqual(1, len(result_set), result_set)
+        remaining = result_set.pop()
+        self.assertEqual(directory, remaining.parent.parent.parent)
+        self.assertEqual(nested_path.name, remaining.parent.name)
+        self.assertEqual("LICENSE", remaining.name)
+        expected.append((remaining, "/".join(str(remaining).rsplit("/", maxsplit=3)[1:])))
+
+        run_mock.assert_has_calls(
+            [
+                mock.call(
+                    path=current_path, short_path=current_short_path, retrieval_flags=42
+                )
+                for current_path, current_short_path in expected
+            ],
+            any_order=False,
+        )
+        self.assertEqual(len(expected), run_mock.call_count, run_mock.call_args_list)
+
     def test_nested_with_existing_directory(self) -> None:
         with TemporaryDirectory() as tempdir:
             directory = Path(tempdir)
             directory.joinpath("directory").mkdir()
             directory.joinpath("directory", "file.txt").write_text("MIT-0")
             directory.joinpath("nested_tar_bz2").write_text("Dummy")
-            with TemporaryDirectory() as nested_directory:
-                nested_path = Path(nested_directory)
-                nested_path.joinpath("LICENSE").write_text("This is my license.")
-                with tarfile.open(directory / "nested.tar.bz2", "w:bz2") as tar:
-                    tar.add(nested_path, arcname=nested_path.name)
+            nested_path = self._generate_tar_bz2_archive(directory)
 
             def run_on_file(path: Path, short_path: str, retrieval_flags: int = 0) -> Any:
                 return path
@@ -361,8 +387,8 @@ class RunOnDirectoryTestCase(TestCase):
                 )
 
             self.assertSetEqual(
-                {'directory', 'nested_tar_bz2', 'nested.tar.bz2'},
-                {path.name for path in directory.glob('*')}
+                {"directory", "nested_tar_bz2", "nested.tar.bz2"},
+                {path.name for path in directory.glob("*")}
             )
 
         result_set: Set[Path] = cast(Set[Path], set(results))
@@ -371,34 +397,16 @@ class RunOnDirectoryTestCase(TestCase):
         for name in ["directory/file.txt", "nested.tar.bz2", "nested_tar_bz2"]:
             result_set.remove(directory / name)
             expected.append((directory / name, name))
-        self.assertEqual(1, len(result_set), result_set)
-        remaining = result_set.pop()
-        self.assertEqual(directory, remaining.parent.parent.parent)
-        self.assertEqual(nested_path.name, remaining.parent.name)
-        self.assertEqual("LICENSE", remaining.name)
-        expected.append((remaining, "/".join(str(remaining).rsplit("/", maxsplit=3)[1:])))
-
-        run_mock.assert_has_calls(
-            [
-                mock.call(
-                    path=current_path, short_path=current_short_path, retrieval_flags=42
-                )
-                for current_path, current_short_path in expected
-            ],
-            any_order=False,
+        self._test_nested(
+            result_set=result_set, directory=directory, nested_path=nested_path, expected=expected, run_mock=run_mock
         )
-        self.assertEqual(len(expected), run_mock.call_count, run_mock.call_args_list)
 
     def test_nested_without_existing_directory(self) -> None:
         with TemporaryDirectory() as tempdir:
             directory = Path(tempdir)
             directory.joinpath("directory").mkdir()
             directory.joinpath("directory", "file.txt").write_text("MIT-0")
-            with TemporaryDirectory() as nested_directory:
-                nested_path = Path(nested_directory)
-                nested_path.joinpath("LICENSE").write_text("This is my license.")
-                with tarfile.open(directory / "nested.tar.bz2", "w:bz2") as tar:
-                    tar.add(nested_path, arcname=nested_path.name)
+            nested_path = self._generate_tar_bz2_archive(directory)
 
             def run_on_file(path: Path, short_path: str, retrieval_flags: int = 0) -> Any:
                 return path
@@ -413,8 +421,8 @@ class RunOnDirectoryTestCase(TestCase):
                 )
 
             self.assertSetEqual(
-                {'directory', 'nested.tar.bz2'},
-                {path.name for path in directory.glob('*')}
+                {"directory", "nested.tar.bz2"},
+                {path.name for path in directory.glob("*")}
             )
 
         result_set: Set[Path] = cast(Set[Path], set(results))
@@ -423,23 +431,46 @@ class RunOnDirectoryTestCase(TestCase):
         for name in ["directory/file.txt", "nested.tar.bz2"]:
             result_set.remove(directory / name)
             expected.append((directory / name, name))
-        self.assertEqual(1, len(result_set), result_set)
-        remaining = result_set.pop()
-        self.assertEqual(directory, remaining.parent.parent.parent)
-        self.assertEqual(nested_path.name, remaining.parent.name)
-        self.assertEqual("LICENSE", remaining.name)
-        expected.append((remaining, "/".join(str(remaining).rsplit("/", maxsplit=3)[1:])))
-
-        run_mock.assert_has_calls(
-            [
-                mock.call(
-                    path=current_path, short_path=current_short_path, retrieval_flags=42
-                )
-                for current_path, current_short_path in expected
-            ],
-            any_order=False,
+        self._test_nested(
+            result_set=result_set, directory=directory, nested_path=nested_path, expected=expected, run_mock=run_mock
         )
-        self.assertEqual(len(expected), run_mock.call_count, run_mock.call_args_list)
+
+    def test_nested_storage_variant(self) -> None:
+        with TemporaryDirectory() as tempdir:
+            directory = Path(tempdir)
+            directory.joinpath("directory").mkdir()
+            directory.joinpath("directory", "file.txt").write_text("MIT-0")
+            _ = self._generate_tar_bz2_archive(directory)
+
+            def run_on_file(path: Path, short_path: str, retrieval_flags: int = 0) -> Any:
+                return path
+
+            with mock.patch.object(retrieval, "run_on_file", side_effect=run_on_file):
+                list(
+                    retrieval.run_on_directory(
+                        tempdir, job_count=1, retrieval_flags=42,
+                        allow_random_directory_for_archive=False,
+                        delete_unpacked_archive_directories=False,
+                    )
+                )
+
+            self.assertSetEqual(
+                {"directory", "nested.tar.bz2", "nested_tar_bz2"},
+                {path.name for path in directory.glob("*")}
+            )
+
+            with mock.patch.object(retrieval, "run_on_file", side_effect=run_on_file):
+                with self.assertRaisesRegex(
+                        expected_exception=FileExistsError,
+                        expected_regex=fr"^\[Errno 17\] File exists: '{re.escape(str(directory / 'nested_tar_bz2'))}'$"
+                ):
+                    list(
+                        retrieval.run_on_directory(
+                            tempdir, job_count=1, retrieval_flags=42,
+                            allow_random_directory_for_archive=False,
+                            delete_unpacked_archive_directories=False,
+                        )
+                    )
 
 
 class RunOnPackageArchiveFileTestCase(TestCase):

@@ -34,21 +34,27 @@ def get_files_from_directory(
         yield path, short_path
 
 
-class TemporaryDirectoryWithFixedName:
+class DirectoryWithFixedNameContext:
     """
-    Create the temporary directory with the given name. Similar to `tempfile.TemporaryDirectory`,
-    but with a fixed name.
+    Create the directory with the given name. Similar to `tempfile.TemporaryDirectory`, but with a fixed name.
     """
 
-    def __init__(self, directory: str | Path, fallback_to_random_if_exists: bool = True) -> None:
+    def __init__(
+            self,
+            directory: str | Path,
+            fallback_to_random_if_exists: bool = True,
+            delete_afterwards: bool = True,
+    ) -> None:
         """
         :param directory: The target directory to create temporarily.
         :param fallback_to_random_if_exists: Specify whether to fail if the target directory
                                              already exists or whether to fall back to a
                                              random directory with the same parent in this case.
+        :param delete_afterwards: Specify whether to delete the directory on exit.
         """
         self.directory = Path(directory)
         self._consider_fallback = fallback_to_random_if_exists
+        self._delete_afterwards = delete_afterwards
 
     def __enter__(self) -> Path:
         if self.directory.exists():
@@ -62,7 +68,8 @@ class TemporaryDirectoryWithFixedName:
         return self.directory
 
     def __exit__(self, type_: Type[BaseException] | None, value: BaseException | None, traceback: Any | None) -> bool | None:
-        shutil.rmtree(self.directory)
+        if self._delete_afterwards:
+            shutil.rmtree(self.directory)
 
         if type_:
             # Error.
