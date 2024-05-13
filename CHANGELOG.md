@@ -4,6 +4,7 @@
 * Move download functionality to dedicated methods.
 * Make `Cargo.toml` metadata parsing optional.
 * Add library-only option to keep unpacked archive directories.
+* Fix handling of permissions for RPM files.
 
 # Version 0.10.0 - 2024-04-19
 

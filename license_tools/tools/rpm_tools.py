@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+import stat
 from enum import IntEnum, IntFlag
 from pathlib import Path
 from typing import Any, cast, Dict  # TODO: Remove `Dict` after dropping Python 3.8.
@@ -62,7 +63,7 @@ _VERBOSE_HEADER_NAMES = {
     "postun": "Post-uninstallation Script",
     "filesizes": "File Sizes (when all < 4 GB)",
     "filestates": "Per-file Installation Status",
-    "filemodes": "Unix Files Modes",  # TODO: Provide meaningful string mapping. What do the negative values mean?
+    "filemodes": "Unix Files Modes",
     "filerdevs": "Device IDs (of device files)",
     "filemtimes": "File Modification Timestamps",
     "filemd5s": "File Hash",
@@ -504,6 +505,61 @@ class FileDigestAlgorithm(IntEnum):
     SHA224 = 9
 
 
+class FileModes(IntEnum):
+    """
+    Enumeration of known file modes.
+    """
+    # File types.
+    IS_DIRECTORY = stat.S_IFDIR
+    IS_CHARACTER_DEVICE = stat.S_IFCHR
+    IS_BLOCK_DEVICE = stat.S_IFBLK
+    IS_REGULAR_FILE = stat.S_IFREG
+    IS_FIFO_NAMED_PIPE = stat.S_IFIFO
+    IS_SYMBOLIC_LINK = stat.S_IFLNK
+    IS_SOCKET_FILE = stat.S_IFSOCK
+
+    # Permissions.
+    SET_UID_BIT = stat.S_ISUID
+    SET_GID_BIT = stat.S_ISGID  # The same as file locking enforcement.
+    STICKY_BIT = stat.S_ISVTX
+    READ_BY_OWNER_ALTERNATIVE = stat.S_IREAD
+    WRITE_BY_OWNER_ALTERNATIVE = stat.S_IWRITE
+    EXECUTE_BY_OWNER_ALTERNATIVE = stat.S_IEXEC
+    READ_WRITE_EXECUTE_BY_OWNER = stat.S_IRWXU
+    READ_BY_OWNER = stat.S_IRUSR
+    WRITE_BY_OWNER = stat.S_IWUSR
+    EXECUTE_BY_OWNER = stat.S_IXUSR
+    READ_WRITE_EXECUTE_BY_GROUP = stat.S_IRWXG
+    READ_BY_GROUP = stat.S_IRGRP
+    WRITE_BY_GROUP = stat.S_IWGRP
+    EXECUTE_BY_GROUP = stat.S_IXGRP
+    READ_WRITE_EXECUTE_BY_OTHERS = stat.S_IRWXO
+    READ_BY_OTHERS = stat.S_IROTH
+    WRITE_BY_OTHERS = stat.S_IWOTH
+    EXECUTE_BY_OTHERS = stat.S_IXOTH
+
+    @classmethod
+    def make_verbose(cls, mode: int) -> list[str]:
+        """
+        Convert the given mode value into a verbose representation.
+
+        :param mode: The mode to convert.
+        :return: The corresponding named constants matching the given mode.
+        """
+        st_type = stat.S_IFMT(mode)
+        st_mode = stat.S_IMODE(mode)
+
+        result = []
+        for name, value in cls.__members__.items():
+            if name.startswith("IS_"):
+                if st_type == value:
+                    result.append(name)
+            else:
+                if st_mode & value == value:
+                    result.append(name)
+        return result
+
+
 def _convert_header_value(key: str, value: Any) -> Any:
     """
     Convert the given header value to the appropriate type.
@@ -554,6 +610,9 @@ def _convert_header_value(key: str, value: Any) -> Any:
         return [FileColor(color) for color in value]
     if key in {"filedigestalgo", "payloaddigestalgo"}:
         return FileDigestAlgorithm(value)
+    if key == "filemodes":
+        # Emulate the regular enumeration display.
+        return ["<FileModes." + "|".join(FileModes.make_verbose(mode)) + f": {mode}>" for mode in value]
 
     # Keep the value without further conversion.
     return value
@@ -603,3 +662,37 @@ def check_rpm_headers(path: Path) -> str | None:
         f"{key:>{maximum_length}}: {display(value)}" for key, value in header_data.items()
     )
     return rendered
+
+
+# Patch broken extraction of integers: https://github.com/srossross/rpmfile/pull/49
+def _extract_int32(offset: int, count: int, store: bytes) -> int | tuple[int]:
+    import struct
+    values = struct.unpack(b"!" + b"I" * count, store[offset: offset + 4 * count])
+    if count == 1:
+        values = values[0]
+    return values  # type: ignore[return-value]
+
+
+def _extract_int16(offset: int, count: int, store: bytes) -> int | tuple[int]:
+    import struct
+    values = struct.unpack(b"!" + b"H" * count, store[offset: offset + 2 * count])
+    if count == 1:
+        values = values[0]
+    return values  # type: ignore[return-value]
+
+
+rpmfile.headers.extract_int32 = _extract_int32
+rpmfile.headers.extract_int16 = _extract_int16
+
+
+# We have to replace this dictionary to monkey-patch the original functionality as well
+# due to the values containing references and thus the regular patches not working by
+# default.
+rpmfile.headers.ty_map = {
+    3: _extract_int16,
+    4: _extract_int32,
+    6: rpmfile.headers.extract_string,
+    7: rpmfile.headers.extract_bin,
+    8: rpmfile.headers.extract_array,
+    9: rpmfile.headers.extract_i18nstring,
+}
