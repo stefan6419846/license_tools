@@ -670,7 +670,7 @@ def _extract_int32(offset: int, count: int, store: bytes) -> int | tuple[int]:
     values = struct.unpack(b"!" + b"I" * count, store[offset: offset + 4 * count])
     if count == 1:
         values = values[0]
-    return values  # type: ignore[return-value]
+    return values  # type: ignore[return-value,unused-ignore]
 
 
 def _extract_int16(offset: int, count: int, store: bytes) -> int | tuple[int]:
@@ -678,7 +678,7 @@ def _extract_int16(offset: int, count: int, store: bytes) -> int | tuple[int]:
     values = struct.unpack(b"!" + b"H" * count, store[offset: offset + 2 * count])
     if count == 1:
         values = values[0]
-    return values  # type: ignore[return-value]
+    return values  # type: ignore[return-value,unused-ignore]
 
 
 rpmfile.headers.extract_int32 = _extract_int32
