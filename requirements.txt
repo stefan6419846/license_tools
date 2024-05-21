@@ -7,5 +7,5 @@ joblib==1.4.2
 fontTools[woff]==4.51.0
 pip-licenses-lib==0.2.1
 rpmfile==2.0.0
-requests==2.31.0
+requests==2.32.1
 tomli==2.0.1
