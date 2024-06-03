@@ -1,5 +1,7 @@
 # Development version
 
+# Version 0.11.0 - 2024-06-03
+
 * Prefer logging over printing.
 * Move download functionality to dedicated methods.
 * Make `Cargo.toml` metadata parsing optional.
