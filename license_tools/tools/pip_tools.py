@@ -16,10 +16,10 @@ from pathlib import Path
 from license_tools.utils import rendering_utils
 
 try:
-    from importlib.metadata import Distribution, PathDistribution
+    from importlib.metadata import PathDistribution
 except ImportError:
     # Python < 3.8
-    from importlib_metadata import Distribution, PathDistribution  # type: ignore[assignment]
+    from importlib_metadata import PathDistribution  # type: ignore[assignment]
 
 from piplicenses_lib import get_package_info, PackageInfo
 
