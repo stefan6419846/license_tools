@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from dataclasses import asdict as dataclasses_asdict
 from pathlib import Path
 
 from license_tools.utils import rendering_utils
@@ -20,24 +21,24 @@ except ImportError:
     # Python < 3.8
     from importlib_metadata import Distribution, PathDistribution  # type: ignore[assignment]
 
-from piplicenses_lib import get_package_info
+from piplicenses_lib import get_package_info, PackageInfo
 
 
 _VERBOSE_NAMES = {
     "name": "Name",
     "version": "Version",
-    "licensefile": "License file",
+    "license_files": "License files",
     "author": "Author",
     "maintainer": "Maintainer",
     "license": "License",
-    "license_classifier": "License classifier",
+    "license_classifiers": "License classifiers",
     "summary": "Summary",
-    "home-page": "Homepage",
-    "requires": "Requirements",
+    "homepage": "Homepage",
+    "requirements": "Requirements",
 }
 
 
-def analyze_metadata(path: Path | str) -> dict[str, str | list[str] | set[str] | Distribution]:
+def analyze_metadata(path: Path | str) -> PackageInfo:
     """
     Analyze the Python package metadata for the given directory.
 
@@ -62,8 +63,10 @@ def check_metadata(path: Path | str) -> str:
     :return: The rendered dictionary-like representation of the relevant fields.
     """
     metadata = analyze_metadata(path)
+    metadata_dict = dataclasses_asdict(metadata)
+    metadata_dict["license_files"] = list(metadata.license_files)
     return rendering_utils.render_dictionary(
-        dictionary=metadata, verbose_names_mapping=_VERBOSE_NAMES, multi_value_keys={"licensefile", "license_classifier", "requires"}
+        dictionary=metadata_dict, verbose_names_mapping=_VERBOSE_NAMES, multi_value_keys={"license_files", "license_classifiers", "requirements"}
     )
 
 

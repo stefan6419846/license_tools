@@ -260,8 +260,9 @@ Typographic Subfamily name: Solid
                * Alice Maz <alice@alicemaz.com>
                * Marshall Pierce <marshall@mpierce.org>
  Description: encodes and decodes base64 as bytes or utf8
-  Repository: https://github.com/marshallpierce/rust-base64
       README: README.md
+  Repository: https://github.com/marshallpierce/rust-base64
+     License: MIT OR Apache-2.0
     Keywords:
                * base64
                * decode
@@ -269,7 +270,6 @@ Typographic Subfamily name: Solid
                * no_std
                * utf8
   Categories: encoding
-     License: MIT OR Apache-2.0
 
 """[1:],
                 stdout.getvalue()
@@ -683,16 +683,16 @@ class RunTestCase(TestCase):
             entry.path = Path("dummy")
         self.assertEqual(expected_result, result)
 
-        expected_output = """              Name: typing_extensions
-           Version: 4.8.0
-      License file: /tmp/dummy/typing_extensions-4.8.0.dist-info/LICENSE
-      Requirements:
-          Homepage: https://github.com/python/typing_extensions
-            Author: "Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Michael Lee" <levkivskyi@gmail.com>
-        Maintainer: UNKNOWN
-           License: UNKNOWN
-           Summary: Backported and Experimental Type Hints for Python 3.8+
-License classifier: Python Software Foundation License
+        expected_output = """               Name: typing_extensions
+            Version: 4.8.0
+      License files: /tmp/dummy/typing_extensions-4.8.0.dist-info/LICENSE
+             Author: "Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Michael Lee" <levkivskyi@gmail.com>
+         Maintainer: UNKNOWN
+            License: UNKNOWN
+License classifiers: Python Software Foundation License
+            Summary: Backported and Experimental Type Hints for Python 3.8+
+           Homepage: https://github.com/python/typing_extensions
+       Requirements:
 
 """ + TYPING_EXTENSION_4_8_0__EXPECTED_OUTPUT
         self.assertEqual(expected_output, re.sub(pattern=r"/tmp/tmp[^/]+", repl="/tmp/dummy", string=str(stdout)))

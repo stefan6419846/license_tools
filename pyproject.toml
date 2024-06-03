@@ -42,7 +42,7 @@ dependencies = [
     "typecode-libmagic",
     "joblib",
     "fontTools[woff]",
-    "pip-licenses-lib",
+    "pip-licenses-lib>=0.3.0",
     "requests",
     "tomli",
 ]

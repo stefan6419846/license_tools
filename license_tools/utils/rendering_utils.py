@@ -22,20 +22,21 @@ def render_dictionary(dictionary: dict[str, Any], verbose_names_mapping: dict[st
     """
     maximum_length = max(map(len, verbose_names_mapping.values()))
     rendered = []
-    for key, value in dictionary.items():
-        if key not in verbose_names_mapping:
+    for key, verbose_name in verbose_names_mapping.items():
+        if key not in dictionary:
             continue
+        value = dictionary[key]
         if key in multi_value_keys and isinstance(value, (list, set, tuple)):
             if isinstance(value, tuple):
                 value = list(value)
             if len(value) == 1:
                 value = value.pop()
-                rendered.append(f"{verbose_names_mapping.get(key):>{maximum_length}}: {value}")
+                rendered.append(f"{verbose_name:>{maximum_length}}: {value}")
             elif not value:
-                rendered.append(f"{verbose_names_mapping.get(key):>{maximum_length}}:")
+                rendered.append(f"{verbose_name:>{maximum_length}}:")
             else:
                 value = "\n" + "\n".join(map(lambda x: " " * maximum_length + f"   * {x}", sorted(value)))
-                rendered.append(f"{verbose_names_mapping.get(key):>{maximum_length}}:{value}")
+                rendered.append(f"{verbose_name:>{maximum_length}}:{value}")
         else:
-            rendered.append(f"{verbose_names_mapping.get(key):>{maximum_length}}: {value}")
+            rendered.append(f"{verbose_name:>{maximum_length}}: {value}")
     return "\n".join(rendered)

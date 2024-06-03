@@ -7,6 +7,7 @@ from __future__ import annotations
 import subprocess
 import sys
 from contextlib import redirect_stderr, redirect_stdout
+from dataclasses import asdict
 from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -28,9 +29,9 @@ class AnalyzeMetadataTestCase(TestCase):
                 archive_path=path, target_directory=directory
             )
 
-            result1 = pip_tools.analyze_metadata(directory / "pypdf-3.17.4.dist-info")
+            result1 = asdict(pip_tools.analyze_metadata(directory / "pypdf-3.17.4.dist-info"))
             result1.pop("distribution")
-            result2 = pip_tools.analyze_metadata(directory)
+            result2 = asdict(pip_tools.analyze_metadata(directory))
             result2.pop("distribution")
             self.assertEqual(result1, result2)
 
@@ -51,36 +52,36 @@ class CheckMetadataTestCase(TestCase):
             )
             result = pip_tools.check_metadata(directory)
             self.assertEqual(f"""
-              Name: pypdf
-           Version: 3.17.4
-      License file: {tempdir}/pypdf-3.17.4.dist-info/LICENSE
-      Requirements:
-                     * Pillow>=8.0.0 ; extra == "full"
-                     * Pillow>=8.0.0 ; extra == "image"
-                     * PyCryptodome ; extra == "crypto" and ( python_version == '3.6')
-                     * PyCryptodome ; extra == "full" and ( python_version == '3.6')
-                     * black ; extra == "dev"
-                     * cryptography ; extra == "crypto" and ( python_version >= '3.7')
-                     * cryptography ; extra == "full" and ( python_version >= '3.7')
-                     * dataclasses; python_version < '3.7'
-                     * flit ; extra == "dev"
-                     * myst_parser ; extra == "docs"
-                     * pip-tools ; extra == "dev"
-                     * pre-commit<2.18.0 ; extra == "dev"
-                     * pytest-cov ; extra == "dev"
-                     * pytest-socket ; extra == "dev"
-                     * pytest-timeout ; extra == "dev"
-                     * pytest-xdist ; extra == "dev"
-                     * sphinx ; extra == "docs"
-                     * sphinx_rtd_theme ; extra == "docs"
-                     * typing_extensions >= 3.7.4.3; python_version < '3.10'
-                     * wheel ; extra == "dev"
-          Homepage: https://github.com/py-pdf/pypdf
-            Author: Mathieu Fenniak <biziqe@mathieu.fenniak.net>
-        Maintainer: Martin Thoma <info@martin-thoma.de>
-           License: UNKNOWN
-           Summary: A pure-python PDF library capable of splitting, merging, cropping, and transforming PDF files
-License classifier: BSD License
+               Name: pypdf
+            Version: 3.17.4
+      License files: {tempdir}/pypdf-3.17.4.dist-info/LICENSE
+             Author: Mathieu Fenniak <biziqe@mathieu.fenniak.net>
+         Maintainer: Martin Thoma <info@martin-thoma.de>
+            License: UNKNOWN
+License classifiers: BSD License
+            Summary: A pure-python PDF library capable of splitting, merging, cropping, and transforming PDF files
+           Homepage: https://github.com/py-pdf/pypdf
+       Requirements:
+                      * Pillow>=8.0.0 ; extra == "full"
+                      * Pillow>=8.0.0 ; extra == "image"
+                      * PyCryptodome ; extra == "crypto" and ( python_version == '3.6')
+                      * PyCryptodome ; extra == "full" and ( python_version == '3.6')
+                      * black ; extra == "dev"
+                      * cryptography ; extra == "crypto" and ( python_version >= '3.7')
+                      * cryptography ; extra == "full" and ( python_version >= '3.7')
+                      * dataclasses; python_version < '3.7'
+                      * flit ; extra == "dev"
+                      * myst_parser ; extra == "docs"
+                      * pip-tools ; extra == "dev"
+                      * pre-commit<2.18.0 ; extra == "dev"
+                      * pytest-cov ; extra == "dev"
+                      * pytest-socket ; extra == "dev"
+                      * pytest-timeout ; extra == "dev"
+                      * pytest-xdist ; extra == "dev"
+                      * sphinx ; extra == "docs"
+                      * sphinx_rtd_theme ; extra == "docs"
+                      * typing_extensions >= 3.7.4.3; python_version < '3.10'
+                      * wheel ; extra == "dev"
 """[1:-1], result)
 
     def test_check_metadata__egg_info(self) -> None:
@@ -91,18 +92,18 @@ License classifier: BSD License
             )
             result = pip_tools.check_metadata(directory)
             self.assertEqual(f"""
-              Name: jwcrypto
-           Version: 1.5.4
-      License file: {tempdir}/jwcrypto-1.5.4/LICENSE
-      Requirements:
-                     * cryptography>=3.4
-                     * typing_extensions>=4.5.0
-          Homepage: https://github.com/latchset/jwcrypto
-            Author: UNKNOWN
-        Maintainer: JWCrypto Project Contributors
-           License: LGPLv3+
-           Summary: Implementation of JOSE Web standards
-License classifier:
+               Name: jwcrypto
+            Version: 1.5.4
+      License files: {tempdir}/jwcrypto-1.5.4/LICENSE
+             Author: UNKNOWN
+         Maintainer: JWCrypto Project Contributors
+            License: LGPLv3+
+License classifiers:
+            Summary: Implementation of JOSE Web standards
+           Homepage: https://github.com/latchset/jwcrypto
+       Requirements:
+                      * cryptography>=3.4
+                      * typing_extensions>=4.5.0
 """[1:-1], result)
 
 

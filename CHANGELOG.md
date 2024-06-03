@@ -5,6 +5,7 @@
 * Make `Cargo.toml` metadata parsing optional.
 * Add library-only option to keep unpacked archive directories.
 * Fix handling of permissions for RPM files.
+* Migrate to `pip-licenses-lib>=0.3.0`.
 
 # Version 0.10.0 - 2024-04-19
 

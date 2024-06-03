@@ -101,8 +101,9 @@ class CheckMetadataTestCase(TestCase):
                * Alice Maz <alice@alicemaz.com>
                * Marshall Pierce <marshall@mpierce.org>
  Description: encodes and decodes base64 as bytes or utf8
-  Repository: https://github.com/marshallpierce/rust-base64
       README: README.md
+  Repository: https://github.com/marshallpierce/rust-base64
+     License: MIT OR Apache-2.0
     Keywords:
                * base64
                * decode
@@ -110,7 +111,6 @@ class CheckMetadataTestCase(TestCase):
                * no_std
                * utf8
   Categories: encoding
-     License: MIT OR Apache-2.0
 """[
                 1:-1
             ],
