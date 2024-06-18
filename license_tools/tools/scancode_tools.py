@@ -344,7 +344,8 @@ class LicenseMatch:
 @dataclass
 class LicenseClue(LicenseMatch):
     """
-    Enriched matching information about a license.
+    Matching information about a license. Compared to regular detections/matches, these are rather
+    considered clues and not perfect detections.
 
     Currently the same as :class:`~LicenseMatch`.
     """
