@@ -78,7 +78,7 @@ class DirectoryWithFixedNameContextTestCase(TestCase):
             if sys.version_info < (3, 12):
                 expected_regex = fr"^\[Errno 2\] No such file or directory: '{re.escape(str(target_name))}'$"
             else:
-                expected_regex = fr"^\[Errno 2\] No such file or directory: '{re.escape(repr(target_name))}'$"
+                expected_regex = fr"^\[Errno 2\] No such file or directory: {re.escape(repr(target_name))}$"
             with self.assertRaisesRegex(
                     expected_exception=FileNotFoundError,
                     expected_regex=expected_regex
