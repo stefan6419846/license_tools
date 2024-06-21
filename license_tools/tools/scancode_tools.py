@@ -757,6 +757,16 @@ class PackageResults:
     Package version.
     """
 
+    is_virtual: bool = False
+    """
+    Indicate virtual packages.
+    """
+
+    is_private: bool = False
+    """
+    Indicate private packages.
+    """
+
     def __post_init__(self) -> None:
         self.license_detections = [
             LicenseDetection(**x) if not isinstance(x, LicenseDetection) else x for x in self.license_detections  # type: ignore[arg-type]
