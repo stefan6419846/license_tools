@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import re
+import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
@@ -74,9 +75,13 @@ class DirectoryWithFixedNameContextTestCase(TestCase):
     def test_deleted_in_between(self) -> None:
         with TemporaryDirectory() as tempdir:
             target_name = Path(tempdir) / "foo"
+            if sys.version_info < (3, 12):
+                expected_regex = fr"^\[Errno 2\] No such file or directory: '{re.escape(str(target_name))}'$"
+            else:
+                expected_regex = fr"^\[Errno 2\] No such file or directory: '{re.escape(repr(target_name))}'$"
             with self.assertRaisesRegex(
                     expected_exception=FileNotFoundError,
-                    expected_regex=fr"^\[Errno 2\] No such file or directory: '{re.escape(str(target_name))}'$"
+                    expected_regex=expected_regex
             ):
                 with DirectoryWithFixedNameContext(Path(tempdir) / "foo") as target:
                     self.assertTrue(target.is_dir())
