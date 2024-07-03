@@ -36,9 +36,8 @@ jobs:
       #     rm -rf intbitset-*
       #   if: ${{ matrix.python == '3.12' }}
       - name: install lxml (Python 3.13)
-        env:
-          STATIC_DEPS: true
-        run:
+        run: |
+          sudo apt-get install libxml2-dev libxslt-devel
           python -m pip install lxml
         if: ${{ matrix.python == '3.13-dev' }}
       - name: install package
