@@ -1,5 +1,9 @@
 # Development version
 
+# Version 0.11.1 - 2024-07-10
+
+* Make RPM handling compatible to `scancode_toolkit>=32.2.0`.
+
 # Version 0.11.0 - 2024-06-03
 
 * Prefer logging over printing.
