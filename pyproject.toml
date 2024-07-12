@@ -59,6 +59,7 @@ regular = [
 ]
 mini = [
     "scancode-toolkit-mini>=32.1.0",
+    "extractcode>=31.0.0",
 ]
 dev = [
     "codespell",
