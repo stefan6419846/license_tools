@@ -60,6 +60,7 @@ regular = [
 mini = [
     "scancode-toolkit-mini>=32.1.0",
     "extractcode>=31.0.0",
+    "extractcode_libarchive>=3.5.1.210525",  # https://github.com/nexB/extractcode/issues/43
 ]
 dev = [
     "codespell",
