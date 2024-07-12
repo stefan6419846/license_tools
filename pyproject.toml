@@ -38,7 +38,6 @@ keywords = [
 ]
 requires-python = ">=3.8, <4"
 dependencies = [
-    "scancode-toolkit>=32.1.0",
     "typecode-libmagic",
     "joblib",
     "fontTools[woff]",
@@ -55,6 +54,12 @@ Issues = "https://github.com/stefan6419846/license_tools/issues"
 Changelog = "https://github.com/stefan6419846/license_tools/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
+regular = [
+    "scancode-toolkit>=32.1.0",
+]
+mini = [
+    "scancode-toolkit-mini>=32.1.0",
+]
 dev = [
     "codespell",
     "coverage",

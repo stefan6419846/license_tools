@@ -8,10 +8,11 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    name: Test with Python ${{ matrix.python }}
+    name: Test with Python ${{ matrix.python }} (${{ matrix.variant }})
     strategy:
       matrix:
         python: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        variant: ['regular', 'mini']
     steps:
       - uses: actions/checkout@v4
       - name: setup test environment
@@ -37,7 +38,7 @@ jobs:
       #   if: ${{ matrix.python == '3.12' }}
       - name: install package
         run:
-          python -m pip install .[dev,extended_rpm]
+          python -m pip install .[${{ matrix.variant }},dev,extended_rpm]
       # https://coverage.readthedocs.io/en/latest/subprocess.html
       # https://stackoverflow.com/questions/17395015/
       - name: coverage preparations

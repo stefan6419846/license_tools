@@ -4,7 +4,7 @@ Collection of tools for working with Open Source licenses, focusing on Python pa
 
 ## About
 
-This tool initially started as some convenience wrapper around the [ScanCode toolkit](https://github.com/nexB/scancode-toolkit/) by nexB Inc. to be used as either a standalone CLI or library. In the meantime, I added some functionality which involves further tooling sometimes irrelevant for ScanCode, sometimes not (yet) implemented there.
+This tool initially started as some convenience wrapper around [ScanCode toolkit](https://github.com/nexB/scancode-toolkit/) by nexB Inc. to be used as either a standalone CLI or library. In the meantime, I added some functionality which involves further tooling sometimes irrelevant for ScanCode, sometimes not (yet) implemented there.
 
 I wrote this tool to simplify the initial scanning steps for third-party packages, mostly tailored to my specific use-cases. For this reason, some implementation or representation details might be opionated and rather tailored to my specific needs. I decided to make this library available as a dedicated package nevertheless, as easy-to-use license compliance (scanner) tooling is sparse, while everyone should care about such topics. If you think that something can be generalized or improved, feel free to open a corresponding issue to discuss this before possibly getting started with an actual PR.
 
