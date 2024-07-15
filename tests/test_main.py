@@ -70,9 +70,10 @@ class MainTestCase(TestCase):
 
     def test_retrieval(self) -> None:
         result = subprocess.run(
-            [sys.executable, "-m", "license_tools", "--package", "typing_extensions==4.8.0", "--index-url", "https://pypi.org/simple"],
+            [sys.executable, "-m", "license_tools", "--package", "typing_extensions==4.8.0", "--index-url", "https://pypi.org/simple", "--jobs", "1"],
             capture_output=True, env=self.custom_env
         )
+        print(result.stderr.decode())
         self.assertEqual(0, result.returncode, result)
         self.assertEqual(b"", result.stderr)
         self.assertEqual(TYPING_EXTENSION_4_8_0__EXPECTED_OUTPUT, result.stdout.decode("UTF-8"))
