@@ -204,17 +204,17 @@ class FileInfo:
     The file size in bytes.
     """
 
-    sha1: str
+    sha1: str | None
     """
     The SHA1 hash.
     """
 
-    md5: str
+    md5: str | None
     """
     The MD5 hash.
     """
 
-    sha256: str
+    sha256: str | None
     """
     The SHA256 hash.
     """
@@ -229,7 +229,7 @@ class FileInfo:
     The detected file type.
     """
 
-    programming_language: str
+    programming_language: str | None
     """
     The detected programming language.
     """
