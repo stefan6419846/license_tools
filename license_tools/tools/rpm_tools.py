@@ -23,11 +23,12 @@ del logging
 
 # Docs: https://rpm-software-management.github.io/rpm/manual/tags.html
 _VERBOSE_HEADER_NAMES = {
-    # Known names: https://github.com/srossross/rpmfile/blob/c0498cd5173afb6fb0af9ed5c7d61335b7c9af0e/rpmfile/headers.py#L12-L310
+    # Known names: https://github.com/srossross/rpmfile/blob/4cd4ae2bd191d3489c95dfa540da14585670adb5/rpmfile/headers.py#L12-L363
     "headersignatures": "Header Signatures",
     "headerimmutable": "Unmodified, Original Header Image",
     "headeri18ntable": "Header Translation Locales",
     "sigsize": "Size Of Header + Payload",
+    "sigmd5": "MD5 Digest Of Header + Payload",
     "sigpgp": "OpenPGP RSA Signature Of Header + Payload",
     "siggpg": "OpenPGP DSA Signature Of Header + Payload",
     "pubkeys": "Public PGP Keys",
@@ -36,6 +37,14 @@ _VERBOSE_HEADER_NAMES = {
     "md5": "SHA1 Digest Of Header",  # Wrong name: https://github.com/srossross/rpmfile/issues/26
     "longsigsize": "Header + Payload Size when > 4 GB",
     "longarchivesize": "Uncompressed Payload Size when > 4 GB",
+    "sha256": "SHA256 Digest Of Header",
+    "veritysignatures": "fsverity Signature (Base64-encoded)",
+    "veritysignaturealgo": "fsverity Signature Algorithm ID",
+    "pgp": "PGP Signature From Signature Header",
+    "pgp5": "PGP5 Signature From Signature Header",
+    "gpg": "GPG Signature From Signature Header",
+    "payloadsize": "Payload Size",
+    "reservedspace": "Reserved Space",
     "name": "Package Name",
     "version": "Package Version",
     "release": "Package Release",
@@ -227,11 +236,24 @@ _VERBOSE_HEADER_NAMES = {
     "transfiletriggertype": "Formatted Transaction File Trigger Type Information",
     "filesignatures": "IMA Signatures (hex encoded)",
     "filesignaturelength": "IMA Signature Length",
-    "payloaddigest": "Cryptographic Digest of the Compressed Payload",
+    "payloaddigest": "Cryptographic Digest Of Compressed Payload",
     "payloaddigestalgo": "Payload Digest Algorithm",
     "modularitylabel": "Modularity Label",
-    # Custom headers `rpmfile` does not know.
-    273: "SHA256 Digest Of Header",
+    "payloaddigestalt": "Cryptographic Digest Of Uncompressed Payload",
+    "archsuffix": "Package File Arch Suffix",
+    "spec": "Expanded And Parsed Spec Contents",
+    "translationurl": "URL Of Upstream Translation Service/Repository",
+    "upstreamreleases": "URL To Check For Newer Upstream Releases",
+    "loaddigestalt": "Cryptographic Digest Of Uncompressed Payload",
+    "upstreamleases": "URL To Check For Newer Upstream Releases",
+    "sourcelicense": "Source License",
+    "sysusers": "Formatted systemd-sysusers Line",
+    "preuntrans": "Pre-uninstallation-transaction Script",
+    "postuntrans": "Post-uninstallation-transaction Script",
+    "preuntransprog": "Pre-uninstallation-transaction Interpreter + Arguments",
+    "postuntransprog": "Post-uninstallation-transaction Interpreter + Arguments",
+    "preuntransflags": "Pre-uninstallation-transaction Flags",
+    "postuntransflags": "Post-uninstallation-transaction Flags",
 }
 
 # These headers are of no real use (for now), not properly documented or deprecated.
@@ -240,6 +262,8 @@ _HEADERS_TO_OMIT = {
     "autoprov",
     "autoreq",
     "autoreqprov",
+    "badsha1_1",
+    "badsha1_2",
     "blinkhdrid",
     "blinknevra",
     "blinkpkgid",
@@ -280,11 +304,13 @@ _HEADERS_TO_OMIT = {
     "fsnames",
     "fssizes",
     "gif",
+    "headerimage",
     "headerregions",
     "icon",
     "identity",
     "installprefix",
     "keywords",
+    "lemd5_2",
     "mssfdomain",
     "mssfmanifest",
     "obsoleteattrsx",
@@ -313,6 +339,9 @@ _HEADERS_TO_OMIT = {
     "scriptmetrics",
     "scriptstates",
     "sig_base",
+    "siglemd5_1",
+    "siglemd5_2",
+    "sigpgp5",
     "transfiletriggerin",
     "transfiletriggerpostun",
     "transfiletriggerun",
@@ -614,6 +643,10 @@ def _convert_header_value(key: str, value: Any) -> Any:
         # Emulate the regular enumeration display.
         return ["<FileModes." + "|".join(FileModes.make_verbose(mode)) + f": {mode}>" for mode in value]
 
+    # TODO: These are just null bytes. Is this value correct?
+    if key == 'reservedspace':
+        return len(value)
+
     # Keep the value without further conversion.
     return value
 
@@ -662,72 +695,3 @@ def check_rpm_headers(path: Path) -> str | None:
         f"{key:>{maximum_length}}: {display(value)}" for key, value in header_data.items()
     )
     return rendered
-
-
-# The following lines have been copied from the original implementation.
-# They patch the broken extraction of integers as per the unmerged PR.
-#
-# Upstream code:
-# https://github.com/srossross/rpmfile/pull/49
-#
-# Original copyright:
-#
-# -------------------------------------------------------------------------
-#
-# Copyright (c) 2015 Sean Ross-Ross
-#
-# MIT License
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-#
-# -------------------------------------------------------------------------
-#
-# This modified version can be used under either the MIT or the Apache-2.0 license,
-# depending on your preferences.
-def _extract_int32(offset: int, count: int, store: bytes) -> int | tuple[int]:
-    import struct
-    values = struct.unpack(b"!" + b"I" * count, store[offset: offset + 4 * count])
-    if count == 1:
-        values = values[0]
-    return values  # type: ignore[return-value,unused-ignore]
-
-
-def _extract_int16(offset: int, count: int, store: bytes) -> int | tuple[int]:
-    import struct
-    values = struct.unpack(b"!" + b"H" * count, store[offset: offset + 2 * count])
-    if count == 1:
-        values = values[0]
-    return values  # type: ignore[return-value,unused-ignore]
-
-
-rpmfile.headers.extract_int32 = _extract_int32
-rpmfile.headers.extract_int16 = _extract_int16
-
-
-# We have to replace this dictionary to monkey-patch the original functionality as well
-# due to the values containing references and thus the regular patches not working by
-# default.
-rpmfile.headers.ty_map = {
-    3: _extract_int16,
-    4: _extract_int32,
-    6: rpmfile.headers.extract_string,
-    7: rpmfile.headers.extract_bin,
-    8: rpmfile.headers.extract_array,
-    9: rpmfile.headers.extract_i18nstring,
-}
