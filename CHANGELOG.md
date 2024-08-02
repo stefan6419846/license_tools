@@ -1,5 +1,7 @@
 # Development version
 
+# Version 0.12.0 - 2024-08-02
+
 * Fix compatibility with `rpmfile>=2.1.0`. This is the minimum supported version now as well.
 
 # Version 0.11.1 - 2024-07-10
