@@ -69,11 +69,14 @@ class MainTestCase(TestCase):
         return custom_env
 
     def test_retrieval(self) -> None:
+        # The tests started to fail with Python 3.13 when using parallel processing within the subprocess here.
+        # Trying to debug this did not yet yield any useful insights on where the issue actually is.
+        # As this should not hurt real-world usage (nobody should really be required to run this in a subprocess
+        # outside the tests), just use the slower sequential analysis here.
         result = subprocess.run(
             [sys.executable, "-m", "license_tools", "--package", "typing_extensions==4.8.0", "--index-url", "https://pypi.org/simple", "--jobs", "1"],
             capture_output=True, env=self.custom_env
         )
-        print(result.stderr.decode())
         self.assertEqual(0, result.returncode, result)
         self.assertEqual(b"", result.stderr)
         self.assertEqual(TYPING_EXTENSION_4_8_0__EXPECTED_OUTPUT, result.stdout.decode("UTF-8"))
