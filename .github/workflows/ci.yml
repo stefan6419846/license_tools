@@ -21,26 +21,6 @@ jobs:
       - name: install pip
         run:
           python -m pip install --upgrade pip wheel
-      # - name: install intbitset (Python 3.12)
-      #   run: |
-      #     python -m pip download --no-binary=:all: --no-deps intbitset
-      #     python -m pip install cython
-      #     tar -xvf intbitset-*
-      #     rm intbitset-*.tar.gz
-      #     cd intbitset-*
-      #     rm -rf intbitset/intbitset.c
-      #     cython intbitset/intbitset.pyx
-      #     python -m pip uninstall cython -y
-      #     python -m pip install --verbose .
-      #     cd ..
-      #     rm -rf intbitset-*
-      #   if: ${{ matrix.python == '3.12' }}
-      - name: install for python 3.13
-        run: |
-          sudo apt-get install libxml2-dev libxslt-dev
-          python -m pip install lxml
-          python -m pip install --pre cffi  # https://github.com/pyca/cryptography/issues/10806
-        if: ${{ matrix.python == '3.13-dev' }}
       - name: install package
         run:
           python -m pip install .[dev,extended_rpm]
