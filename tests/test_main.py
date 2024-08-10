@@ -74,7 +74,7 @@ class MainTestCase(TestCase):
         # As this should not hurt real-world usage (nobody should really be required to run this in a subprocess
         # outside the tests), just use the slower sequential analysis here.
         result = subprocess.run(
-            [sys.executable, "-m", "license_tools", "--package", "typing_extensions==4.8.0", "--index-url", "https://pypi.org/simple", "--jobs", "1"],
+            [sys.executable, "-m", "license_tools", "--package", "typing_extensions==4.8.0", "--index-url", "https://pypi.org/simple"],
             capture_output=True, env=self.custom_env
         )
         self.assertEqual(0, result.returncode, result)
