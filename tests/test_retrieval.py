@@ -683,7 +683,7 @@ class RunTestCase(TestCase):
             entry.path = Path("dummy")
         self.assertEqual(expected_result, result)
 
-        expected_output = """               Name: typing_extensions
+        expected_output = """               Name: typing-extensions
             Version: 4.8.0
       License files: /tmp/dummy/typing_extensions-4.8.0.dist-info/LICENSE
              Author: "Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Michael Lee" <levkivskyi@gmail.com>
