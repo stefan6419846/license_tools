@@ -11,7 +11,7 @@ from __future__ import annotations
 import datetime
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any
+from typing import Any, Union  # TODO: Remove `Union` when dropping support for Python 3.9.
 
 from fontTools import ttx  # type: ignore[import-untyped]
 from fontTools.misc import timeTools  # type: ignore[import-untyped]
@@ -190,7 +190,7 @@ _TTF_HEAD_IDS = {
 
 KNOWN_FONT_EXTENSIONS = {".otf", ".ttf", ".woff", ".woff2"}
 
-FONT_VALUE_TYPE = str | int | datetime.datetime
+FONT_VALUE_TYPE = Union[str, int, datetime.datetime]
 
 
 def handle_ttfont_head(head: HeadTable) -> OrderedDict[str, FONT_VALUE_TYPE]:
