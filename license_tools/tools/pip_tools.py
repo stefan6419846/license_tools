@@ -11,15 +11,10 @@ from __future__ import annotations
 import subprocess
 import sys
 from dataclasses import asdict as dataclasses_asdict
+from importlib.metadata import PathDistribution
 from pathlib import Path
 
 from license_tools.utils import rendering_utils
-
-try:
-    from importlib.metadata import PathDistribution
-except ImportError:
-    # Python < 3.8
-    from importlib_metadata import PathDistribution  # type: ignore[assignment]
 
 from piplicenses_lib import get_package_info, PackageInfo
 

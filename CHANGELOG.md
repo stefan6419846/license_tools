@@ -1,5 +1,7 @@
 # Development version
 
+* Drop support for Python 3.8.
+
 # Version 0.12.0 - 2024-08-02
 
 * Fix compatibility with `rpmfile>=2.1.0`. This is the minimum supported version now as well.

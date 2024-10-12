@@ -4,10 +4,7 @@
 
 from __future__ import annotations
 
-try:
-    from importlib.metadata import version as _version
-except ImportError:
-    from importlib_metadata import version as _version
+from importlib.metadata import version as _version
 
 
 VERSION: str = _version("license_tools")

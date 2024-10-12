@@ -12,7 +12,7 @@ from contextlib import contextmanager, redirect_stdout
 from io import StringIO
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
-from typing import Any, cast, Dict, Generator, List, Set, Tuple  # TODO: Remove `Set` and `Tuple` after dropping Python 3.8.
+from typing import Any, cast, Generator
 from unittest import mock, TestCase
 
 from license_tools import retrieval
@@ -54,7 +54,7 @@ class RetrievalFlagsTestCase(TestCase):
                 retrieve_python_metadata=True,
                 retrieve_cargo_metadata=True,
             ),
-            cast(Dict[str, bool], RetrievalFlags.all(as_kwargs=True)),
+            cast(dict[str, bool], RetrievalFlags.all(as_kwargs=True)),
         )
 
     def test_is_set(self) -> None:
@@ -346,7 +346,7 @@ class RunOnDirectoryTestCase(TestCase):
         return nested_path
 
     def _test_nested(
-            self, result_set: Set[Path], directory: Path, nested_path: Path, expected: List[Tuple[Path, str]], run_mock: mock.Mock
+            self, result_set: set[Path], directory: Path, nested_path: Path, expected: list[tuple[Path, str]], run_mock: mock.Mock
     ) -> None:
         self.assertEqual(1, len(result_set), result_set)
         remaining = result_set.pop()
@@ -391,8 +391,8 @@ class RunOnDirectoryTestCase(TestCase):
                 {path.name for path in directory.glob("*")}
             )
 
-        result_set: Set[Path] = cast(Set[Path], set(results))
-        expected: List[Tuple[Path, str]] = []
+        result_set: set[Path] = cast(set[Path], set(results))
+        expected: list[tuple[Path, str]] = []
         self.assertEqual(4, len(results), results)
         for name in ["directory/file.txt", "nested.tar.bz2", "nested_tar_bz2"]:
             result_set.remove(directory / name)
@@ -425,8 +425,8 @@ class RunOnDirectoryTestCase(TestCase):
                 {path.name for path in directory.glob("*")}
             )
 
-        result_set: Set[Path] = cast(Set[Path], set(results))
-        expected: List[Tuple[Path, str]] = []
+        result_set: set[Path] = cast(set[Path], set(results))
+        expected: list[tuple[Path, str]] = []
         self.assertEqual(3, len(results), results)
         for name in ["directory/file.txt", "nested.tar.bz2"]:
             result_set.remove(directory / name)
@@ -474,7 +474,7 @@ class RunOnDirectoryTestCase(TestCase):
 
 
 class RunOnPackageArchiveFileTestCase(TestCase):
-    def _check_call(self, download: Download, expected_files: List[str], expected_license: str | None = None) -> None:
+    def _check_call(self, download: Download, expected_files: list[str], expected_license: str | None = None) -> None:
         with get_from_url(download) as archive_path:
             directory_result = [object(), object(), object()]
 

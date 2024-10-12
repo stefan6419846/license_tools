@@ -8,14 +8,10 @@ import atexit
 import shutil
 from contextlib import contextmanager
 from dataclasses import dataclass
+from importlib.resources import files, as_file
 from pathlib import Path
 from tempfile import mkdtemp, NamedTemporaryFile
 from typing import Generator
-try:
-    from importlib.resources import files, as_file  # type: ignore[attr-defined,unused-ignore]
-except ImportError:
-    # Python 3.8
-    from importlib_resources import files, as_file  # type: ignore[unused-ignore,import-not-found,no-redef]
 
 
 CACHE_DIRECTORY = Path(mkdtemp())
