@@ -47,7 +47,7 @@ def analyze_metadata(path: Path | str) -> PackageInfo:
         except StopIteration:
             path = next(path.rglob("*.egg-info"))
     distribution = PathDistribution(path)
-    return get_package_info(distribution)
+    return get_package_info(distribution, normalize_name=True)
 
 
 def check_metadata(path: Path | str) -> str:

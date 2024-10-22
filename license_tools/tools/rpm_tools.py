@@ -15,6 +15,8 @@ from enum import IntEnum, IntFlag
 from pathlib import Path
 from typing import Any, cast
 
+import rpmfile  # type: ignore[import-untyped]
+
 logger = logging.getLogger(__name__)
 del logging
 
@@ -362,8 +364,6 @@ def extract(archive_path: Path, target_path: Path) -> None:
     :param archive_path: The RPM file to unpack.
     :param target_path: The directory to unpack to.
     """
-    import rpmfile  # type: ignore[import-untyped]
-
     target_path_str = str(target_path)
 
     # See `rpmfile.cli` for the `extract` option.

@@ -1,6 +1,8 @@
 # Development version
 
 * Drop support for Python 3.8.
+* Fix compatibility with `scancode_toolkit==32.3.0`. This is the minimum supported version now as well.
+* Fix tests by requiring `pip-licenses-lib>=0.4.0`.
 
 # Version 0.12.0 - 2024-08-02
 
@@ -8,7 +10,7 @@
 
 # Version 0.11.1 - 2024-07-10
 
-* Make RPM handling compatible to `scancode_toolkit>=32.2.0`.
+* Make RPM handling compatible with `scancode_toolkit>=32.2.0`.
 
 # Version 0.11.0 - 2024-06-03
 

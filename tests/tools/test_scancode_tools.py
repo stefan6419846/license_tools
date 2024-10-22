@@ -207,7 +207,7 @@ class PackageResultsTestCase(TestCase):
                                 license_expression='lgpl-2.1-plus', rule_identifier='lgpl-2.1-plus_64.RULE', rule_relevance=100,
                                 rule_url='https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/lgpl-2.1-plus_64.RULE',
                                 matched_text='LGPL-2.1+',
-                                spdx_license_expression='LGPL-2.1-or-later', from_file=None,
+                                license_expression_spdx='LGPL-2.1-or-later', from_file=None,
                             )
                         ]
                     )
