@@ -9,6 +9,7 @@ Tools related to images.
 from __future__ import annotations
 
 import logging
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -53,6 +54,9 @@ def check_image_metadata(path: Path) -> str | None:
     exiftool = shutil.which("exiftool")
     if not exiftool:
         raise ValueError("exiftool not found!")
+
+    environment = os.environ.copy()
+    environment["LC_ALL"] = "C"
     output = subprocess.check_output(
         [
             exiftool,
@@ -64,6 +68,7 @@ def check_image_metadata(path: Path) -> str | None:
             "-exclude", "File:FileInodeChangeDate",
             path
         ],
-        stderr=subprocess.PIPE
+        stderr=subprocess.PIPE,
+        env=environment
     )
     return output.decode("UTF-8")
