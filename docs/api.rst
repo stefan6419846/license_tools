@@ -13,6 +13,12 @@ license_tools\.tools\.font_tools
 .. automodule:: license_tools.tools.font_tools
    :members:
 
+license_tools\.tools\.image_tools
+---------------------------------
+
+.. automodule:: license_tools.tools.image_tools
+   :members:
+
 license_tools\.tools\.linking_tools
 -----------------------------------
 

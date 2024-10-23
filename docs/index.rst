@@ -28,6 +28,7 @@ Features
 * Look into RPM file metadata.
 * Look into Python package metadata.
 * Look into Rust crate metadata.
+* Look into image metadata.
 * Recursively look into nested archives, for example by unpacking the actual upstream source code archives inside RPM (source) files.
 * Download the package versions declared inside a ``Cargo.lock`` file.
 * Make everything available from the terminal.
@@ -43,6 +44,12 @@ You can install this package from PyPI:
     python -m pip install license_tools
 
 Alternatively, you can use the package from source directly after installing the required dependencies.
+
+Some features might require installing extras or OS-level packages:
+
+* Analysis of shared objects requires the ``ldd`` command to be available inside the path.
+* Analysis of image metadata requires the ``exiftool`` command to be available inside the path.
+  You might obtain a recent distribution archive from https://exiftool.org/
 
 
 Usage

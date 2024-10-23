@@ -55,6 +55,7 @@ class FileResultsTestCase(TestCase):
         del flags["retrieve_font_data"]
         del flags["retrieve_python_metadata"]
         del flags["retrieve_cargo_metadata"]
+        del flags["retrieve_image_metadata"]
         self.assertEqual(4, len(flags))
         result = FileResults(
             path=SETUP_PATH, short_path="setup.py", retrieve_licenses=True,

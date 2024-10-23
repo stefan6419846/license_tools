@@ -42,7 +42,7 @@ class RetrievalFlagsTestCase(TestCase):
         )
 
     def test_all(self) -> None:
-        self.assertEqual(255, RetrievalFlags.all())
+        self.assertEqual(511, RetrievalFlags.all())
         self.assertDictEqual(
             dict(
                 retrieve_copyrights=True,
@@ -53,6 +53,7 @@ class RetrievalFlagsTestCase(TestCase):
                 retrieve_font_data=True,
                 retrieve_python_metadata=True,
                 retrieve_cargo_metadata=True,
+                retrieve_image_metadata=True,
             ),
             cast(dict[str, bool], RetrievalFlags.all(as_kwargs=True)),
         )
@@ -74,6 +75,7 @@ class RetrievalFlagsTestCase(TestCase):
                 retrieve_font_data=False,
                 retrieve_python_metadata=False,
                 retrieve_cargo_metadata=False,
+                retrieve_image_metadata=False,
             ),
             RetrievalFlags.to_kwargs(0),
         )
@@ -87,6 +89,7 @@ class RetrievalFlagsTestCase(TestCase):
                 retrieve_font_data=False,
                 retrieve_python_metadata=False,
                 retrieve_cargo_metadata=False,
+                retrieve_image_metadata=False,
             ),
             RetrievalFlags.to_kwargs(21),
         )
@@ -236,6 +239,64 @@ Typographic Subfamily name: Solid
             short_path="setup.py",
         )
         self.assertEqual("setup.py\n" + font_awesome + "\n\n", stdout)
+
+    def test_run_on_file__image_handling(self) -> None:
+        # 1) Image handling is inactive.
+        results_mock, check_mock, stdout = self._run_mocked(
+            flags=15, mock_target="license_tools.tools.image_tools.check_image_metadata"
+        )
+        check_mock.assert_not_called()
+        results_mock.assert_called_once_with(
+            path=SETUP_PATH,
+            short_path="setup.py",
+            retrieve_licenses=True,
+            retrieve_copyrights=True,
+            retrieve_emails=True,
+            retrieve_file_info=True,
+            retrieve_urls=True,
+        )
+        self.assertEqual("", stdout)
+
+        # 2) Image handling is active, but has no results.
+        for result in ["", None]:
+            with self.subTest(result=result):
+                results_mock, check_mock, stdout = self._run_mocked(
+                    flags=511,
+                    return_value=result,
+                    mock_target="license_tools.tools.image_tools.check_image_metadata",
+                )
+                check_mock.assert_called_once_with(path=SETUP_PATH)
+                results_mock.assert_called_once_with(
+                    path=SETUP_PATH,
+                    short_path="setup.py",
+                    retrieve_licenses=True,
+                    retrieve_copyrights=True,
+                    retrieve_emails=True,
+                    retrieve_file_info=True,
+                    retrieve_urls=True,
+                )
+                self.assertEqual("", stdout)
+
+        # 3) Image handling is active and has results.
+        mountain_jpg = """[File]          File Name                       : mountain.jpg
+[File]          File Size                       : 424 kB
+[File]          File Modification Date/Time     : 2024:10:22 14:54:14+00:00
+[File]          File Permissions                : -rw-r--r--
+[File]          File Type                       : JPEG
+[File]          File Type Extension             : jpg
+[File]          MIME Type                       : image/jpeg
+"""
+        results_mock, check_mock, stdout = self._run_mocked(
+            flags=511,
+            return_value=mountain_jpg,
+            mock_target="license_tools.tools.image_tools.check_image_metadata",
+        )
+        check_mock.assert_called_once_with(path=SETUP_PATH)
+        results_mock.assert_called_once_with(
+            path=SETUP_PATH,
+            short_path="setup.py",
+        )
+        self.assertEqual("setup.py\n" + mountain_jpg + "\n", stdout)
 
     def test_cargo_toml(self) -> None:
         with get_from_url(BASE64__0_22_0__CARGO_TOML) as source_path, TemporaryDirectory() as directory:

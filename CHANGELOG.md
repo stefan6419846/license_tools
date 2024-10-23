@@ -1,6 +1,7 @@
 # Development version
 
 * Drop support for Python 3.8.
+* Add support for retrieving image metadata by using `exiftool`.
 * Fix compatibility with `scancode_toolkit==32.3.0`. This is the minimum supported version now as well.
 * Fix tests by requiring `pip-licenses-lib>=0.4.0`.
 

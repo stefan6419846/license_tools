@@ -19,7 +19,7 @@ from typing import BinaryIO, cast, Generator
 import scancode_config  # type: ignore[import-untyped]
 from joblib import Parallel, delayed  # type: ignore[import-untyped]
 
-from license_tools.tools import cargo_tools, font_tools, linking_tools, pip_tools, scancode_tools
+from license_tools.tools import cargo_tools, font_tools, image_tools, linking_tools, pip_tools, scancode_tools
 from license_tools.tools.pip_tools import download_package
 from license_tools.tools.scancode_tools import FileResults, Licenses, PackageResults
 from license_tools.utils import archive_utils
@@ -40,6 +40,7 @@ class RetrievalFlags:
     FONT_DATA = 32
     PYTHON_METADATA = 64
     CARGO_METADATA = 128
+    IMAGE_METADATA = 256
 
     @classmethod
     def to_int(
@@ -52,6 +53,7 @@ class RetrievalFlags:
         retrieve_font_data: bool = False,
         retrieve_python_metadata: bool = False,
         retrieve_cargo_metadata: bool = False,
+        retrieve_image_metadata: bool = False,
     ) -> int:
         """
         Convert the given boolean parameter values to a single integer flag value.
@@ -64,6 +66,7 @@ class RetrievalFlags:
         :param retrieve_font_data: Whether to retrieve font data.
         :param retrieve_python_metadata: Whether to retrieve Python package metadata.
         :param retrieve_cargo_metadata: Whether to retrieve Cargo metadata.
+        :param retrieve_image_metadata: Whether to retrieve image metadata.
         :return: The flags derived from the given parameters.
         """
         return (
@@ -75,6 +78,7 @@ class RetrievalFlags:
             + cls.FONT_DATA * retrieve_font_data
             + cls.PYTHON_METADATA * retrieve_python_metadata
             + cls.CARGO_METADATA * retrieve_cargo_metadata
+            + cls.IMAGE_METADATA * retrieve_image_metadata
         )
 
     @classmethod
@@ -85,7 +89,7 @@ class RetrievalFlags:
         :param: If enabled, return kwargs instead of the integer value.
         :return: The value for all flags enabled.
         """
-        value = cls.to_int(True, True, True, True, True, True, True, True)
+        value = cls.to_int(True, True, True, True, True, True, True, True, True)
         if as_kwargs:
             return cls.to_kwargs(value)
         return value
@@ -118,6 +122,7 @@ class RetrievalFlags:
             retrieve_font_data=cls.is_set(flags=flags, flag=cls.FONT_DATA),
             retrieve_python_metadata=cls.is_set(flags=flags, flag=cls.PYTHON_METADATA),
             retrieve_cargo_metadata=cls.is_set(flags=flags, flag=cls.CARGO_METADATA),
+            retrieve_image_metadata=cls.is_set(flags=flags, flag=cls.IMAGE_METADATA),
         )
 
 
@@ -206,6 +211,11 @@ def run_on_file(
         results = font_tools.check_font(path=path)
         if results:
             print(short_path + "\n" + results + "\n")
+            return _get_dummy_file_results(path=path, short_path=short_path)
+    if retrieval_kwargs.pop("retrieve_image_metadata"):
+        results = image_tools.check_image_metadata(path=path)
+        if results:
+            print(short_path + "\n" + results)
             return _get_dummy_file_results(path=path, short_path=short_path)
 
     # Register this here as each parallel process has its own directory.
@@ -389,6 +399,7 @@ def run(
     retrieve_font_data: bool = False,
     retrieve_python_metadata: bool = False,
     retrieve_cargo_metadata: bool = False,
+    retrieve_image_metadata: bool = False,
 ) -> list[FileResults]:
     """
     Run the analysis for the given input definition.
@@ -412,6 +423,7 @@ def run(
     :param retrieve_font_data: Whether to retrieve font data.
     :param retrieve_python_metadata: Whether to retrieve Python package metadata.
     :param retrieve_cargo_metadata: Whether to retrieve Cargo metadata.
+    :param retrieve_image_metadata: Whether to retrieve image metadata.
     :return: The requested results.
     """
     # Remove the temporary directory of the main thread.
@@ -431,6 +443,7 @@ def run(
         retrieve_font_data=retrieve_font_data,
         retrieve_python_metadata=bool(retrieve_python_metadata and package_definition),
         retrieve_cargo_metadata=retrieve_cargo_metadata,
+        retrieve_image_metadata=retrieve_image_metadata,
     )
 
     # Run the analysis itself.
