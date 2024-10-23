@@ -1,5 +1,7 @@
 # Development version
 
+# Version 0.13.0 - 2024-10-23
+
 * Drop support for Python 3.8.
 * Add support for retrieving image metadata by using `exiftool`.
 * Fix compatibility with `scancode_toolkit==32.3.0`. This is the minimum supported version now as well.
