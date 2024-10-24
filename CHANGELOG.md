@@ -1,5 +1,9 @@
 # Development version
 
+# Version 0.13.2 - 2024-10-24
+
+* Fix faulty workaround condition which accidentally was inverted.
+
 # Version 0.13.1 - 2024-10-24
 
 * Add short-term workaround for the archive extraction setting the timezone to UTC. 
