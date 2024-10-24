@@ -26,7 +26,7 @@ from extractcode.archive import should_extract as _should_extract  # type: ignor
 # without the fix (at least when not already using UTC as the timezone anyway).
 # As far as I could test it, this does not seem to have any relevant
 # downsides for license retrieval.
-if os.getenv("LICENSE_TOOLS_DISABLE_TZ_WORKAROUND").lower() == "true":  # pragma: no cover
+if os.getenv("LICENSE_TOOLS_DISABLE_TZ_WORKAROUND", "").lower() == "true":  # pragma: no cover
     extractcode.libarchive2.set_env_with_tz = lambda: None
 
 
