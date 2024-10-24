@@ -1,5 +1,10 @@
 # Development version
 
+# Version 0.13.1 - 2024-10-24
+
+* Add short-term workaround for the archive extraction setting the timezone to UTC. 
+  Set the environment variable `LICENSE_TOOLS_DISABLE_TZ_WORKAROUND=true` if you want to disable this workaround.
+
 # Version 0.13.0 - 2024-10-23
 
 * Drop support for Python 3.8.

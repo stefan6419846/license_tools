@@ -8,13 +8,26 @@ Archive handling.
 
 from __future__ import annotations
 
+import os
 import shutil
 from pathlib import Path
 from typing import cast
 
-from extractcode import all_kinds  # type: ignore[import-untyped]
+import extractcode  # type: ignore[import-untyped]
+from extractcode import all_kinds
 from extractcode.api import extract_archive as _extract_archive, extract_archives as _extract_archives  # type: ignore[import-untyped]
 from extractcode.archive import should_extract as _should_extract  # type: ignore[import-untyped]
+
+# Mitigate https://github.com/aboutcode-org/extractcode/issues/65
+# This is a particularly ugly workaround and I would indeed prefer an upstream
+# solution, but this would most likely be more complex and require more
+# research. In most cases, this should indeed be irrelevant for CLI users,
+# but library users might see strange side effects on log statements etc.
+# without the fix (at least when not already using UTC as the timezone anyway).
+# As far as I could test it, this does not seem to have any relevant
+# downsides for license retrieval.
+if os.getenv("LICENSE_TOOLS_DISABLE_TZ_WORKAROUND").lower() == "true":  # pragma: no cover
+    extractcode.libarchive2.set_env_with_tz = lambda: None
 
 
 def extract(archive_path: Path, target_directory: Path, recurse: bool = False) -> None:
