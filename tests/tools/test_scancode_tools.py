@@ -10,6 +10,8 @@ from tempfile import mkdtemp, NamedTemporaryFile
 from typing import cast, Dict
 from unittest import TestCase
 
+from faker import Faker
+
 from license_tools.retrieval import RetrievalFlags
 from license_tools.tools import scancode_tools
 from license_tools.tools.scancode_tools import (
@@ -101,6 +103,20 @@ class FileResultsTestCase(TestCase):
         )
         self.assertEqual(expected, result.copyrights)
 
+    def test_retrieve_copyrights__limit(self) -> None:
+        with NamedTemporaryFile(mode="w+t") as source_file:
+            fake = Faker()
+            for _ in range(123):
+                source_file.write(f'Copyright (c) {fake.year()} {fake.name()}\n')
+            source_file.flush()
+            source_file.seek(0)
+
+            result = scancode_tools.FileResults(
+                path=Path(source_file.name), short_path='dummy.txt', retrieve_copyrights=True
+            )
+            self.assertIsNotNone(result.copyrights)
+            self.assertEqual(123, len(cast(Copyrights, result.copyrights).copyrights), result.copyrights)
+
     def test_retrieve_emails(self) -> None:
         result = scancode_tools.FileResults(
             path=SETUP_PATH, short_path="setup.py", retrieve_emails=True
@@ -112,6 +128,28 @@ class FileResultsTestCase(TestCase):
         )
         expected = Emails(emails=[])
         self.assertEqual(expected, result.emails)
+
+    def test_retrieve_emails__limit(self) -> None:
+        with NamedTemporaryFile(mode="w+t") as source_file:
+            fake = Faker()
+            for _ in range(123):
+                # `fake.email()` does not work here, as `cluecode.finder.find_emails` will filter `example.org`
+                # for example due to `cluecode.finder_data.JUNK*`.
+                source_file.write(f'{fake.company_email()}\n')
+            source_file.flush()
+            source_file.seek(0)
+
+            result = scancode_tools.FileResults(
+                path=Path(source_file.name), short_path='dummy.txt', retrieve_emails=True
+            )
+            self.assertIsNotNone(result.emails)
+            self.assertEqual(50, len(cast(Emails, result.emails).emails), result.emails)
+
+            result = scancode_tools.FileResults(
+                path=Path(source_file.name), short_path='dummy.txt', retrieve_emails=True, email_limit=None,
+            )
+            self.assertIsNotNone(result.emails)
+            self.assertEqual(123, len(cast(Emails, result.emails).emails), result.emails)
 
     def test_retrieve_urls(self) -> None:
         result = scancode_tools.FileResults(
@@ -137,6 +175,27 @@ class FileResultsTestCase(TestCase):
             ]
         )
         self.assertEqual(expected, result.urls)
+
+    def test_retrieve_urls__limit(self) -> None:
+        with NamedTemporaryFile(mode="w+t") as source_file:
+            fake = Faker()
+            for i in range(123):
+                # Without the index, the generated URLs tend to not be unique with 123 generated values.
+                source_file.write(f'{fake.url()}{i}\n')
+            source_file.flush()
+            source_file.seek(0)
+
+            result = scancode_tools.FileResults(
+                path=Path(source_file.name), short_path='dummy.txt', retrieve_urls=True
+            )
+            self.assertIsNotNone(result.urls)
+            self.assertEqual(50, len(cast(Urls, result.urls).urls), result.urls)
+
+            result = scancode_tools.FileResults(
+                path=Path(source_file.name), short_path='dummy.txt', retrieve_urls=True, url_limit=None,
+            )
+            self.assertIsNotNone(result.urls)
+            self.assertEqual(123, len(cast(Urls, result.urls).urls), result.urls)
 
     def test_retrieve_licenses(self) -> None:
         self.maxDiff = None

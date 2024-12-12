@@ -1,5 +1,7 @@
 # Development version
 
+* Allow API users to modify the e-mail and URL retrieval limit.
+
 # Version 0.13.2 - 2024-10-24
 
 * Fix faulty workaround condition which accidentally was inverted.

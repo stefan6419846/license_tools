@@ -510,14 +510,24 @@ class FileResults:
     The retrieved file information.
     """
 
+    email_limit: int | None = dataclass_field(default=50, repr=False)
+    """
+    The maximum number of e-mails to retrieve.
+    """
+
+    url_limit: int | None = dataclass_field(default=50, repr=False)
+    """
+    The maximum number of URLs to retrieve.
+    """
+
     def __post_init__(self) -> None:
         path_str = str(self.path)
         if self.retrieve_copyrights:
             self.copyrights = Copyrights(**api.get_copyrights(path_str))
         if self.retrieve_emails:
-            self.emails = Emails(**api.get_emails(path_str))
+            self.emails = Emails(**api.get_emails(path_str, threshold=self.email_limit))
         if self.retrieve_urls:
-            self.urls = Urls(**api.get_urls(path_str))
+            self.urls = Urls(**api.get_urls(path_str, threshold=self.url_limit))
         if self.retrieve_licenses:
             self.licenses = Licenses(**api.get_licenses(path_str))
         if self.retrieve_file_info:
