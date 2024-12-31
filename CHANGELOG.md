@@ -1,5 +1,7 @@
 # Development version
 
+# Version 0.15.0 - 2024-12-31
+
 * Add support for retrieving translation metadata by using `msgunfmt`.
 
 # Version 0.14.0 - 2024-12-12
