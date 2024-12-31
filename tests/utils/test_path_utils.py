@@ -10,7 +10,9 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
 
-from license_tools.utils.path_utils import get_files_from_directory, DirectoryWithFixedNameContext
+from license_tools.utils.path_utils import get_file_type, get_files_from_directory, DirectoryWithFixedNameContext, get_mime_type
+from tests import get_file
+from tests.data import LICENSE_PATH, SETUP_PATH
 
 
 class GetFilesFromDirectoryTestCase(TestCase):
@@ -92,3 +94,45 @@ class DirectoryWithFixedNameContextTestCase(TestCase):
             with DirectoryWithFixedNameContext(Path(tempdir) / "foo", delete_afterwards=False) as target:
                 self.assertTrue(target.is_dir())
             self.assertTrue(target.is_dir())
+
+
+class GetMimeTypeTestCase(TestCase):
+    def test_get_mime_type(self) -> None:
+        self.assertEqual(
+            "text/x-script.python",
+            get_mime_type(SETUP_PATH)
+        )
+        self.assertEqual(
+            "text/plain",
+            get_mime_type(LICENSE_PATH)
+        )
+
+        with get_file("croissant.jpg") as path:
+            self.assertEqual(
+                "image/jpeg",
+                get_mime_type(path)
+            )
+
+
+class GetFileTypeTestCase(TestCase):
+    def test_get_file_type(self) -> None:
+        self.assertEqual(
+            "Python script, ASCII text executable",
+            get_file_type(SETUP_PATH)
+        )
+        self.assertEqual(
+            "ASCII text",
+            get_file_type(LICENSE_PATH)
+        )
+
+        with get_file("croissant.jpg") as path:
+            self.assertEqual(
+                "JPEG image data, Exif standard: [TIFF image data, little-endian, direntries=0], baseline, precision 8, 1280x853, components 3",
+                get_file_type(path)
+            )
+
+        with get_file("Carlito-Regular.ttf") as path:
+            self.assertEqual(
+                'TrueType Font data, 17 tables, 1st "GDEF", 15 names, Microsoft, language 0x409',
+                get_file_type(path)
+            )

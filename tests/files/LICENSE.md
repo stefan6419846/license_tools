@@ -6,6 +6,7 @@ This currently covers the following assets:
 
   * *Carlito* version 1.104 by Łukasz Dziedzic, subject to the terms of the OFL-1.1: https://fonts.google.com/specimen/Carlito
   * *croissant.jpg* by Petr Kratochvil, subject to CC0-1.0: https://commons.wikimedia.org/wiki/File:Croissant-Petr_Kratochvil.jpg, modified from http://www.publicdomainpictures.net/view-image.php?image=12541&picture=croissant
+  * *django_mo.po*, which is https://github.com/django/django/raw/8d9901c961bf9d5cfa6bddddbbcebfbf487a5125/django/contrib/admin/locale/de/LC_MESSAGES/django.mo decompiled using `msgunfmt`. It is subject to the terms of the BSD-3-Clause.
   * *Font Awesome* version 6.5.1, subject to the terms of the OFL-1.1: https://fontawesome.com/download
   * *mountain.jpg* by George Hiles, subject to CC0-1.0: https://commons.wikimedia.org/wiki/File:Mountain_highway_(Unsplash).jpg (resized)
   * *Weather Icons* by Lukas Bischoff and Erik Flowers, subject to the terms of the OFL-1.1: https://github.com/erikflowers/weather-icons/blob/bb80982bf1f43f2d57f9dd753e7413bf88beb9ed/font/weathericons-regular-webfont.woff

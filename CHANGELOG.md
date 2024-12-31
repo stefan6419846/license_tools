@@ -1,5 +1,7 @@
 # Development version
 
+* Add support for retrieving translation metadata by using `msgunfmt`.
+
 # Version 0.14.0 - 2024-12-12
 
 * Allow API users to modify the e-mail and URL retrieval limit.

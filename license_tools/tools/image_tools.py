@@ -12,22 +12,11 @@ import logging
 import shutil
 import subprocess
 from pathlib import Path
-from typing import cast
 
-from typecode import magic2  # type: ignore[import-untyped]
+from license_tools.utils.path_utils import get_mime_type
 
 logger = logging.getLogger(__name__)
 del logging
-
-
-def _get_mime_type(path: Path) -> str:
-    """
-    Get the mime type.
-
-    :param: The file to check.
-    :return: The guessed mime type.
-    """
-    return cast(str, magic2.mime_type(path))
 
 
 def is_image(path: Path) -> bool:
@@ -37,8 +26,8 @@ def is_image(path: Path) -> bool:
     :param path: The file to check.
     :return: True if the file is an image, False otherwise.
     """
-    file_type = _get_mime_type(path).lower()
-    return file_type.startswith("image")
+    mime_type = get_mime_type(path).lower()
+    return mime_type.startswith("image")
 
 
 def check_image_metadata(path: Path) -> str | None:

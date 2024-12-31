@@ -7,7 +7,9 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 from tempfile import mkdtemp
-from typing import Any, Generator, Type
+from typing import Any, cast, Generator, Type
+
+from typecode import magic2  # type: ignore[import-untyped]
 
 
 def get_files_from_directory(
@@ -75,3 +77,23 @@ class DirectoryWithFixedNameContext:
             # Error.
             return None
         return True
+
+
+def get_mime_type(path: Path) -> str:
+    """
+    Get the mime type.
+
+    :param: The file to check.
+    :return: The guessed mime type.
+    """
+    return cast(str, magic2.mime_type(path))
+
+
+def get_file_type(path: Path) -> str:
+    """
+    Get the file type.
+
+    :param: The file to check.
+    :return: The guessed file type.
+    """
+    return cast(str, magic2.file_type(path))

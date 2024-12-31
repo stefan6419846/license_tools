@@ -13,24 +13,6 @@ from tests import get_file
 from tests.data import LICENSE_PATH, SETUP_PATH
 
 
-class GetMimeTypeTestCase(TestCase):
-    def test_get_mime_type(self) -> None:
-        self.assertEqual(
-            "text/x-script.python",
-            image_tools._get_mime_type(SETUP_PATH)
-        )
-        self.assertEqual(
-            "text/plain",
-            image_tools._get_mime_type(LICENSE_PATH)
-        )
-
-        with get_file("croissant.jpg") as path:
-            self.assertEqual(
-                "image/jpeg",
-                image_tools._get_mime_type(path)
-            )
-
-
 class IsImageTestCase(TestCase):
     def test_is_image(self) -> None:
         self.assertFalse(image_tools.is_image(SETUP_PATH))

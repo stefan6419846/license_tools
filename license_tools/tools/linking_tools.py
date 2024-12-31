@@ -13,7 +13,7 @@ import subprocess
 from pathlib import Path
 from typing import cast, Literal
 
-from typecode import magic2  # type: ignore[import-untyped]
+from license_tools.utils.path_utils import get_file_type
 
 logger = logging.getLogger(__name__)
 del logging
@@ -27,16 +27,6 @@ ELF_TYPES = [ELF_EXE, ELF_SHARED, ELF_RELOC]
 ELF_TYPES_TYPE = Literal["executable", "shared object", "relocatable", "unknown"]
 
 
-def _get_file_type(path: Path) -> str:
-    """
-    Get the file type.
-
-    :param: The file to check.
-    :return: The guessed file type.
-    """
-    return cast(str, magic2.file_type(path))
-
-
 def is_elf(path: Path) -> bool:
     """
     Check if the given file is an ELF file.
@@ -44,7 +34,7 @@ def is_elf(path: Path) -> bool:
     :param path: The file to check.
     :return: True if the file is an ELF binary, False otherwise.
     """
-    file_type = _get_file_type(path).lower()
+    file_type = get_file_type(path).lower()
     return file_type.startswith("elf") and any(elf_type in file_type for elf_type in ELF_TYPES)
 
 
@@ -57,7 +47,7 @@ def get_elf_type(path: Path) -> ELF_TYPES_TYPE | None:
     """
     if not is_elf(path):
         return None
-    file_type = _get_file_type(path).lower()
+    file_type = get_file_type(path).lower()
     for elf_type in ELF_TYPES:
         if elf_type in file_type:
             return cast(ELF_TYPES_TYPE, elf_type)

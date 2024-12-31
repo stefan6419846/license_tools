@@ -43,6 +43,12 @@ license_tools\.tools\.scancode_tools
 .. automodule:: license_tools.tools.scancode_tools
    :members:
 
+license_tools\.tools\.translation_tools
+---------------------------------------
+
+.. automodule:: license_tools.tools.translation_tools
+   :members:
+
 license_tools\.utils\.archive_utils
 -----------------------------------
 

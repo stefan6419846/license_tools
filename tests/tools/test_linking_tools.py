@@ -27,24 +27,6 @@ def get_libc_path() -> Path:
     raise ValueError("Could not determine libc.so location.")
 
 
-class GetFileTypeTestCase(TestCase):
-    def test_get_file_type(self) -> None:
-        self.assertEqual(
-            "Python script, ASCII text executable",
-            linking_tools._get_file_type(SETUP_PATH)
-        )
-        self.assertEqual(
-            "ASCII text",
-            linking_tools._get_file_type(LICENSE_PATH)
-        )
-
-        with get_file("Carlito-Regular.ttf") as path:
-            self.assertEqual(
-                'TrueType Font data, 17 tables, 1st "GDEF", 15 names, Microsoft, language 0x409',
-                linking_tools._get_file_type(path)
-            )
-
-
 class IsElfTestCase(TestCase):
     def test_is_elf(self) -> None:
         self.assertFalse(linking_tools.is_elf(SETUP_PATH))
