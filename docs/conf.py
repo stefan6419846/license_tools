@@ -39,5 +39,6 @@ autoclass_content = "both"
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "fontTools": ("https://fonttools.readthedocs.io/en/latest/", None),
+    "piplicenses_lib": ("https://pip-licenses-lib.readthedocs.io/en/latest/", None),
     "requests": ("https://requests.readthedocs.io/en/latest/", None),
 }

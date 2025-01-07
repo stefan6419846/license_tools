@@ -545,7 +545,7 @@ class Party:
     Available party types.
     """
 
-    type: PARTY_TYPES = None
+    type: Party.PARTY_TYPES = None
     """
     The party type.
     """
