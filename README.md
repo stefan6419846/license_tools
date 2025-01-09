@@ -20,6 +20,7 @@ I wrote this tool to simplify the initial scanning steps for third-party package
 * Look into image metadata.
 * Recursively look into nested archives, for example by unpacking the actual upstream source code archives inside RPM (source) files.
 * Download the package versions declared inside a `Cargo.lock` file.
+* Unpack/decompile `*.mo` translation files (not available from CLI).
 * Make everything available from the terminal.
 
 ## Installation
@@ -37,6 +38,8 @@ Some features might require installing extras or OS-level packages:
 * Analysis of shared objects requires the `ldd` command to be available inside the path.
 * Analysis of image metadata requires the `exiftool` command to be available inside the path.
   You might obtain a recent distribution archive from https://exiftool.org/
+* Unpacking of `*.mo` files requires the `msgunfmt` command to be available inside the path.
+  This binary usually is part of GNU gettext.
 
 ## Usage
 
