@@ -1,7 +1,7 @@
 # Ensure that we always test against the latest versions
 # as soon as they get released by pinning them here and
 # letting `dependabot` update them for new releases.
-scancode-toolkit==32.3.1
+scancode-toolkit==32.3.2
 typecode-libmagic==5.39.210531
 joblib==1.4.2
 fontTools[woff]==4.55.3
