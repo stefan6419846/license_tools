@@ -4,7 +4,7 @@
 scancode-toolkit==32.3.2
 typecode-libmagic==5.39.210531
 joblib==1.4.2
-fontTools[woff]==4.55.6
+fontTools[woff]==4.55.7
 pip-licenses-lib==0.5.0
 rpmfile==2.1.0
 requests==2.32.3
