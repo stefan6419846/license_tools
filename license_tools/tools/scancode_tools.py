@@ -109,9 +109,9 @@ class Copyrights:
     """
 
     def __post_init__(self) -> None:
-        self.copyrights = [Copyright(**x) if not isinstance(x, Copyright) else x for x in self.copyrights]  # type: ignore[arg-type]
-        self.holders = [Holder(**x) if not isinstance(x, Holder) else x for x in self.holders]  # type: ignore[arg-type]
-        self.authors = [Author(**x) if not isinstance(x, Author) else x for x in self.authors]  # type: ignore[arg-type]
+        self.copyrights = [Copyright(**x) if not isinstance(x, Copyright) else x for x in self.copyrights]
+        self.holders = [Holder(**x) if not isinstance(x, Holder) else x for x in self.holders]
+        self.authors = [Author(**x) if not isinstance(x, Author) else x for x in self.authors]
 
 
 @dataclass
@@ -148,7 +148,7 @@ class Emails:
     """
 
     def __post_init__(self) -> None:
-        self.emails = [Email(**x) if not isinstance(x, Email) else x for x in self.emails]  # type: ignore[arg-type]
+        self.emails = [Email(**x) if not isinstance(x, Email) else x for x in self.emails]
 
 
 @dataclass
@@ -185,7 +185,7 @@ class Urls:
     """
 
     def __post_init__(self) -> None:
-        self.urls = [Url(**x) if not isinstance(x, Url) else x for x in self.urls]  # type: ignore[arg-type]
+        self.urls = [Url(**x) if not isinstance(x, Url) else x for x in self.urls]
 
 
 @dataclass
@@ -380,7 +380,7 @@ class LicenseDetection:
     """
 
     def __post_init__(self) -> None:
-        self.matches = [LicenseMatch(**x) if not isinstance(x, LicenseMatch) else x for x in self.matches]  # type: ignore[arg-type]
+        self.matches = [LicenseMatch(**x) if not isinstance(x, LicenseMatch) else x for x in self.matches]
 
 
 @dataclass
@@ -416,10 +416,10 @@ class Licenses:
 
     def __post_init__(self) -> None:
         self.license_detections = [
-            LicenseDetection(**x) if not isinstance(x, LicenseDetection) else x for x in self.license_detections  # type: ignore[arg-type]
+            LicenseDetection(**x) if not isinstance(x, LicenseDetection) else x for x in self.license_detections
         ]
         self.license_clues = [
-            LicenseClue(**x) if not isinstance(x, LicenseClue) else x for x in self.license_clues  # type: ignore[arg-type]
+            LicenseClue(**x) if not isinstance(x, LicenseClue) else x for x in self.license_clues
         ]
 
     def get_scores_of_detected_license_expression_spdx(self) -> list[float]:
@@ -779,13 +779,13 @@ class PackageResults:
 
     def __post_init__(self) -> None:
         self.license_detections = [
-            LicenseDetection(**x) if not isinstance(x, LicenseDetection) else x for x in self.license_detections  # type: ignore[arg-type]
+            LicenseDetection(**x) if not isinstance(x, LicenseDetection) else x for x in self.license_detections
         ]
         self.other_license_detections = [
-            LicenseDetection(**x) if not isinstance(x, LicenseDetection) else x for x in self.other_license_detections  # type: ignore[arg-type]
+            LicenseDetection(**x) if not isinstance(x, LicenseDetection) else x for x in self.other_license_detections
         ]
         self.parties = [
-            Party(**x) if not isinstance(x, Party) else x for x in self.parties  # type: ignore[arg-type]
+            Party(**x) if not isinstance(x, Party) else x for x in self.parties
         ]
 
     @classmethod
