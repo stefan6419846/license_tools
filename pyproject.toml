@@ -45,7 +45,6 @@ dependencies = [
     "pip-licenses-lib>=0.4.0",
     "requests",
     "tomli",
-    "Beautifulsoup4<4.14",  # TODO: https://github.com/aboutcode-org/commoncode/issues/79
 ]
 
 [project.urls]
