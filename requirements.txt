@@ -2,7 +2,7 @@
 # as soon as they get released by pinning them here and
 # letting `dependabot` update them for new releases.
 scancode-toolkit==32.3.2
-commoncode==32.2.0
+commoncode==32.2.1
 typecode-libmagic==5.39.210531
 joblib==1.4.2
 fontTools[woff]==4.56.0
