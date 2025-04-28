@@ -1,5 +1,9 @@
 # Development version
 
+# Version 0.15.2 - 2025-04-28
+
+* Fix linking analysis for non-default locale.
+
 # Version 0.15.1 - 2025-04-28
 
 * Do not fail when running linking analysis on non-dynamic executables.

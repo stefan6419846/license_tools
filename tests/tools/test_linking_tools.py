@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -52,6 +53,12 @@ class GetElfTypeTestCase(TestCase):
 
 
 class CheckSharedObjectsTestCase(TestCase):
+    @property
+    def _env(self) -> dict[str, str]:
+        env = os.environ.copy()
+        env["LC_ALL"] = "C"
+        return env
+
     def test_so(self) -> None:
         path = get_libc_path().resolve()
         with mock.patch(
@@ -59,7 +66,7 @@ class CheckSharedObjectsTestCase(TestCase):
         ) as subprocess_mock:
             result = check_shared_objects(path)
         self.assertEqual("Test output\nAnother line\n", result)
-        subprocess_mock.assert_called_once_with(["ldd", path], stderr=subprocess.PIPE)
+        subprocess_mock.assert_called_once_with(["ldd", path], stderr=subprocess.PIPE, env=self._env)
 
     def test_binary(self) -> None:
         path = Path("/usr/bin/bc")
@@ -68,7 +75,7 @@ class CheckSharedObjectsTestCase(TestCase):
         ) as subprocess_mock:
             result = check_shared_objects(path)
         self.assertEqual("Test output\nAnother line\n", result)
-        subprocess_mock.assert_called_once_with(["ldd", path], stderr=subprocess.PIPE)
+        subprocess_mock.assert_called_once_with(["ldd", path], stderr=subprocess.PIPE, env=self._env)
 
     def test_python(self) -> None:
         path = Path("/tmp/libdummy.py")
@@ -110,7 +117,7 @@ class CheckSharedObjectsTestCase(TestCase):
                 result = check_shared_objects(source.resolve())
             self.assertEqual("Test output\nAnother line\n", result)
             subprocess_mock.assert_called_once_with(
-                ["ldd", target], stderr=subprocess.PIPE
+                ["ldd", target], stderr=subprocess.PIPE, env=self._env
             )
             elf_mock.assert_called_once_with(source.resolve())
 

@@ -12,7 +12,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "license_tools"
 description = "Collection of tools for working with Open Source licenses"
-version = "0.15.1"
+version = "0.15.2"
 license = {text = "Apache-2.0"}
 readme = {file = "README.md", content-type = "text/markdown"}
 authors = [

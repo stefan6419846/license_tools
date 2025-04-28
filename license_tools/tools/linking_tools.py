@@ -9,6 +9,7 @@ Tools related to binary linking.
 from __future__ import annotations
 
 import logging
+import os
 import subprocess
 from pathlib import Path
 from typing import cast, Literal
@@ -69,8 +70,11 @@ def check_shared_objects(path: Path) -> str | None:
             "Ignoring symlink %s to %s for shared object analysis.", path, path.resolve()
         )
         return None
+
+    env = os.environ.copy()
+    env["LC_ALL"] = "C"
     try:
-        output = subprocess.check_output(["ldd", path], stderr=subprocess.PIPE)
+        output = subprocess.check_output(["ldd", path], stderr=subprocess.PIPE, env=env)
     except subprocess.CalledProcessError as exception:
         if b"\tnot a dynamic executable" in exception.stderr:
             return None
