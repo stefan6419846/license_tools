@@ -37,7 +37,7 @@ def _get_or_download(download: Download) -> Path:
 
 
 @contextmanager
-def get_from_url(download: Download) -> Generator[Path, None, None]:
+def get_from_url(download: Download) -> Generator[Path]:
     with NamedTemporaryFile(suffix=download.suffix) as temp_file:
         path = Path(temp_file.name)
         source_path = _get_or_download(download)
@@ -46,7 +46,7 @@ def get_from_url(download: Download) -> Generator[Path, None, None]:
 
 
 @contextmanager
-def get_file(name: str) -> Generator[Path, None, None]:
+def get_file(name: str) -> Generator[Path]:
     reference = files("tests") / "files" / name
     with as_file(reference) as path:
         yield path

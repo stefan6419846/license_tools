@@ -175,7 +175,7 @@ class DownloadPackageTestCase(TestCase):
 
         def run(
             command: list[str | Path], *args: Any, **kwargs: Any
-        ) -> "subprocess.CompletedProcess[bytes]":
+        ) -> subprocess.CompletedProcess[bytes]:
             _directory = command[command.index("--dest") + 1]
             directories.append(_directory)
             Path(_directory).joinpath("dummy.py").touch()

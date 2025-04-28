@@ -789,7 +789,7 @@ class PackageResults:
         ]
 
     @classmethod
-    def from_rpm(cls, path: Path) -> "PackageResults":
+    def from_rpm(cls, path: Path) -> PackageResults:
         """
         Get the results for the given RPM path.
 

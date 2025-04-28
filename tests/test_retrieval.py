@@ -541,7 +541,7 @@ class RunOnPackageArchiveFileTestCase(TestCase):
 
             def run_on_directory(
                 directory: Path, job_count: int, retrieval_flags: int
-            ) -> Generator[Any, None, None]:
+            ) -> Generator[Any]:
                 self.assertEqual(2, job_count)
                 self.assertEqual(42, retrieval_flags)
                 actual = [x[1] for x in get_files_from_directory(directory)]
@@ -595,7 +595,7 @@ class RunOnDownloadedArchiveFileTestCase(TestCase):
 
         def run_on_package_archive_file(
             archive_path: Path, job_count: int, retrieval_flags: int
-        ) -> Generator[Any, None, None]:
+        ) -> Generator[Any]:
             self.assertEqual(2, job_count)
             self.assertEqual(42, retrieval_flags)
             self.assertEqual(download.suffix, archive_path.name[-len(download.suffix):])
@@ -626,7 +626,7 @@ class RunOnDownloadedPackageFileTestCase(TestCase):
 
         def run_on_package_archive_file(
             archive_path: Path, job_count: int, retrieval_flags: int, retrieve_python_metadata: bool = False
-        ) -> Generator[Any, None, None]:
+        ) -> Generator[Any]:
             self.assertEqual("typing_extensions-4.8.0-py3-none-any.whl", archive_path.name)
             self.assertEqual(3, job_count)
             self.assertEqual(42, retrieval_flags)
@@ -653,7 +653,7 @@ class RunOnDownloadedPackageFileTestCase(TestCase):
 
         def run_on_package_archive_file(
             archive_path: Path, job_count: int, retrieval_flags: int, retrieve_python_metadata: bool = False
-        ) -> Generator[Any, None, None]:
+        ) -> Generator[Any]:
             self.assertEqual("typing_extensions-4.8.0.tar.gz", archive_path.name)
             self.assertEqual(3, job_count)
             self.assertEqual(42, retrieval_flags)
@@ -699,7 +699,7 @@ class Stdout:
 
 class RunTestCase(TestCase):
     @contextmanager
-    def record_stdout(self) -> Generator[Stdout, None, None]:
+    def record_stdout(self) -> Generator[Stdout]:
         result = Stdout()
         with mock.patch(
             "shutil.get_terminal_size", return_value=os.terminal_size((100, 20))

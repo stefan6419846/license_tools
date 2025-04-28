@@ -237,7 +237,7 @@ def run_on_directory(
     prefix: str | None = None,
     allow_random_directory_for_archive: bool = True,
     delete_unpacked_archive_directories: bool = True,
-) -> Generator[FileResults, None, None]:
+) -> Generator[FileResults]:
     """
     Run the analysis on the given directory.
 
@@ -282,7 +282,7 @@ def run_on_package_archive_file(
     archive_path: Path,
     job_count: int = 4,
     retrieval_flags: int = 0,
-) -> Generator[FileResults, None, None]:
+) -> Generator[FileResults]:
     """
     Run the analysis on the given package archive file.
 
@@ -314,7 +314,7 @@ def run_on_downloaded_archive_file(
     download_url: str,
     job_count: int = 4,
     retrieval_flags: int = 0,
-) -> Generator[FileResults, None, None]:
+) -> Generator[FileResults]:
     """
     Run the analysis on the given archive file after downloading it.
 
@@ -348,7 +348,7 @@ def run_on_downloaded_package_file(
     job_count: int = 4,
     retrieval_flags: int = 0,
     prefer_sdist: bool = False,
-) -> Generator[FileResults, None, None]:
+) -> Generator[FileResults]:
     """
     Run the analysis for the given package definition.
 

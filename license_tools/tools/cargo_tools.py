@@ -116,7 +116,7 @@ class PackageVersion:
         )
 
 
-def get_package_versions(lock_path: Path | str) -> Generator[PackageVersion, None, None]:
+def get_package_versions(lock_path: Path | str) -> Generator[PackageVersion]:
     """
     Get the packages from the given lock file.
 

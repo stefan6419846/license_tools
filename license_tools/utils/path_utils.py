@@ -15,7 +15,7 @@ from typecode import magic2  # type: ignore[import-untyped]
 def get_files_from_directory(
     directory: str | Path,
     prefix: str | None = None,
-) -> Generator[tuple[Path, str], None, None]:
+) -> Generator[tuple[Path, str]]:
     """
     Get the files from the given directory, recursively.
 
@@ -69,7 +69,7 @@ class DirectoryWithFixedNameContext:
             self.directory.mkdir(parents=False, exist_ok=False)
         return self.directory
 
-    def __exit__(self, type_: Type[BaseException] | None, value: BaseException | None, traceback: Any | None) -> bool | None:
+    def __exit__(self, type_: type[BaseException] | None, value: BaseException | None, traceback: Any | None) -> bool | None:
         if self._delete_afterwards:
             shutil.rmtree(self.directory)
 
