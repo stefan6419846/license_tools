@@ -8,4 +8,5 @@ include tests/files/*.md
 include tests/files/croissant.jpg
 include tests/files/mountain.jpg
 include tests/files/django_mo.po
+include tests/files/meson-generated_ieee754.c.o
 include tests/*/*.py

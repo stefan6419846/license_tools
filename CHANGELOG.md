@@ -1,5 +1,10 @@
 # Development version
 
+# Version 0.15.1 - 2025-04-28
+
+* Do not fail when running linking analysis on non-dynamic executables.
+* Remove obsolete Sphinx workarounds.
+
 # Version 0.15.0 - 2024-12-31
 
 * Add support for retrieving translation metadata by using `msgunfmt`.

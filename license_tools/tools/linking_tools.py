@@ -69,5 +69,10 @@ def check_shared_objects(path: Path) -> str | None:
             "Ignoring symlink %s to %s for shared object analysis.", path, path.resolve()
         )
         return None
-    output = subprocess.check_output(["ldd", path], stderr=subprocess.PIPE)
+    try:
+        output = subprocess.check_output(["ldd", path], stderr=subprocess.PIPE)
+    except subprocess.CalledProcessError as exception:
+        if b"\tnot a dynamic executable" in exception.stderr:
+            return None
+        raise
     return output.decode("UTF-8")

@@ -113,3 +113,8 @@ class CheckSharedObjectsTestCase(TestCase):
                 ["ldd", target], stderr=subprocess.PIPE
             )
             elf_mock.assert_called_once_with(source.resolve())
+
+    def test_not_a_dynamic_executable(self) -> None:
+        with get_file("meson-generated_ieee754.c.o") as path:
+            result = check_shared_objects(path)
+        self.assertIsNone(result)
