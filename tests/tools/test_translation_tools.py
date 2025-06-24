@@ -8,6 +8,7 @@ import shutil
 import subprocess
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+from typing import cast
 from unittest import TestCase
 
 from license_tools.tools import translation_tools
@@ -59,7 +60,7 @@ class CheckCompiledGettextMetadataTestCase(TestCase):
             expected = list(filter(lambda x: "POT-Creation-Date" not in x, expected))
             compiled = subprocess.run(
                 [
-                    shutil.which("msgfmt"),
+                    cast(str, shutil.which("msgfmt")),
                     po_path,
                     "--output-file", "-"
                 ],
@@ -70,4 +71,5 @@ class CheckCompiledGettextMetadataTestCase(TestCase):
             mo_file.write(compiled.stdout)
             mo_file.seek(0)
             result = translation_tools.check_compiled_gettext_metadata(Path(mo_file.name))
-        self.assertListEqual(expected, result.splitlines(keepends=False))
+        self.assertIsNotNone(result)
+        self.assertListEqual(expected, cast(str, result).splitlines(keepends=False))
