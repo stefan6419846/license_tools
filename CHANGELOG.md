@@ -1,5 +1,9 @@
 # Development version
 
+# Version 0.16.0 - 2025-06-24
+
+* Extract compiled message catalogues without any translations as well.
+
 # Version 0.15.2 - 2025-04-28
 
 * Fix linking analysis for non-default locale.

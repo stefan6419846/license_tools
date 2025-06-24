@@ -4,6 +4,10 @@
 
 from __future__ import annotations
 
+import shutil
+import subprocess
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 from unittest import TestCase
 
 from license_tools.tools import translation_tools
@@ -47,3 +51,23 @@ class CheckCompiledGettextMetadataTestCase(TestCase):
 
         with get_file("django_mo.po") as path:
             self.assertEqual(path.read_text(), result)
+
+    def test_untranslated_mo_file(self) -> None:
+        with get_file("untranslated.po") as po_path:
+            expected = po_path.read_text(encoding="UTF-8").splitlines(keepends=False)
+            expected = expected[:-3]
+            expected = list(filter(lambda x: "POT-Creation-Date" not in x, expected))
+            compiled = subprocess.run(
+                [
+                    shutil.which("msgfmt"),
+                    po_path,
+                    "--output-file", "-"
+                ],
+                capture_output=True,
+                check=True
+            )
+        with NamedTemporaryFile(suffix=".mo") as mo_file:
+            mo_file.write(compiled.stdout)
+            mo_file.seek(0)
+            result = translation_tools.check_compiled_gettext_metadata(Path(mo_file.name))
+        self.assertListEqual(expected, result.splitlines(keepends=False))

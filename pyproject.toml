@@ -12,8 +12,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "license_tools"
 description = "Collection of tools for working with Open Source licenses"
-version = "0.15.2"
-license = {text = "Apache-2.0"}
+version = "0.16.0"
+license = "Apache-2.0"
 readme = {file = "README.md", content-type = "text/markdown"}
 authors = [
     {name = "stefan6419846"},
@@ -22,7 +22,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Software Development",
