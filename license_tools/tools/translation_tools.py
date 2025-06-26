@@ -49,6 +49,7 @@ def check_compiled_gettext_metadata(path: Path) -> str | None:
     output = subprocess.check_output(
         [
             msgunfmt,
+            "--force-po",
             path,
         ],
         stderr=subprocess.PIPE,
