@@ -69,7 +69,8 @@ class MainTestCase(TestCase):
         return custom_env
 
     def test_retrieval(self) -> None:
-        # The tests started to fail with Python 3.13 when using parallel processing within the subprocess here.
+        # The tests started to fail with Python 3.13 when using parallel processing within the subprocess here,
+        # while later on they became very slow on Python 3.9 when Python 3.13 worked normally.
         # Trying to debug this did not yet yield any useful insights on where the issue actually is.
         # As this should not hurt real-world usage (nobody should really be required to run this in a subprocess
         # outside the tests), just use the slower sequential analysis here.
