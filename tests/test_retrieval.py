@@ -823,11 +823,11 @@ License classifiers: Python Software Foundation License
         self.assertIsInstance(first_result, FileResults)
         self.assertEqual(SETUP_PY_LICENSES, first_result.licenses)
         self.assertEqual(
-            f"""{SETUP_PATH} Apache-2.0 AND (LicenseRef-scancode-unknown-license-reference AND Apache-2.0) 
+            f"""{SETUP_PATH}                                                             Apache-2.0 [100.0, 100.0]
 
 ====================================================================================================
 
-Apache-2.0 AND (LicenseRef-scancode-unknown-license-reference AND Apache-2.0)  1
+                                                            Apache-2.0  1
 """,  # noqa: W291
             str(stdout),
         )

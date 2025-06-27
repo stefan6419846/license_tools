@@ -264,6 +264,11 @@ class FileInfo:
     Whether this file is some script.
     """
 
+    sha1_git: str | None = None
+    """
+    The hash according to the Git blob SHA1 convention (https://git-scm.com/book/en/v2/Git-Internals-Git-Objects#_object_storage).
+    """
+
     def __post_init__(self) -> None:
         if isinstance(self.date, str):
             self.date = datetime.datetime.strptime(self.date, "%Y-%m-%d").date()

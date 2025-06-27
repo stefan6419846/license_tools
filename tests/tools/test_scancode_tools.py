@@ -32,7 +32,7 @@ from tests.data import LIBAIO1__0_3_109_1_25__RPM, LICENSE_PATH, SETUP_PATH, SET
 class LicensesTestCase(TestCase):
     def test_get_scores_of_detected_license_expression_spdx(self) -> None:
         result = SETUP_PY_LICENSES.get_scores_of_detected_license_expression_spdx()
-        self.assertEqual([], result)
+        self.assertEqual([100.0, 100.0], result)
 
         file_results = FileResults(
             path=LICENSE_PATH, short_path="LICENSE.txt", retrieve_licenses=True
@@ -228,6 +228,7 @@ class FileResultsTestCase(TestCase):
             sha1="e343a35cf2fa04782749dab102d45129cdb0b644",
             md5="a97c0affb458a65d8682bf0a48f36e63",
             sha256="c63bf759e5502fc9f4ad863b883423a2d75992aeaebee6a713eb81fe3f714a4b",
+            sha1_git="f301245e24299fc112e109874ef38f7340ca0199",
             mime_type="text/plain",
             file_type="ASCII text",
             programming_language="Python",
