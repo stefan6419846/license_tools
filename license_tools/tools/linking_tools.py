@@ -10,9 +10,10 @@ from __future__ import annotations
 
 import logging
 import os
+import shutil
 import subprocess
 from pathlib import Path
-from typing import cast, Literal
+from typing import Literal, cast
 
 from license_tools.utils.path_utils import get_file_type
 
@@ -67,14 +68,19 @@ def check_shared_objects(path: Path) -> str | None:
     if path.is_symlink():
         # Ignore symlinks as they usually are package-internal and `ldd` does not always like them.
         logger.warning(
-            "Ignoring symlink %s to %s for shared object analysis.", path, path.resolve()
+            "Ignoring symlink %s to %s for shared object analysis.", path, path.resolve(),
         )
         return None
 
+    ldd = shutil.which("ldd")
+    if not ldd:
+        raise ValueError("ldd not found!")
+
     env = os.environ.copy()
     env["LC_ALL"] = "C"
+
     try:
-        output = subprocess.check_output(["ldd", path], stderr=subprocess.PIPE, env=env)
+        output = subprocess.check_output([ldd, path], stderr=subprocess.PIPE, env=env)
     except subprocess.CalledProcessError as exception:
         if b"\tnot a dynamic executable" in exception.stderr:
             return None

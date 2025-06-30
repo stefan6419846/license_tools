@@ -6,13 +6,12 @@ from __future__ import annotations
 
 import atexit
 import shutil
+from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from importlib.resources import files, as_file
+from importlib.resources import as_file, files
 from pathlib import Path
-from tempfile import mkdtemp, NamedTemporaryFile
-from typing import Generator
-
+from tempfile import NamedTemporaryFile, mkdtemp
 
 CACHE_DIRECTORY = Path(mkdtemp())
 

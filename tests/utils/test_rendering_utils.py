@@ -61,5 +61,5 @@ class RenderDictionaryTestCase(TestCase):
 Multiple 1: 1337
 Multiple 2: [42, 43, 44]
 """[1:-1],
-            result
+            result,
         )

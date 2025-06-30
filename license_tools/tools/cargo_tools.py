@@ -9,9 +9,10 @@ Tools related to Cargo/Rust.
 from __future__ import annotations
 
 import logging
+from collections.abc import Generator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Generator
+from typing import Any
 
 import tomli
 
@@ -78,7 +79,7 @@ def check_metadata(path: Path | str) -> str:
     if not metadata:
         return ""
     return rendering_utils.render_dictionary(
-        dictionary=metadata, verbose_names_mapping=_VERBOSE_NAMES, multi_value_keys={"authors", "categories", "keywords"}
+        dictionary=metadata, verbose_names_mapping=_VERBOSE_NAMES, multi_value_keys={"authors", "categories", "keywords"},
     )
 
 
@@ -112,7 +113,7 @@ class PackageVersion:
         return Download(
             url=f"https://crates.io/api/v1/crates/{self.name}/{self.version}/download",
             filename=f"{self.name}_{self.version}.crate",
-            sha256=self.checksum
+            sha256=self.checksum,
         )
 
 

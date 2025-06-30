@@ -8,7 +8,7 @@ import datetime
 from collections import OrderedDict
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from license_tools.tools import font_tools
 from tests import get_file
@@ -36,7 +36,7 @@ class ConvertHeadFlagsTestCase(TestCase):
 
     def test_some(self) -> None:
         self.assertEqual(
-            "Baseline for font at y=0; " "Font converted",
+            "Baseline for font at y=0; Font converted",
             font_tools.convert_head_flags(1 + 2 ** 12),
         )
 
@@ -56,10 +56,10 @@ class ConvertTimestamp(TestCase):
             font_tools.convert_timestamp_to_datetime(3784421337),
         )
         self.assertEqual(
-            "2023-11-29 20:15:42", font_tools.convert_timestamp_to_string(3784133742)
+            "2023-11-29 20:15:42", font_tools.convert_timestamp_to_string(3784133742),
         )
         self.assertEqual(
-            "1904-01-01 00:00:00", font_tools.convert_timestamp_to_string(-1)
+            "1904-01-01 00:00:00", font_tools.convert_timestamp_to_string(-1),
         )
 
 
@@ -75,17 +75,17 @@ class ConvertMacStyleTestCase(TestCase):
 
     def test_some(self) -> None:
         self.assertEqual(
-            "Bold, Italic, Condensed", font_tools.convert_mac_style(1 + 2 + 32)
+            "Bold, Italic, Condensed", font_tools.convert_mac_style(1 + 2 + 32),
         )
 
 
 class ConvertFontDirectionHintTestCase(TestCase):
     def test_convert_font_direction_hint(self) -> None:
         self.assertEqual(
-            "Fully mixed directional glyphs", font_tools.convert_font_direction_hint(0)
+            "Fully mixed directional glyphs", font_tools.convert_font_direction_hint(0),
         )
         self.assertEqual(
-            "Only strongly left to right", font_tools.convert_font_direction_hint(1)
+            "Only strongly left to right", font_tools.convert_font_direction_hint(1),
         )
         self.assertEqual(
             "Strongly right to left, but also contains neutrals",
@@ -142,7 +142,7 @@ class AnalyzeFontTestCase(TestCase):
                         ),
                         ("Index to Loc format", "Long offsets (Offset32)"),
                         ("Glyph Data Format", 0),
-                    ]
+                    ],
                 ),
                 "name": OrderedDict(
                     [
@@ -176,7 +176,7 @@ class AnalyzeFontTestCase(TestCase):
                             ),
                         ),
                         ("License Info URL", "https://scripts.sil.org/OFL"),
-                    ]
+                    ],
                 ),
             },
             result,
@@ -216,7 +216,7 @@ class AnalyzeFontTestCase(TestCase):
                         ),
                         ("Index to Loc format", "Short offsets (Offset16)"),
                         ("Glyph Data Format", 0),
-                    ]
+                    ],
                 ),
                 "name": OrderedDict(
                     [
@@ -238,7 +238,7 @@ class AnalyzeFontTestCase(TestCase):
                             "URL Designer",
                             "http://www.helloerik.com, http://www.artill.de",
                         ),
-                    ]
+                    ],
                 ),
             },
             result,
@@ -275,7 +275,7 @@ class AnalyzeFontTestCase(TestCase):
                         ),
                         ("Index to Loc format", "Long offsets (Offset32)"),
                         ("Glyph Data Format", 0),
-                    ]
+                    ],
                 ),
                 "name": OrderedDict(
                     [
@@ -293,7 +293,7 @@ class AnalyzeFontTestCase(TestCase):
                         ("URL Vendor", "https://fontawesome.com"),
                         ("Typographic Family name", "Font Awesome 6 Free"),
                         ("Typographic Subfamily name", "Solid"),
-                    ]
+                    ],
                 ),
             },
             result,
@@ -330,7 +330,7 @@ class AnalyzeFontTestCase(TestCase):
                         ),
                         ("Index to Loc format", "Short offsets (Offset16)"),
                         ("Glyph Data Format", 0),
-                    ]
+                    ],
                 ),
                 "name": OrderedDict(
                     [
@@ -348,7 +348,7 @@ class AnalyzeFontTestCase(TestCase):
                         ("URL Vendor", "https://fontawesome.com"),
                         ("Typographic Family name", "Font Awesome 6 Free"),
                         ("Typographic Subfamily name", "Regular"),
-                    ]
+                    ],
                 ),
             },
             result,
@@ -371,7 +371,7 @@ class CheckFontTestCase(TestCase):
             return _result
 
         with get_file("Carlito-Regular.ttf") as ttf_path, mock.patch.object(
-                font_tools, "analyze_font", side_effect=analyze_font
+                font_tools, "analyze_font", side_effect=analyze_font,
         ):
             result = font_tools.check_font(ttf_path)
         self.assertIsNone(result)
@@ -403,7 +403,7 @@ class DumpToTtxTestCase(TestCase):
             with NamedTemporaryFile(suffix=".ttx") as target:
                 target_path = Path(target.name)
                 result = font_tools.dump_to_ttx(
-                    source_path=path, target_path=target_path
+                    source_path=path, target_path=target_path,
                 )
                 self.assertEqual(target_path, result)
 

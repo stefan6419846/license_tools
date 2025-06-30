@@ -12,9 +12,10 @@ import atexit
 import math
 import shutil
 from collections import defaultdict
+from collections.abc import Generator
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
-from typing import BinaryIO, cast, Generator
+from typing import BinaryIO, cast
 
 import scancode_config  # type: ignore[import-untyped]
 from joblib import Parallel, delayed  # type: ignore[import-untyped]
@@ -89,7 +90,10 @@ class RetrievalFlags:
         :param: If enabled, return kwargs instead of the integer value.
         :return: The value for all flags enabled.
         """
-        value = cls.to_int(True, True, True, True, True, True, True, True, True)
+        value = cls.to_int(
+            retrieve_copyrights=True, retrieve_emails=True, retrieve_file_info=True, retrieve_urls=True, retrieve_ldd_data=True, retrieve_font_data=True,
+            retrieve_python_metadata=True, retrieve_cargo_metadata=True, retrieve_image_metadata=True,
+        )
         if as_kwargs:
             return cls.to_kwargs(value)
         return value
@@ -113,17 +117,17 @@ class RetrievalFlags:
         :param flags: The flags to convert.
         :return: The associated keyword arguments.
         """
-        return dict(
-            retrieve_copyrights=cls.is_set(flags=flags, flag=cls.COPYRIGHTS),
-            retrieve_emails=cls.is_set(flags=flags, flag=cls.EMAILS),
-            retrieve_file_info=cls.is_set(flags=flags, flag=cls.FILE_INFO),
-            retrieve_urls=cls.is_set(flags=flags, flag=cls.URLS),
-            retrieve_ldd_data=cls.is_set(flags=flags, flag=cls.LDD_DATA),
-            retrieve_font_data=cls.is_set(flags=flags, flag=cls.FONT_DATA),
-            retrieve_python_metadata=cls.is_set(flags=flags, flag=cls.PYTHON_METADATA),
-            retrieve_cargo_metadata=cls.is_set(flags=flags, flag=cls.CARGO_METADATA),
-            retrieve_image_metadata=cls.is_set(flags=flags, flag=cls.IMAGE_METADATA),
-        )
+        return {
+            "retrieve_copyrights": cls.is_set(flags=flags, flag=cls.COPYRIGHTS),
+            "retrieve_emails": cls.is_set(flags=flags, flag=cls.EMAILS),
+            "retrieve_file_info": cls.is_set(flags=flags, flag=cls.FILE_INFO),
+            "retrieve_urls": cls.is_set(flags=flags, flag=cls.URLS),
+            "retrieve_ldd_data": cls.is_set(flags=flags, flag=cls.LDD_DATA),
+            "retrieve_font_data": cls.is_set(flags=flags, flag=cls.FONT_DATA),
+            "retrieve_python_metadata": cls.is_set(flags=flags, flag=cls.PYTHON_METADATA),
+            "retrieve_cargo_metadata": cls.is_set(flags=flags, flag=cls.CARGO_METADATA),
+            "retrieve_image_metadata": cls.is_set(flags=flags, flag=cls.IMAGE_METADATA),
+        }
 
 
 def _run_on_archive_file(path: Path, short_path: str, default_to_none: bool = False) -> FileResults | None:
@@ -135,7 +139,6 @@ def _run_on_archive_file(path: Path, short_path: str, default_to_none: bool = Fa
     :param default_to_none: Return `None` if no results could be determined instead of an empty entry.
     :return: Explicitly declared results.
     """
-
     if path.suffix == ".rpm" or (path.suffixes and ".rpm" in path.suffixes):
         rpm_results = PackageResults.from_rpm(path)
         if rpm_results.declared_license_expression_spdx:
@@ -152,7 +155,7 @@ def _run_on_archive_file(path: Path, short_path: str, default_to_none: bool = Fa
 
 def _get_dummy_file_results(
         path: Path,
-        short_path: str
+        short_path: str,
 ) -> FileResults:
     """
     Get some empty dummy license results, which allows displaying the file in the
@@ -189,7 +192,7 @@ def run_on_file(
         # values.
         return cast(
             FileResults,
-            _run_on_archive_file(path=path, short_path=short_path, default_to_none=False)
+            _run_on_archive_file(path=path, short_path=short_path, default_to_none=False),
         )
 
     retrieval_kwargs = RetrievalFlags.to_kwargs(flags=retrieval_flags)
@@ -297,7 +300,7 @@ def run_on_package_archive_file(
 
     with TemporaryDirectory() as working_directory:
         if not archive_utils.can_extract(archive_path):
-            raise ValueError(f'Unsupported archive format: {archive_path}')
+            raise ValueError(f"Unsupported archive format: {archive_path}")
         archive_utils.extract(archive_path=archive_path, target_directory=Path(working_directory))
 
         if RetrievalFlags.is_set(flags=retrieval_flags, flag=RetrievalFlags.PYTHON_METADATA):
@@ -366,7 +369,7 @@ def run_on_downloaded_package_file(
             index_url=index_url,
             prefer_sdist=prefer_sdist,
         )
-        name = list(Path(download_directory).glob("*"))[0]
+        name = next(Path(download_directory).glob("*"))
         yield from run_on_package_archive_file(
             archive_path=name.resolve(),
             job_count=job_count,
@@ -430,7 +433,7 @@ def run(
     atexit.register(scancode_tools.cleanup, scancode_config.scancode_temp_dir)
 
     assert _check_that_exactly_one_value_is_set(
-        [directory, file_path, archive_path, package_definition, download_url]
+        [directory, file_path, archive_path, package_definition, download_url],
     ), "Exactly one source is required."
 
     license_counts: dict[str | None, int] = defaultdict(int)
@@ -455,7 +458,7 @@ def run(
                 retrieval_flags=retrieval_flags,
                 job_count=job_count,
                 prefer_sdist=prefer_sdist,
-            )
+            ),
         )
     elif directory:
         results = list(
@@ -463,7 +466,7 @@ def run(
                 directory=str(directory),
                 retrieval_flags=retrieval_flags,
                 job_count=job_count,
-            )
+            ),
         )
     elif archive_path:
         results = list(
@@ -471,7 +474,7 @@ def run(
                 archive_path=Path(archive_path),
                 retrieval_flags=retrieval_flags,
                 job_count=job_count,
-            )
+            ),
         )
     elif download_url:
         results = list(
@@ -479,7 +482,7 @@ def run(
                 download_url=download_url,
                 retrieval_flags=retrieval_flags,
                 job_count=job_count,
-            )
+            ),
         )
     elif file_path:
         results = [
@@ -487,7 +490,7 @@ def run(
                 path=Path(file_path),
                 short_path=str(file_path),
                 retrieval_flags=retrieval_flags,
-            )
+            ),
          ]
     else:
         return []
@@ -517,7 +520,7 @@ def run(
     count_length = int(count_length) + 1
     for identifier in sorted(license_counts, key=str):
         print(
-            f"{identifier!s:>70}", f"{license_counts[identifier]:>{count_length + 1}d}"
+            f"{identifier!s:>70}", f"{license_counts[identifier]:>{count_length + 1}d}",
         )
 
     return results
