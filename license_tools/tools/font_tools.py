@@ -19,7 +19,6 @@ from fontTools.ttLib import TTFont  # type: ignore[import-untyped]
 from fontTools.ttLib.tables._h_e_a_d import table__h_e_a_d as HeadTable  # type: ignore[import-untyped]  # noqa: N812
 from fontTools.ttLib.tables._n_a_m_e import table__n_a_m_e as NameTable  # type: ignore[import-untyped]  # noqa: N812
 
-
 # https://learn.microsoft.com/en-us/typography/opentype/spec/name#name-ids
 _TTF_NAME_IDS: list[str] = [
     "Copyright notice",
@@ -92,7 +91,7 @@ def convert_timestamp_to_datetime(value: int) -> datetime.datetime:
     :return: The regular datetime object.
     """
     return datetime.datetime.fromtimestamp(
-        max(0, value) + timeTools.epoch_diff, tz=datetime.timezone.utc
+        max(0, value) + timeTools.epoch_diff, tz=datetime.timezone.utc,
     )
 
 
@@ -266,10 +265,9 @@ def check_font(path: Path) -> str | None:
     if not names:
         return None
     maximum_length = max(map(len, names.keys()))
-    rendered = "\n".join(
+    return "\n".join(
         f"{key:>{maximum_length}}: {value}" for key, value in names.items()
     )
-    return rendered
 
 
 def dump_to_ttx(source_path: Path, target_path: Path) -> Path:

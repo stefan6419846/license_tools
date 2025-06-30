@@ -6,8 +6,8 @@ from __future__ import annotations
 
 import datetime
 from pathlib import Path
-from tempfile import mkdtemp, NamedTemporaryFile
-from typing import cast, Dict
+from tempfile import NamedTemporaryFile, mkdtemp
+from typing import cast
 from unittest import TestCase
 
 from faker import Faker
@@ -21,8 +21,12 @@ from license_tools.tools.scancode_tools import (
     FileInfo,
     FileResults,
     Holder,
-    LicenseDetection, LicenseMatch, Licenses,
-    PackageResults, Party, Url,
+    LicenseDetection,
+    LicenseMatch,
+    Licenses,
+    PackageResults,
+    Party,
+    Url,
     Urls,
 )
 from tests import get_from_url
@@ -35,7 +39,7 @@ class LicensesTestCase(TestCase):
         self.assertEqual([100.0, 100.0], result)
 
         file_results = FileResults(
-            path=LICENSE_PATH, short_path="LICENSE.txt", retrieve_licenses=True
+            path=LICENSE_PATH, short_path="LICENSE.txt", retrieve_licenses=True,
         )
         licenses = cast(Licenses, file_results.licenses)
         result = licenses.get_scores_of_detected_license_expression_spdx()
@@ -44,7 +48,7 @@ class LicensesTestCase(TestCase):
 
 class FileResultsTestCase(TestCase):
     def assert_not_requested(
-        self, result: FileResults, fields: list[str], invert: bool = False
+        self, result: FileResults, fields: list[str], invert: bool = False,
     ) -> None:
         method = self.assertIsNotNone if invert else self.assertIsNone
         for field in fields:
@@ -52,7 +56,7 @@ class FileResultsTestCase(TestCase):
                 method(getattr(result, field))
 
     def test_full(self) -> None:
-        flags = cast(Dict[str, bool], RetrievalFlags.all(as_kwargs=True))
+        flags = cast(dict[str, bool], RetrievalFlags.all(as_kwargs=True))
         del flags["retrieve_ldd_data"]
         del flags["retrieve_font_data"]
         del flags["retrieve_python_metadata"]
@@ -85,18 +89,18 @@ class FileResultsTestCase(TestCase):
 
     def test_retrieve_copyrights(self) -> None:
         result = scancode_tools.FileResults(
-            path=SETUP_PATH, short_path="setup.py", retrieve_copyrights=True
+            path=SETUP_PATH, short_path="setup.py", retrieve_copyrights=True,
         )
         self.assertEqual(SETUP_PATH, result.path)
         self.assertEqual("setup.py", result.short_path)
         self.assert_not_requested(
-            result=result, fields=["emails", "urls", "licenses", "file_info"]
+            result=result, fields=["emails", "urls", "licenses", "file_info"],
         )
         expected = Copyrights(
             copyrights=[
                 Copyright(
-                    copyright="Copyright (c) stefan6419846", start_line=1, end_line=1
-                )
+                    copyright="Copyright (c) stefan6419846", start_line=1, end_line=1,
+                ),
             ],
             holders=[Holder(holder="stefan6419846", start_line=1, end_line=1)],
             authors=[],
@@ -107,24 +111,24 @@ class FileResultsTestCase(TestCase):
         with NamedTemporaryFile(mode="w+t") as source_file:
             fake = Faker()
             for _ in range(123):
-                source_file.write(f'Copyright (c) {fake.year()} {fake.name()}\n')
+                source_file.write(f"Copyright (c) {fake.year()} {fake.name()}\n")
             source_file.flush()
             source_file.seek(0)
 
             result = scancode_tools.FileResults(
-                path=Path(source_file.name), short_path='dummy.txt', retrieve_copyrights=True
+                path=Path(source_file.name), short_path="dummy.txt", retrieve_copyrights=True,
             )
             self.assertIsNotNone(result.copyrights)
             self.assertEqual(123, len(cast(Copyrights, result.copyrights).copyrights), result.copyrights)
 
     def test_retrieve_emails(self) -> None:
         result = scancode_tools.FileResults(
-            path=SETUP_PATH, short_path="setup.py", retrieve_emails=True
+            path=SETUP_PATH, short_path="setup.py", retrieve_emails=True,
         )
         self.assertEqual(SETUP_PATH, result.path)
         self.assertEqual("setup.py", result.short_path)
         self.assert_not_requested(
-            result=result, fields=["copyrights", "urls", "licenses", "file_info"]
+            result=result, fields=["copyrights", "urls", "licenses", "file_info"],
         )
         expected = Emails(emails=[])
         self.assertEqual(expected, result.emails)
@@ -135,30 +139,30 @@ class FileResultsTestCase(TestCase):
             for _ in range(123):
                 # `fake.email()` does not work here, as `cluecode.finder.find_emails` will filter `example.org`
                 # for example due to `cluecode.finder_data.JUNK*`.
-                source_file.write(f'{fake.company_email()}\n')
+                source_file.write(f"{fake.company_email()}\n")
             source_file.flush()
             source_file.seek(0)
 
             result = scancode_tools.FileResults(
-                path=Path(source_file.name), short_path='dummy.txt', retrieve_emails=True
+                path=Path(source_file.name), short_path="dummy.txt", retrieve_emails=True,
             )
             self.assertIsNotNone(result.emails)
             self.assertEqual(50, len(cast(Emails, result.emails).emails), result.emails)
 
             result = scancode_tools.FileResults(
-                path=Path(source_file.name), short_path='dummy.txt', retrieve_emails=True, email_limit=None,
+                path=Path(source_file.name), short_path="dummy.txt", retrieve_emails=True, email_limit=None,
             )
             self.assertIsNotNone(result.emails)
             self.assertEqual(123, len(cast(Emails, result.emails).emails), result.emails)
 
     def test_retrieve_urls(self) -> None:
         result = scancode_tools.FileResults(
-            path=SETUP_PATH, short_path="setup.py", retrieve_urls=True
+            path=SETUP_PATH, short_path="setup.py", retrieve_urls=True,
         )
         self.assertEqual(SETUP_PATH, result.path)
         self.assertEqual("setup.py", result.short_path)
         self.assert_not_requested(
-            result=result, fields=["copyrights", "emails", "licenses", "file_info"]
+            result=result, fields=["copyrights", "emails", "licenses", "file_info"],
         )
         expected = Urls(
             urls=[
@@ -172,7 +176,7 @@ class FileResultsTestCase(TestCase):
                     start_line=21,
                     end_line=21,
                 ),
-            ]
+            ],
         )
         self.assertEqual(expected, result.urls)
 
@@ -181,18 +185,18 @@ class FileResultsTestCase(TestCase):
             fake = Faker()
             for i in range(123):
                 # Without the index, the generated URLs tend to not be unique with 123 generated values.
-                source_file.write(f'{fake.url()}{i}\n')
+                source_file.write(f"{fake.url()}{i}\n")
             source_file.flush()
             source_file.seek(0)
 
             result = scancode_tools.FileResults(
-                path=Path(source_file.name), short_path='dummy.txt', retrieve_urls=True
+                path=Path(source_file.name), short_path="dummy.txt", retrieve_urls=True,
             )
             self.assertIsNotNone(result.urls)
             self.assertEqual(50, len(cast(Urls, result.urls).urls), result.urls)
 
             result = scancode_tools.FileResults(
-                path=Path(source_file.name), short_path='dummy.txt', retrieve_urls=True, url_limit=None,
+                path=Path(source_file.name), short_path="dummy.txt", retrieve_urls=True, url_limit=None,
             )
             self.assertIsNotNone(result.urls)
             self.assertEqual(123, len(cast(Urls, result.urls).urls), result.urls)
@@ -200,12 +204,12 @@ class FileResultsTestCase(TestCase):
     def test_retrieve_licenses(self) -> None:
         self.maxDiff = None
         result = scancode_tools.FileResults(
-            path=SETUP_PATH, short_path="setup.py", retrieve_licenses=True
+            path=SETUP_PATH, short_path="setup.py", retrieve_licenses=True,
         )
         self.assertEqual(SETUP_PATH, result.path)
         self.assertEqual("setup.py", result.short_path)
         self.assert_not_requested(
-            result=result, fields=["copyrights", "emails", "urls", "file_info"]
+            result=result, fields=["copyrights", "emails", "urls", "file_info"],
         )
         self.assertEqual(SETUP_PY_LICENSES, result.licenses)
 
@@ -214,13 +218,13 @@ class FileResultsTestCase(TestCase):
             path = Path(file_object.name)
             path.write_text('print("Hello World!")\n')
             result = scancode_tools.FileResults(
-                path=path, short_path="test.py", retrieve_file_info=True
+                path=path, short_path="test.py", retrieve_file_info=True,
             )
 
         self.assertEqual(path, result.path)
         self.assertEqual("test.py", result.short_path)
         self.assert_not_requested(
-            result=result, fields=["copyrights", "emails", "urls", "licenses"]
+            result=result, fields=["copyrights", "emails", "urls", "licenses"],
         )
         expected = FileInfo(
             date=datetime.date.today(),
@@ -248,42 +252,42 @@ class PackageResultsTestCase(TestCase):
             results = PackageResults.from_rpm(rpm_path)
         self.assertEqual(
             PackageResults(
-                api_data_url=None, bug_tracking_url=None, code_view_url=None, copyright=None, datasource_id='rpm_archive',
-                declared_license_expression='lgpl-2.1-plus', declared_license_expression_spdx='LGPL-2.1-or-later',
+                api_data_url=None, bug_tracking_url=None, code_view_url=None, copyright=None, datasource_id="rpm_archive",
+                declared_license_expression="lgpl-2.1-plus", declared_license_expression_spdx="LGPL-2.1-or-later",
                 description=(
                     'Linux-Native Asynchronous I/O Access Library\nThe Linux-native asynchronous I/O facility ("async I/O", or "aio") has\n'
                     'a richer API and capability set than the simple POSIX async I/O\nfacility. This library provides the Linux-native API for async I/O. '
                     'The\nPOSIX async I/O facility requires this library to provide\nkernel-accelerated async I/O capabilities, as do applications that\n'
                     'require the Linux-native async I/O API.'
                 ),
-                download_url=None, extracted_license_statement='LGPL-2.1+', holder=None,
-                homepage_url='http://kernel.org/pub/linux/libs/aio/', keywords=[],
+                download_url=None, extracted_license_statement="LGPL-2.1+", holder=None,
+                homepage_url="http://kernel.org/pub/linux/libs/aio/", keywords=[],
                 license_detections=[
                     LicenseDetection(
-                        license_expression='lgpl-2.1-plus', license_expression_spdx='LGPL-2.1-or-later',
-                        identifier='lgpl_2_1_plus-d0bddf88-13b4-4982-bdf5-ce866a0e8394',
+                        license_expression="lgpl-2.1-plus", license_expression_spdx="LGPL-2.1-or-later",
+                        identifier="lgpl_2_1_plus-d0bddf88-13b4-4982-bdf5-ce866a0e8394",
                         matches=[
                             LicenseMatch(
-                                score=100.0, start_line=1, end_line=1, matched_length=3, match_coverage=100.0, matcher='1-hash',
-                                license_expression='lgpl-2.1-plus', rule_identifier='lgpl-2.1-plus_64.RULE', rule_relevance=100,
-                                rule_url='https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/lgpl-2.1-plus_64.RULE',
-                                matched_text='LGPL-2.1+',
-                                license_expression_spdx='LGPL-2.1-or-later', from_file=None,
-                            )
-                        ]
-                    )
+                                score=100.0, start_line=1, end_line=1, matched_length=3, match_coverage=100.0, matcher="1-hash",
+                                license_expression="lgpl-2.1-plus", rule_identifier="lgpl-2.1-plus_64.RULE", rule_relevance=100,
+                                rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/lgpl-2.1-plus_64.RULE",
+                                matched_text="LGPL-2.1+",
+                                license_expression_spdx="LGPL-2.1-or-later", from_file=None,
+                            ),
+                        ],
+                    ),
                 ],
-                md5=None, name='libaio1', namespace=None, notice_text=None, other_license_detections=[], other_license_expression=None,
+                md5=None, name="libaio1", namespace=None, notice_text=None, other_license_detections=[], other_license_expression=None,
                 other_license_expression_spdx=None,
                 parties=[
-                    Party(type=None, role='distributor', name='SUSE Linux Enterprise 15', email=None, url=None),
-                    Party(type=None, role='vendor', name='SUSE LLC <https://www.suse.com/>', email=None, url=None)
+                    Party(type=None, role="distributor", name="SUSE Linux Enterprise 15", email=None, url=None),
+                    Party(type=None, role="vendor", name="SUSE LLC <https://www.suse.com/>", email=None, url=None),
                 ],
-                primary_language=None, purl='pkg:rpm/libaio1@0.3.109-1.25', qualifiers={}, release_date=None,
+                primary_language=None, purl="pkg:rpm/libaio1@0.3.109-1.25", qualifiers={}, release_date=None,
                 repository_download_url=None, repository_homepage_url=None, sha1=None, sha256=None, sha512=None, size=None,
-                source_packages=['pkg:rpm/libaio@0.3.109-1.25?arch=src'], subpath=None, type='rpm', vcs_url=None, version='0.3.109-1.25'
+                source_packages=["pkg:rpm/libaio@0.3.109-1.25?arch=src"], subpath=None, type="rpm", vcs_url=None, version="0.3.109-1.25",
             ),
-            results
+            results,
         )
 
 

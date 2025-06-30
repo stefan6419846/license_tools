@@ -20,7 +20,7 @@ class ExtractTestCase(TestCase):
         with get_from_url(LIBAIO1__0_3_109_1_25__RPM) as path, TemporaryDirectory() as tempdir:
             directory = Path(tempdir)
             rpm_tools.extract(
-                archive_path=path, target_path=directory
+                archive_path=path, target_path=directory,
             )
             actual = [x[1] for x in get_files_from_directory(directory)]
             self.assertEqual(
@@ -197,7 +197,7 @@ Index Into File Dependencies Dictionary Denoting Start Of File's Dependencies: [
                                    Cryptographic Digest Of Compressed Payload: ['f001b298e5add90e4d2fdbc442b92b8aae7beb5fac77159a5baa33fb7217d48a']
                                                      Payload Digest Algorithm: <FileDigestAlgorithm.SHA512: 8>
 """[1:-1].format(file_flags=file_flags, file_verification_flags=file_verification_flags, required_names_flags=required_names_flags),  # noqa: E501
-            results
+            results,
         )
 
     def test_source(self) -> None:
@@ -281,5 +281,5 @@ require the Linux-native async I/O API.
 Cryptographic Digest Of Compressed Payload: ['75c03228af86b5aa125966962a19ec402ab330054264f74a4d877dd357a46c26']
                   Payload Digest Algorithm: <FileDigestAlgorithm.SHA512: 8>
 """[1:-1].format(file_flags=file_flags, file_verification_flags=file_verification_flags, required_names_flags=required_names_flags),  # noqa: E501
-            results
+            results,
         )

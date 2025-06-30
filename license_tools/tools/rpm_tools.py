@@ -8,6 +8,7 @@ Tools related to RPM files.
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 import logging
 import stat
@@ -437,6 +438,7 @@ class FileFlags(IntFlag):
     """
     Flags used to indicate the file types.
     """
+
     # https://refspecs.linuxbase.org/LSB_3.1.0/LSB-Core-generic/LSB-Core-generic/pkgformat.html, section 22.2.4.3.1
     # https://github.com/eclipse/packager/blob/e481c63dd76b112b3924d93e39ab6e791e60a41b/rpm/src/main/java/org/eclipse/packager/rpm/FileFlags.java
     CONFIG = 1 << 0
@@ -458,6 +460,7 @@ class VerifyFlags(IntFlag):
     """
     Flags used to indicate how to verify the file.
     """
+
     # https://github.com/eclipse/packager/blob/e481c63dd76b112b3924d93e39ab6e791e60a41b/rpm/src/main/java/org/eclipse/packager/rpm/VerifyFlags.java
     MD5 = 1 << 0
     SIZE = 1 << 1
@@ -474,6 +477,7 @@ class DependencyFlags(IntFlag):
     """
     Flags used to indicate how to handle dependency relationships.
     """
+
     # https://refspecs.linuxbase.org/LSB_3.1.0/LSB-Core-generic/LSB-Core-generic/pkgformat.html, section 22.2.4.4.2
     # https://github.com/rpm-software-management/rpm/blob/f1b68c9e7672a2af8251d611f61c4ab17fcd3ea8/include/rpm/rpmds.h#L22-L53
     ANY = 0
@@ -512,6 +516,7 @@ class FileColor(IntEnum):
     """
     Enumeration of file "color"/types.
     """
+
     ELF_32_BIT = 1
     ELF_64_BIT = 2
     OTHER = 0
@@ -521,6 +526,7 @@ class FileDigestAlgorithm(IntEnum):
     """
     Enumeration of allowed file digest algorithms.
     """
+
     # https://docs.rs/rpm-rs/latest/rpm/enum.FileDigestAlgorithm.html
     MD5 = 0
     SHA1 = 1
@@ -538,6 +544,7 @@ class FileModes(IntEnum):
     """
     Enumeration of known file modes.
     """
+
     # File types.
     IS_DIRECTORY = stat.S_IFDIR
     IS_CHARACTER_DEVICE = stat.S_IFCHR
@@ -583,9 +590,8 @@ class FileModes(IntEnum):
             if name.startswith("IS_"):
                 if st_type == value:
                     result.append(name)
-            else:
-                if st_mode & value == value:
-                    result.append(name)
+            elif st_mode & value == value:
+                result.append(name)
         return result
 
 
@@ -599,10 +605,8 @@ def _convert_header_value(key: str, value: Any) -> Any:
     """
     # Attempt to decode bytes.
     if isinstance(value, bytes):
-        try:
+        with contextlib.suppress(UnicodeDecodeError):
             value = value.decode("UTF-8")
-        except UnicodeDecodeError:
-            pass
 
     # Do not differentiate between lists and tuples.
     if isinstance(value, tuple):
@@ -610,10 +614,8 @@ def _convert_header_value(key: str, value: Any) -> Any:
 
     # Attempt to decode lists of strings.
     if isinstance(value, list) and value and isinstance(value[0], bytes):
-        try:
+        with contextlib.suppress(UnicodeDecodeError):
             value = [entry.decode("UTF-8") for entry in value]
-        except UnicodeDecodeError:
-            pass
 
     # Convert UTC timestamps.
     if key == "buildtime":
@@ -644,7 +646,7 @@ def _convert_header_value(key: str, value: Any) -> Any:
         return ["<FileModes." + "|".join(FileModes.make_verbose(mode)) + f": {mode}>" for mode in value]
 
     # TODO: These are just null bytes. Is this value correct?
-    if key == 'reservedspace':
+    if key == "reservedspace":
         return len(value)
 
     # Keep the value without further conversion.
@@ -691,7 +693,6 @@ def check_rpm_headers(path: Path) -> str | None:
             return repr(v)
         return str(v)
 
-    rendered = "\n".join(
+    return "\n".join(
         f"{key:>{maximum_length}}: {display(value)}" for key, value in header_data.items()
     )
-    return rendered

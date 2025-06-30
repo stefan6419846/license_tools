@@ -35,7 +35,7 @@ def render_dictionary(dictionary: dict[str, Any], verbose_names_mapping: dict[st
             elif not value:
                 rendered.append(f"{verbose_name:>{maximum_length}}:")
             else:
-                value = "\n" + "\n".join(map(lambda x: " " * maximum_length + f"   * {x}", sorted(value)))
+                value = "\n" + "\n".join(" " * maximum_length + f"   * {x}" for x in sorted(value))
                 rendered.append(f"{verbose_name:>{maximum_length}}:{value}")
         else:
             rendered.append(f"{verbose_name:>{maximum_length}}: {value}")

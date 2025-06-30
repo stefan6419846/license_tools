@@ -4,8 +4,6 @@
 
 from pathlib import Path
 
-from tests import Download
-
 from license_tools.tools.scancode_tools import (
     FileResults,
     LicenseClue,
@@ -13,7 +11,7 @@ from license_tools.tools.scancode_tools import (
     LicenseMatch,
     Licenses,
 )
-
+from tests import Download
 
 SETUP_PATH = Path(__file__).parent / "files" / "setup.py"
 LICENSE_PATH = Path(__file__).parent.parent / "LICENSE.txt"
@@ -154,7 +152,7 @@ SETUP_PY_LICENSES = Licenses(
                     rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/apache-2.0_65.RULE",
                     from_file=None,
                     matched_text=None,
-                )
+                ),
             ],
         ),
         LicenseDetection(
@@ -176,7 +174,7 @@ SETUP_PY_LICENSES = Licenses(
                     rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/pypi_apache_no-version.RULE",
                     from_file=None,
                     matched_text=None,
-                )
+                ),
             ],
         ),
     ],
@@ -272,7 +270,7 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
                             rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/python_63.RULE",
                             from_file=None,
                             matched_text=None,
-                        )
+                        ),
                     ],
                 ),
                 LicenseDetection(
@@ -346,7 +344,7 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
                             rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/gpl_194.RULE",
                             from_file=None,
                             matched_text=None,
-                        )
+                        ),
                     ],
                 ),
                 LicenseDetection(
@@ -368,7 +366,7 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
                             rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/gpl-1.0-plus_351.RULE",
                             from_file=None,
                             matched_text=None,
-                        )
+                        ),
                     ],
                 ),
                 LicenseDetection(
@@ -390,7 +388,7 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
                             rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/python_16.RULE",
                             from_file=None,
                             matched_text=None,
-                        )
+                        ),
                     ],
                 ),
                 LicenseDetection(
@@ -582,9 +580,9 @@ TYPING_EXTENSION_4_8_0__LICENSES = [
                             rule_relevance=99,
                             rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/pypi_python_software_foundation_license2.RULE",  # noqa: E501
                             from_file=None,
-                        )
+                        ),
                     ],
-                )
+                ),
             ],
             license_clues=[],
         ),

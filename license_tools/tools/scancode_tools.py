@@ -11,7 +11,8 @@ from __future__ import annotations
 
 import atexit
 import datetime
-from dataclasses import dataclass, field as dataclass_field
+from dataclasses import dataclass
+from dataclasses import field as dataclass_field
 from pathlib import Path
 from typing import Literal
 
@@ -355,8 +356,6 @@ class LicenseClue(LicenseMatch):
     Currently the same as :class:`~LicenseMatch`.
     """
 
-    pass
-
 
 @dataclass
 class LicenseDetection:
@@ -433,17 +432,14 @@ class Licenses:
 
         :return: The corresponding scores if they could be resolved.
         """
-        scores = []
         for detection in self.license_detections:
             if (
                 detection.license_expression == self.detected_license_expression
                 or detection.license_expression_spdx
                 == self.detected_license_expression_spdx
             ):
-                for match in detection.matches:
-                    scores.append(match.score)
-                return scores
-        return scores
+                return [match.score for match in detection.matches]
+        return []
 
 
 @dataclass
@@ -676,7 +672,7 @@ class PackageResults:
     """
 
     other_license_detections: list[LicenseDetection] = dataclass_field(
-        default_factory=list
+        default_factory=list,
     )
     """
     Additional license detections.

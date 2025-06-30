@@ -8,12 +8,13 @@ import copy
 import os
 import re
 import tarfile
+from collections.abc import Generator
 from contextlib import contextmanager, redirect_stdout
 from io import StringIO
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
-from typing import Any, cast, Generator
-from unittest import mock, TestCase
+from typing import Any, cast
+from unittest import TestCase, mock
 
 from license_tools import retrieval
 from license_tools.retrieval import RetrievalFlags
@@ -38,23 +39,30 @@ class RetrievalFlagsTestCase(TestCase):
     def test_to_int(self) -> None:
         self.assertEqual(0, RetrievalFlags.to_int())
         self.assertEqual(
-            21, RetrievalFlags.to_int(True, False, True, False, True, False)
+            21, RetrievalFlags.to_int(
+                retrieve_copyrights=True,
+                retrieve_emails=False,
+                retrieve_file_info=True,
+                retrieve_urls=False,
+                retrieve_ldd_data=True,
+                retrieve_font_data=False,
+            ),
         )
 
     def test_all(self) -> None:
         self.assertEqual(511, RetrievalFlags.all())
         self.assertDictEqual(
-            dict(
-                retrieve_copyrights=True,
-                retrieve_emails=True,
-                retrieve_file_info=True,
-                retrieve_urls=True,
-                retrieve_ldd_data=True,
-                retrieve_font_data=True,
-                retrieve_python_metadata=True,
-                retrieve_cargo_metadata=True,
-                retrieve_image_metadata=True,
-            ),
+            {
+                "retrieve_copyrights": True,
+                "retrieve_emails": True,
+                "retrieve_file_info": True,
+                "retrieve_urls": True,
+                "retrieve_ldd_data": True,
+                "retrieve_font_data": True,
+                "retrieve_python_metadata": True,
+                "retrieve_cargo_metadata": True,
+                "retrieve_image_metadata": True,
+            },
             cast(dict[str, bool], RetrievalFlags.all(as_kwargs=True)),
         )
 
@@ -66,31 +74,31 @@ class RetrievalFlagsTestCase(TestCase):
 
     def test_to_kwargs(self) -> None:
         self.assertDictEqual(
-            dict(
-                retrieve_copyrights=False,
-                retrieve_emails=False,
-                retrieve_file_info=False,
-                retrieve_urls=False,
-                retrieve_ldd_data=False,
-                retrieve_font_data=False,
-                retrieve_python_metadata=False,
-                retrieve_cargo_metadata=False,
-                retrieve_image_metadata=False,
-            ),
+            {
+                "retrieve_copyrights": False,
+                "retrieve_emails": False,
+                "retrieve_file_info": False,
+                "retrieve_urls": False,
+                "retrieve_ldd_data": False,
+                "retrieve_font_data": False,
+                "retrieve_python_metadata": False,
+                "retrieve_cargo_metadata": False,
+                "retrieve_image_metadata": False,
+            },
             RetrievalFlags.to_kwargs(0),
         )
         self.assertDictEqual(
-            dict(
-                retrieve_copyrights=True,
-                retrieve_emails=False,
-                retrieve_file_info=True,
-                retrieve_urls=False,
-                retrieve_ldd_data=True,
-                retrieve_font_data=False,
-                retrieve_python_metadata=False,
-                retrieve_cargo_metadata=False,
-                retrieve_image_metadata=False,
-            ),
+            {
+                "retrieve_copyrights": True,
+                "retrieve_emails": False,
+                "retrieve_file_info": True,
+                "retrieve_urls": False,
+                "retrieve_ldd_data": True,
+                "retrieve_font_data": False,
+                "retrieve_python_metadata": False,
+                "retrieve_cargo_metadata": False,
+                "retrieve_image_metadata": False,
+            },
             RetrievalFlags.to_kwargs(21),
         )
 
@@ -112,12 +120,12 @@ class RunOnFileTestCase(TestCase):
 
         file_result = DummyFileResult()
         with mock.patch.object(
-            retrieval, "FileResults", return_value=file_result
+            retrieval, "FileResults", return_value=file_result,
         ) as results_mock, redirect_stdout(stdout), mock.patch(
-            mock_target, return_value=return_value
+            mock_target, return_value=return_value,
         ) as check_mock:
             result = retrieval.run_on_file(
-                path=SETUP_PATH, short_path="setup.py", retrieval_flags=flags
+                path=SETUP_PATH, short_path="setup.py", retrieval_flags=flags,
             )
             self.assertEqual(file_result, result)
         return results_mock, check_mock, stdout.getvalue()
@@ -125,7 +133,7 @@ class RunOnFileTestCase(TestCase):
     def test_run_on_file__ldd_handling(self) -> None:
         # 1) LDD handling is inactive.
         results_mock, check_mock, stdout = self._run_mocked(
-            flags=15, mock_target="license_tools.tools.linking_tools.check_shared_objects"
+            flags=15, mock_target="license_tools.tools.linking_tools.check_shared_objects",
         )
         check_mock.assert_not_called()
         results_mock.assert_called_once_with(
@@ -181,7 +189,7 @@ class RunOnFileTestCase(TestCase):
     def test_run_on_file__font_handling(self) -> None:
         # 1) Font handling is inactive.
         results_mock, check_mock, stdout = self._run_mocked(
-            flags=15, mock_target="license_tools.tools.font_tools.check_font"
+            flags=15, mock_target="license_tools.tools.font_tools.check_font",
         )
         check_mock.assert_not_called()
         results_mock.assert_called_once_with(
@@ -243,7 +251,7 @@ Typographic Subfamily name: Solid
     def test_run_on_file__image_handling(self) -> None:
         # 1) Image handling is inactive.
         results_mock, check_mock, stdout = self._run_mocked(
-            flags=15, mock_target="license_tools.tools.image_tools.check_image_metadata"
+            flags=15, mock_target="license_tools.tools.image_tools.check_image_metadata",
         )
         check_mock.assert_not_called()
         results_mock.assert_called_once_with(
@@ -333,35 +341,35 @@ Typographic Subfamily name: Solid
   Categories: encoding
 
 """[1:],
-                stdout.getvalue()
+                stdout.getvalue(),
             )
             self.assertEqual(
                 FileResults(
-                    path=cargo_toml_path, short_path='/path/to/Cargo.toml', retrieve_copyrights=False, retrieve_emails=False, retrieve_urls=False,
+                    path=cargo_toml_path, short_path="/path/to/Cargo.toml", retrieve_copyrights=False, retrieve_emails=False, retrieve_urls=False,
                     retrieve_licenses=True, retrieve_file_info=False, copyrights=None, emails=None, urls=None,
                     licenses=Licenses(
-                        detected_license_expression='mit OR apache-2.0', detected_license_expression_spdx='MIT OR Apache-2.0',
+                        detected_license_expression="mit OR apache-2.0", detected_license_expression_spdx="MIT OR Apache-2.0",
                         percentage_of_license_text=2.55,
                         license_detections=[
                             LicenseDetection(
-                                license_expression='mit OR apache-2.0', license_expression_spdx='MIT OR Apache-2.0',
-                                identifier='mit_or_apache_2_0-719f8427-422e-8023-c20e-9f8dd0af13b9',
+                                license_expression="mit OR apache-2.0", license_expression_spdx="MIT OR Apache-2.0",
+                                identifier="mit_or_apache_2_0-719f8427-422e-8023-c20e-9f8dd0af13b9",
                                 matches=[
                                     LicenseMatch(
-                                        score=100.0, start_line=11, end_line=11, matched_length=6, match_coverage=100.0, matcher='2-aho',
-                                        license_expression='mit OR apache-2.0', license_expression_spdx='MIT OR Apache-2.0',
-                                        rule_identifier='mit_or_apache-2.0_14.RULE', rule_relevance=100,
-                                        rule_url='https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/mit_or_apache-2.0_14.RULE',
-                                        from_file=None, matched_text=None
-                                    )
-                                ]
-                            )
+                                        score=100.0, start_line=11, end_line=11, matched_length=6, match_coverage=100.0, matcher="2-aho",
+                                        license_expression="mit OR apache-2.0", license_expression_spdx="MIT OR Apache-2.0",
+                                        rule_identifier="mit_or_apache-2.0_14.RULE", rule_relevance=100,
+                                        rule_url="https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/mit_or_apache-2.0_14.RULE",
+                                        from_file=None, matched_text=None,
+                                    ),
+                                ],
+                            ),
                         ],
-                        license_clues=[]
+                        license_clues=[],
                     ),
-                    file_info=None
+                    file_info=None,
                 ),
-                result
+                result,
             )
 
 
@@ -375,20 +383,20 @@ class RunOnDirectoryTestCase(TestCase):
             return next(file_results_iterable)
 
         with mock.patch.object(
-            retrieval, "run_on_file", side_effect=run_on_file
+            retrieval, "run_on_file", side_effect=run_on_file,
         ) as run_mock, mock.patch.object(
-            retrieval, "get_files_from_directory", return_value=paths
+            retrieval, "get_files_from_directory", return_value=paths,
         ) as get_mock:
             results = list(
                 retrieval.run_on_directory(
-                    "/tmp/dummy/directory", job_count=1, retrieval_flags=42
-                )
+                    "/tmp/dummy/directory", job_count=1, retrieval_flags=42,
+                ),
             )
         self.assertListEqual(file_results, results)
         run_mock.assert_has_calls(
             [
                 mock.call(
-                    path=current_path, short_path=current_short_path, retrieval_flags=42
+                    path=current_path, short_path=current_short_path, retrieval_flags=42,
                 )
                 for current_path, current_short_path in paths
             ],
@@ -407,7 +415,7 @@ class RunOnDirectoryTestCase(TestCase):
         return nested_path
 
     def _test_nested(
-            self, result_set: set[Path], directory: Path, nested_path: Path, expected: list[tuple[Path, str]], run_mock: mock.Mock
+            self, result_set: set[Path], directory: Path, nested_path: Path, expected: list[tuple[Path, str]], run_mock: mock.Mock,
     ) -> None:
         self.assertEqual(1, len(result_set), result_set)
         remaining = result_set.pop()
@@ -419,7 +427,7 @@ class RunOnDirectoryTestCase(TestCase):
         run_mock.assert_has_calls(
             [
                 mock.call(
-                    path=current_path, short_path=current_short_path, retrieval_flags=42
+                    path=current_path, short_path=current_short_path, retrieval_flags=42,
                 )
                 for current_path, current_short_path in expected
             ],
@@ -439,17 +447,17 @@ class RunOnDirectoryTestCase(TestCase):
                 return path
 
             with mock.patch.object(
-                retrieval, "run_on_file", side_effect=run_on_file
+                retrieval, "run_on_file", side_effect=run_on_file,
             ) as run_mock:
                 results = list(
                     retrieval.run_on_directory(
-                        tempdir, job_count=1, retrieval_flags=42
-                    )
+                        tempdir, job_count=1, retrieval_flags=42,
+                    ),
                 )
 
             self.assertSetEqual(
                 {"directory", "nested_tar_bz2", "nested.tar.bz2"},
-                {path.name for path in directory.glob("*")}
+                {path.name for path in directory.glob("*")},
             )
 
         result_set: set[Path] = cast(set[Path], set(results))
@@ -459,7 +467,7 @@ class RunOnDirectoryTestCase(TestCase):
             result_set.remove(directory / name)
             expected.append((directory / name, name))
         self._test_nested(
-            result_set=result_set, directory=directory, nested_path=nested_path, expected=expected, run_mock=run_mock
+            result_set=result_set, directory=directory, nested_path=nested_path, expected=expected, run_mock=run_mock,
         )
 
     def test_nested_without_existing_directory(self) -> None:
@@ -473,17 +481,17 @@ class RunOnDirectoryTestCase(TestCase):
                 return path
 
             with mock.patch.object(
-                retrieval, "run_on_file", side_effect=run_on_file
+                retrieval, "run_on_file", side_effect=run_on_file,
             ) as run_mock:
                 results = list(
                     retrieval.run_on_directory(
-                        tempdir, job_count=1, retrieval_flags=42
-                    )
+                        tempdir, job_count=1, retrieval_flags=42,
+                    ),
                 )
 
             self.assertSetEqual(
                 {"directory", "nested.tar.bz2"},
-                {path.name for path in directory.glob("*")}
+                {path.name for path in directory.glob("*")},
             )
 
         result_set: set[Path] = cast(set[Path], set(results))
@@ -493,7 +501,7 @@ class RunOnDirectoryTestCase(TestCase):
             result_set.remove(directory / name)
             expected.append((directory / name, name))
         self._test_nested(
-            result_set=result_set, directory=directory, nested_path=nested_path, expected=expected, run_mock=run_mock
+            result_set=result_set, directory=directory, nested_path=nested_path, expected=expected, run_mock=run_mock,
         )
 
     def test_nested_storage_variant(self) -> None:
@@ -512,25 +520,25 @@ class RunOnDirectoryTestCase(TestCase):
                         tempdir, job_count=1, retrieval_flags=42,
                         allow_random_directory_for_archive=False,
                         delete_unpacked_archive_directories=False,
-                    )
+                    ),
                 )
 
             self.assertSetEqual(
                 {"directory", "nested.tar.bz2", "nested_tar_bz2"},
-                {path.name for path in directory.glob("*")}
+                {path.name for path in directory.glob("*")},
             )
 
             with mock.patch.object(retrieval, "run_on_file", side_effect=run_on_file):
                 with self.assertRaisesRegex(
                         expected_exception=FileExistsError,
-                        expected_regex=fr"^\[Errno 17\] File exists: '{re.escape(str(directory / 'nested_tar_bz2'))}'$"
+                        expected_regex=fr"^\[Errno 17\] File exists: '{re.escape(str(directory / 'nested_tar_bz2'))}'$",
                 ):
                     list(
                         retrieval.run_on_directory(
                             tempdir, job_count=1, retrieval_flags=42,
                             allow_random_directory_for_archive=False,
                             delete_unpacked_archive_directories=False,
-                        )
+                        ),
                     )
 
 
@@ -540,7 +548,7 @@ class RunOnPackageArchiveFileTestCase(TestCase):
             directory_result = [object(), object(), object()]
 
             def run_on_directory(
-                directory: Path, job_count: int, retrieval_flags: int
+                directory: Path, job_count: int, retrieval_flags: int,
             ) -> Generator[Any]:
                 self.assertEqual(2, job_count)
                 self.assertEqual(42, retrieval_flags)
@@ -549,12 +557,12 @@ class RunOnPackageArchiveFileTestCase(TestCase):
                 yield from directory_result
 
             with mock.patch.object(
-                retrieval, "run_on_directory", side_effect=run_on_directory
+                retrieval, "run_on_directory", side_effect=run_on_directory,
             ):
                 result = list(
                     retrieval.run_on_package_archive_file(
-                        archive_path=archive_path, job_count=2, retrieval_flags=42
-                    )
+                        archive_path=archive_path, job_count=2, retrieval_flags=42,
+                    ),
                 )
 
             expected = directory_result
@@ -594,7 +602,7 @@ class RunOnDownloadedArchiveFileTestCase(TestCase):
         directory_result = [object(), object(), object()]
 
         def run_on_package_archive_file(
-            archive_path: Path, job_count: int, retrieval_flags: int
+            archive_path: Path, job_count: int, retrieval_flags: int,
         ) -> Generator[Any]:
             self.assertEqual(2, job_count)
             self.assertEqual(42, retrieval_flags)
@@ -608,8 +616,8 @@ class RunOnDownloadedArchiveFileTestCase(TestCase):
         ):
             result = list(
                 retrieval.run_on_downloaded_archive_file(
-                    download_url=download.url, job_count=2, retrieval_flags=42
-                )
+                    download_url=download.url, job_count=2, retrieval_flags=42,
+                ),
             )
         self.assertEqual(directory_result, result)
 
@@ -625,7 +633,7 @@ class RunOnDownloadedPackageFileTestCase(TestCase):
         archive_result = [object(), object(), object()]
 
         def run_on_package_archive_file(
-            archive_path: Path, job_count: int, retrieval_flags: int, retrieve_python_metadata: bool = False
+            archive_path: Path, job_count: int, retrieval_flags: int, retrieve_python_metadata: bool = False,
         ) -> Generator[Any]:
             self.assertEqual("typing_extensions-4.8.0-py3-none-any.whl", archive_path.name)
             self.assertEqual(3, job_count)
@@ -644,7 +652,7 @@ class RunOnDownloadedPackageFileTestCase(TestCase):
                     index_url="https://pypi.org/simple",
                     job_count=3,
                     retrieval_flags=42,
-                )
+                ),
             )
             self.assertEqual(archive_result, result)
 
@@ -652,7 +660,7 @@ class RunOnDownloadedPackageFileTestCase(TestCase):
         archive_result = [object(), object(), object()]
 
         def run_on_package_archive_file(
-            archive_path: Path, job_count: int, retrieval_flags: int, retrieve_python_metadata: bool = False
+            archive_path: Path, job_count: int, retrieval_flags: int, retrieve_python_metadata: bool = False,
         ) -> Generator[Any]:
             self.assertEqual("typing_extensions-4.8.0.tar.gz", archive_path.name)
             self.assertEqual(3, job_count)
@@ -672,7 +680,7 @@ class RunOnDownloadedPackageFileTestCase(TestCase):
                     job_count=3,
                     retrieval_flags=42,
                     prefer_sdist=True,
-                )
+                ),
             )
             self.assertEqual(archive_result, result)
 
@@ -685,7 +693,7 @@ class CheckThatExactlyOneValueIsSetTestCase(TestCase):
         )
         self.assertIs(False, retrieval._check_that_exactly_one_value_is_set([]))
         self.assertIs(
-            False, retrieval._check_that_exactly_one_value_is_set([None, None])
+            False, retrieval._check_that_exactly_one_value_is_set([None, None]),
         )
 
 
@@ -702,7 +710,7 @@ class RunTestCase(TestCase):
     def record_stdout(self) -> Generator[Stdout]:
         result = Stdout()
         with mock.patch(
-            "shutil.get_terminal_size", return_value=os.terminal_size((100, 20))
+            "shutil.get_terminal_size", return_value=os.terminal_size((100, 20)),
         ), redirect_stdout(result.stdout):
             yield result
 
@@ -769,7 +777,7 @@ License classifiers: Python Software Foundation License
                 ) as run_mock:
                     result = retrieval.run(directory=path, retrieve_ldd_data=True)
             run_mock.assert_called_once_with(
-                directory=directory, retrieval_flags=16, job_count=4
+                directory=directory, retrieval_flags=16, job_count=4,
             )
             self.assertEqual(TYPING_EXTENSION_4_8_0__LICENSES, result)
             self.assertEqual(TYPING_EXTENSION_4_8_0__EXPECTED_OUTPUT, str(stdout))
@@ -828,7 +836,7 @@ License classifiers: Python Software Foundation License
 ====================================================================================================
 
                                                             Apache-2.0  1
-""",  # noqa: W291
+""",
             str(stdout),
         )
 

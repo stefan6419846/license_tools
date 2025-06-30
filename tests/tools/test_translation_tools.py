@@ -62,10 +62,10 @@ class CheckCompiledGettextMetadataTestCase(TestCase):
                 [
                     cast(str, shutil.which("msgfmt")),
                     po_path,
-                    "--output-file", "-"
+                    "--output-file", "-",
                 ],
                 capture_output=True,
-                check=True
+                check=True,
             )
         with NamedTemporaryFile(suffix=".mo") as mo_file:
             mo_file.write(compiled.stdout)

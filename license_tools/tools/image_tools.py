@@ -53,7 +53,7 @@ def check_image_metadata(path: Path) -> str | None:
             "-exclude", "File:Directory",
             "-exclude", "File:FileAccessDate",
             "-exclude", "File:FileInodeChangeDate",
-            path
+            path,
         ],
         stderr=subprocess.PIPE,
     )

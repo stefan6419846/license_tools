@@ -12,7 +12,7 @@ from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from license_tools.tools import pip_tools
 from license_tools.utils import archive_utils
@@ -26,7 +26,7 @@ class AnalyzeMetadataTestCase(TestCase):
         with get_from_url(PYPDF__3_17_4__WHEEL) as path, TemporaryDirectory() as tempdir:
             directory = Path(tempdir)
             archive_utils.extract(
-                archive_path=path, target_directory=directory
+                archive_path=path, target_directory=directory,
             )
 
             result1 = asdict(pip_tools.analyze_metadata(directory / "pypdf-3.17.4.dist-info"))
@@ -48,7 +48,7 @@ class CheckMetadataTestCase(TestCase):
         with get_from_url(PYPDF__3_17_4__WHEEL) as path, TemporaryDirectory() as tempdir:
             directory = Path(tempdir)
             archive_utils.extract(
-                archive_path=path, target_directory=directory
+                archive_path=path, target_directory=directory,
             )
             result = pip_tools.check_metadata(directory)
             self.assertEqual(f"""
@@ -88,7 +88,7 @@ License classifiers: BSD License
         with get_from_url(JWCRYPTO__1_5_4__TAR_GZ) as path, TemporaryDirectory() as tempdir:
             directory = Path(tempdir)
             archive_utils.extract(
-                archive_path=path, target_directory=directory
+                archive_path=path, target_directory=directory,
             )
             result = pip_tools.check_metadata(directory)
             self.assertEqual(f"""
@@ -115,12 +115,12 @@ class DownloadPackageTestCase(TestCase):
             pip_tools.download_package(
                 package_definition="typing_extensions==4.8.0",
                 index_url="https://pypi.org/simple",
-                download_directory=directory
+                download_directory=directory,
             )
             actual = [x[1] for x in get_files_from_directory(directory)]
             self.assertEqual(
                 ["typing_extensions-4.8.0-py3-none-any.whl"],
-                actual
+                actual,
             )
 
         self.assertEqual("", stderr.getvalue())
@@ -133,12 +133,12 @@ class DownloadPackageTestCase(TestCase):
                 package_definition="typing_extensions==4.8.0",
                 index_url="https://pypi.org/simple",
                 download_directory=directory,
-                prefer_sdist=True
+                prefer_sdist=True,
             )
             actual = [x[1] for x in get_files_from_directory(directory)]
             self.assertEqual(
                 ["typing_extensions-4.8.0.tar.gz"],
-                actual
+                actual,
             )
 
         self.assertEqual("", stderr.getvalue())
@@ -151,12 +151,12 @@ class DownloadPackageTestCase(TestCase):
                 pip_tools.download_package(
                     package_definition="typing_extensions==1234567890",
                     index_url="https://pypi.org/simple",
-                    download_directory=directory
+                    download_directory=directory,
                 )
             actual = [x[1] for x in get_files_from_directory(directory)]
             self.assertEqual(
                 [],
-                actual
+                actual,
             )
 
         stderr_string = stderr.getvalue()
@@ -174,7 +174,7 @@ class DownloadPackageTestCase(TestCase):
         directories = []
 
         def run(
-            command: list[str | Path], *args: Any, **kwargs: Any
+            command: list[str | Path], *args: Any, **kwargs: Any,
         ) -> subprocess.CompletedProcess[bytes]:
             _directory = command[command.index("--dest") + 1]
             directories.append(_directory)
@@ -184,7 +184,7 @@ class DownloadPackageTestCase(TestCase):
         with mock.patch("subprocess.run", side_effect=run) as subprocess_mock:
             with TemporaryDirectory() as directory:
                 pip_tools.download_package(
-                    package_definition="testing", download_directory=directory
+                    package_definition="testing", download_directory=directory,
                 )
             with TemporaryDirectory() as directory:
                 pip_tools.download_package(
@@ -231,5 +231,5 @@ class DownloadPackageTestCase(TestCase):
                 any_order=False,
             )
             self.assertEqual(
-                2, subprocess_mock.call_count, subprocess_mock.call_args_list
+                2, subprocess_mock.call_count, subprocess_mock.call_args_list,
             )
