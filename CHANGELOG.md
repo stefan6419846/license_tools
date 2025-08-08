@@ -1,5 +1,7 @@
 # Development version
 
+# Version 0.17.0 - 2025-08-08
+
 * Fix compatibility with `scancode-toolkit==32.4.0` and its output format version 4.1.0.
 * Add support for retrieving details from the TTF files embedded into EOT files.
 
