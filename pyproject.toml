@@ -12,7 +12,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "license_tools"
 description = "Collection of tools for working with Open Source licenses"
-version = "0.16.0"
+version = "0.17.0"
 license = "Apache-2.0"
 readme = {file = "README.md", content-type = "text/markdown"}
 authors = [
@@ -40,6 +40,7 @@ dependencies = [
     "scancode-toolkit>=32.3.0",
     "typecode-libmagic",
     "joblib",
+    "eot-tools",
     "fontTools[woff]",
     "pip-licenses-lib>=0.4.0",
     "requests",

@@ -5,9 +5,11 @@
 from __future__ import annotations
 
 import shutil
+from collections.abc import Generator
 from pathlib import Path
 from tempfile import mkdtemp
-from typing import Any, cast, Generator
+from types import TracebackType
+from typing import cast
 
 from typecode import magic2  # type: ignore[import-untyped]
 
@@ -26,7 +28,7 @@ def get_files_from_directory(
     """
     directory_string = str(directory) if prefix is None else prefix
     common_prefix_length = len(directory_string) + int(
-        not directory_string.endswith("/")
+        not directory_string.endswith("/"),
     )
 
     for path in sorted(Path(directory).rglob("*"), key=str):
@@ -69,7 +71,7 @@ class DirectoryWithFixedNameContext:
             self.directory.mkdir(parents=False, exist_ok=False)
         return self.directory
 
-    def __exit__(self, type_: type[BaseException] | None, value: BaseException | None, traceback: Any | None) -> bool | None:
+    def __exit__(self, type_: type[BaseException] | None, value: BaseException | None, traceback: TracebackType | None) -> bool | None:
         if self._delete_afterwards:
             shutil.rmtree(self.directory)
 

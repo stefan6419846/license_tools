@@ -11,7 +11,8 @@ from __future__ import annotations
 
 import atexit
 import datetime
-from dataclasses import dataclass, field as dataclass_field
+from dataclasses import dataclass
+from dataclasses import field as dataclass_field
 from pathlib import Path
 from typing import Literal
 
@@ -264,6 +265,11 @@ class FileInfo:
     Whether this file is some script.
     """
 
+    sha1_git: str | None = None
+    """
+    The hash according to the Git blob SHA1 convention (https://git-scm.com/book/en/v2/Git-Internals-Git-Objects#_object_storage).
+    """
+
     def __post_init__(self) -> None:
         if isinstance(self.date, str):
             self.date = datetime.datetime.strptime(self.date, "%Y-%m-%d").date()
@@ -350,8 +356,6 @@ class LicenseClue(LicenseMatch):
     Currently the same as :class:`~LicenseMatch`.
     """
 
-    pass
-
 
 @dataclass
 class LicenseDetection:
@@ -428,17 +432,14 @@ class Licenses:
 
         :return: The corresponding scores if they could be resolved.
         """
-        scores = []
         for detection in self.license_detections:
             if (
                 detection.license_expression == self.detected_license_expression
                 or detection.license_expression_spdx
                 == self.detected_license_expression_spdx
             ):
-                for match in detection.matches:
-                    scores.append(match.score)
-                return scores
-        return scores
+                return [match.score for match in detection.matches]
+        return []
 
 
 @dataclass
@@ -671,7 +672,7 @@ class PackageResults:
     """
 
     other_license_detections: list[LicenseDetection] = dataclass_field(
-        default_factory=list
+        default_factory=list,
     )
     """
     Additional license detections.

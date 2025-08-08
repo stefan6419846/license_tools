@@ -14,10 +14,9 @@ from dataclasses import asdict as dataclasses_asdict
 from importlib.metadata import PathDistribution
 from pathlib import Path
 
+from piplicenses_lib import PackageInfo, get_package_info
+
 from license_tools.utils import rendering_utils
-
-from piplicenses_lib import get_package_info, PackageInfo
-
 
 _VERBOSE_NAMES = {
     "name": "Name",
@@ -61,7 +60,7 @@ def check_metadata(path: Path | str) -> str:
     metadata_dict = dataclasses_asdict(metadata)
     metadata_dict["license_files"] = list(metadata.license_files)
     return rendering_utils.render_dictionary(
-        dictionary=metadata_dict, verbose_names_mapping=_VERBOSE_NAMES, multi_value_keys={"license_files", "license_classifiers", "requirements"}
+        dictionary=metadata_dict, verbose_names_mapping=_VERBOSE_NAMES, multi_value_keys={"license_files", "license_classifiers", "requirements"},
     )
 
 
@@ -69,7 +68,7 @@ def download_package(
         package_definition: str,
         download_directory: Path | str,
         index_url: str | None = None,
-        prefer_sdist: bool = False
+        prefer_sdist: bool = False,
 ) -> None:
     """
     Download the given package and save it to the given directory.
@@ -95,7 +94,7 @@ def download_package(
         command += ["--no-binary", ":all:"]
     try:
         subprocess.run(
-            command, capture_output=True, text=True, check=True
+            command, capture_output=True, text=True, check=True,
         )
     except subprocess.CalledProcessError as exception:
         if exception.stdout:

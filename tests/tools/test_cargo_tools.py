@@ -7,14 +7,13 @@ from __future__ import annotations
 import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from license_tools.tools import cargo_tools
 from license_tools.tools.cargo_tools import PackageVersion
 from license_tools.utils.download_utils import Download
 from tests import get_from_url
 from tests.data import BASE64__0_22_0__CARGO_TOML, CRYPTOGRAPHY__42_0_0__CARGO_LOCK
-
 
 EXPECTED_METADATA = {
     "authors": ["Alice Maz <alice@alicemaz.com>", "Marshall Pierce <marshall@mpierce.org>"],
@@ -191,32 +190,32 @@ class GetPackageVersionsTestCase(TestCase):
 
         warning_mock.assert_has_calls(
             [
-                mock.call('Skipping %s', {'name': 'cryptography-cffi', 'version': '0.1.0', 'dependencies': ['cc', 'openssl-sys', 'pyo3']}),
+                mock.call("Skipping %s", {"name": "cryptography-cffi", "version": "0.1.0", "dependencies": ["cc", "openssl-sys", "pyo3"]}),
                 mock.call(
-                    'Skipping %s',
-                    {'name': 'cryptography-key-parsing', 'version': '0.1.0', 'dependencies': ['asn1', 'cfg-if', 'cryptography-x509', 'openssl', 'openssl-sys']}
+                    "Skipping %s",
+                    {"name": "cryptography-key-parsing", "version": "0.1.0", "dependencies": ["asn1", "cfg-if", "cryptography-x509", "openssl", "openssl-sys"]},
                 ),
                 mock.call(
-                    'Skipping %s',
-                    {'name': 'cryptography-openssl', 'version': '0.1.0', 'dependencies': ['foreign-types', 'foreign-types-shared', 'openssl', 'openssl-sys']}
+                    "Skipping %s",
+                    {"name": "cryptography-openssl", "version": "0.1.0", "dependencies": ["foreign-types", "foreign-types-shared", "openssl", "openssl-sys"]},
                 ),
                 mock.call(
-                    'Skipping %s',
+                    "Skipping %s",
                     {
-                        'name': 'cryptography-rust', 'version': '0.1.0',
-                        'dependencies': [
-                            'asn1', 'cc', 'cfg-if', 'cryptography-cffi', 'cryptography-key-parsing', 'cryptography-openssl', 'cryptography-x509',
-                            'cryptography-x509-verification', 'foreign-types-shared', 'once_cell', 'openssl', 'openssl-sys', 'pem', 'pyo3', 'self_cell'
-                        ]
-                    }
+                        "name": "cryptography-rust", "version": "0.1.0",
+                        "dependencies": [
+                            "asn1", "cc", "cfg-if", "cryptography-cffi", "cryptography-key-parsing", "cryptography-openssl", "cryptography-x509",
+                            "cryptography-x509-verification", "foreign-types-shared", "once_cell", "openssl", "openssl-sys", "pem", "pyo3", "self_cell",
+                        ],
+                    },
                 ),
-                mock.call('Skipping %s', {'name': 'cryptography-x509', 'version': '0.1.0', 'dependencies': ['asn1']}),
+                mock.call("Skipping %s", {"name": "cryptography-x509", "version": "0.1.0", "dependencies": ["asn1"]}),
                 mock.call(
-                    'Skipping %s',
-                    {'name': 'cryptography-x509-verification', 'version': '0.1.0', 'dependencies': ['asn1', 'cryptography-x509', 'once_cell', 'pem']}
-                )
+                    "Skipping %s",
+                    {"name": "cryptography-x509-verification", "version": "0.1.0", "dependencies": ["asn1", "cryptography-x509", "once_cell", "pem"]},
+                ),
             ],
-            any_order=False
+            any_order=False,
         )
         self.assertEqual(6, warning_mock.call_count, warning_mock.call_args_list)
 
@@ -235,5 +234,5 @@ class DownloadFromLockFileTestCase(TestCase):
             cargo_tools.download_from_lock_file(lock_path=lock_path, target_directory=directory)
         download_mock.assert_called_once_with(
             downloads=[package.to_download() for package in package_versions],
-            directory=Path(directory)
+            directory=Path(directory),
         )

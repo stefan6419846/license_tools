@@ -13,8 +13,14 @@ from license_tools.utils import archive_utils
 from license_tools.utils.path_utils import get_files_from_directory
 from tests import get_from_url
 from tests.data import (
-    BASE64__0_22_0__CRATE, JSON__20231013__JAR, LIBAIO1__0_3_109_1_25__RPM, LIBAIO1__0_3_109_1_25__SRC_RPM, TYPING_EXTENSION_4_8_0__SOURCE_FILES,
-    TYPING_EXTENSION_4_8_0__WHEEL_FILES, TYPING_EXTENSIONS__4_8_0__SDIST, TYPING_EXTENSIONS__4_8_0__WHEEL,
+    BASE64__0_22_0__CRATE,
+    JSON__20231013__JAR,
+    LIBAIO1__0_3_109_1_25__RPM,
+    LIBAIO1__0_3_109_1_25__SRC_RPM,
+    TYPING_EXTENSION_4_8_0__SOURCE_FILES,
+    TYPING_EXTENSION_4_8_0__WHEEL_FILES,
+    TYPING_EXTENSIONS__4_8_0__SDIST,
+    TYPING_EXTENSIONS__4_8_0__WHEEL,
 )
 
 
@@ -141,7 +147,7 @@ class ArchiveUtilsTestCase(TestCase):
                     "base64-0.22.0/tests/encode.rs",
                     "base64-0.22.0/tests/tests.rs",
                 ],
-                actual
+                actual,
             )
 
     def test_zip(self) -> None:

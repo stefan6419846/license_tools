@@ -19,7 +19,6 @@ import requests
 
 from license_tools.constants import VERSION
 
-
 logger = logging.getLogger(__name__)
 del logging
 
@@ -31,8 +30,6 @@ class ChecksumError(ValueError):
     """
     Error indicating a wrong checksum.
     """
-
-    pass
 
 
 @dataclass
@@ -70,15 +67,13 @@ class Download:
         else:
             return
         if digest != expected:
-            raise ChecksumError(f'Checksum mismatch: Got {digest}, expected {expected}!')
+            raise ChecksumError(f"Checksum mismatch: Got {digest}, expected {expected}!")
 
 
 class DownloadError(ValueError):
     """
     Error indicating some (generic) download failure.
     """
-
-    pass
 
 
 def get_session() -> requests.Session:

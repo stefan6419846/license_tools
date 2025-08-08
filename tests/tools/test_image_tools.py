@@ -126,7 +126,7 @@ class CheckImageMetadataTestCase(TestCase):
 \[Composite\]     Image Size                      : 1280x853
 \[Composite\]     Megapixels                      : 1\.1
             """.strip() + "\n$",
-            text=cast(str, result)
+            text=cast(str, result),
         )
 
     def test_mountain_jpg(self) -> None:
@@ -320,5 +320,5 @@ class CheckImageMetadataTestCase(TestCase):
 \[Composite\]     Hyperfocal Distance             : 3\.45 m
 \[Composite\]     Light Value                     : 13\.3
             """.strip() + "\n$",  # noqa: E501, W291
-            text=cast(str, result)
+            text=cast(str, result),
         )

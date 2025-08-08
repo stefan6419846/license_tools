@@ -8,7 +8,7 @@ import os
 import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from license_tools.tools import linking_tools
 from license_tools.tools.linking_tools import check_shared_objects
@@ -62,25 +62,25 @@ class CheckSharedObjectsTestCase(TestCase):
     def test_so(self) -> None:
         path = get_libc_path().resolve()
         with mock.patch(
-            "subprocess.check_output", return_value=b"Test output\nAnother line\n"
+            "subprocess.check_output", return_value=b"Test output\nAnother line\n",
         ) as subprocess_mock:
             result = check_shared_objects(path)
         self.assertEqual("Test output\nAnother line\n", result)
-        subprocess_mock.assert_called_once_with(["ldd", path], stderr=subprocess.PIPE, env=self._env)
+        subprocess_mock.assert_called_once_with(["/usr/bin/ldd", path], stderr=subprocess.PIPE, env=self._env)
 
     def test_binary(self) -> None:
         path = Path("/usr/bin/bc")
         with mock.patch(
-            "subprocess.check_output", return_value=b"Test output\nAnother line\n"
+            "subprocess.check_output", return_value=b"Test output\nAnother line\n",
         ) as subprocess_mock:
             result = check_shared_objects(path)
         self.assertEqual("Test output\nAnother line\n", result)
-        subprocess_mock.assert_called_once_with(["ldd", path], stderr=subprocess.PIPE, env=self._env)
+        subprocess_mock.assert_called_once_with(["/usr/bin/ldd", path], stderr=subprocess.PIPE, env=self._env)
 
     def test_python(self) -> None:
         path = Path("/tmp/libdummy.py")
         with mock.patch(
-            "subprocess.check_output", return_value=b"Test output\nAnother line\n"
+            "subprocess.check_output", return_value=b"Test output\nAnother line\n",
         ) as subprocess_mock:
             result = check_shared_objects(path)
         self.assertIsNone(result)
@@ -95,29 +95,29 @@ class CheckSharedObjectsTestCase(TestCase):
             source.symlink_to(target=target)
 
             with mock.patch(
-                "subprocess.check_output", return_value=b"Test output\nAnother line\n"
+                "subprocess.check_output", return_value=b"Test output\nAnother line\n",
             ) as subprocess_mock, mock.patch.object(
-                linking_tools.logger, "warning"
+                linking_tools.logger, "warning",
             ) as warning_mock, mock.patch.object(
-                linking_tools, "is_elf", return_value=True
+                linking_tools, "is_elf", return_value=True,
             ) as elf_mock:
                 result = check_shared_objects(source)
             self.assertIsNone(result)
             subprocess_mock.assert_not_called()
             warning_mock.assert_called_once_with(
-                "Ignoring symlink %s to %s for shared object analysis.", source, target
+                "Ignoring symlink %s to %s for shared object analysis.", source, target,
             )
             elf_mock.assert_called_once_with(source)
 
             with mock.patch(
-                "subprocess.check_output", return_value=b"Test output\nAnother line\n"
+                "subprocess.check_output", return_value=b"Test output\nAnother line\n",
             ) as subprocess_mock, mock.patch.object(
-                linking_tools, "is_elf", return_value=True
+                linking_tools, "is_elf", return_value=True,
             ) as elf_mock:
                 result = check_shared_objects(source.resolve())
             self.assertEqual("Test output\nAnother line\n", result)
             subprocess_mock.assert_called_once_with(
-                ["ldd", target], stderr=subprocess.PIPE, env=self._env
+                ["/usr/bin/ldd", target], stderr=subprocess.PIPE, env=self._env,
             )
             elf_mock.assert_called_once_with(source.resolve())
 

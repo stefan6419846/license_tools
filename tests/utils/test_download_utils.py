@@ -4,12 +4,13 @@
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 import requests
 
@@ -25,13 +26,13 @@ class DownloadTestCase(TestCase):
 
         # Correct sha256 checksum.
         Download(
-            url="http://localhost", filename="dummy", sha256="03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340"
+            url="http://localhost", filename="dummy", sha256="03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340",
         ).verify_checksum(b"Hello World!\n")
 
         # Incorrect sha256 checksum.
         with self.assertRaisesRegex(
                 expected_exception=ChecksumError,
-                expected_regex=r"^Checksum mismatch: Got 03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340, expected INVALID!$"
+                expected_regex=r"^Checksum mismatch: Got 03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340, expected INVALID!$",
         ):
             Download(url="http://localhost", filename="dummy", sha256="INVALID").verify_checksum(b"Hello World!\n")
 
@@ -53,7 +54,7 @@ class DownloadFileTestCase(TestCase):
                 mock.patch.object(session, "get", return_value=response):
             with self.assertRaisesRegex(
                     expected_exception=DownloadError,
-                    expected_regex=r"^Download not okay\? http://localhost <Response \[404\]>$"
+                    expected_regex=r"^Download not okay\? http://localhost <Response \[404\]>$",
             ):
                 download_utils.download_file(
                     url="http://localhost",
@@ -81,24 +82,20 @@ class DownloadFileToDirectoryTestCase(TestCase):
     def test_reuse_session(self) -> None:
         session = download_utils.get_session()
         with mock.patch.object(download_utils, "get_session") as session_mock:
-            try:
+            with contextlib.suppress(Exception):
                 download_utils.download_file_to_directory(
                     download=Download(url="http://localhost", filename="dummy"),
                     directory=Path("/dummy"),
-                    session=session
+                    session=session,
                 )
-            except Exception:
-                pass
         session_mock.assert_not_called()
 
         with mock.patch.object(download_utils, "get_session") as session_mock:
-            try:
+            with contextlib.suppress(Exception):
                 download_utils.download_file_to_directory(
                     download=Download(url="http://localhost", filename="dummy"),
                     directory=Path("/dummy"),
                 )
-            except Exception:
-                pass
         session_mock.assert_called_once_with()
 
     def test_not_okay(self) -> None:
@@ -108,7 +105,7 @@ class DownloadFileToDirectoryTestCase(TestCase):
         with mock.patch.object(session, "get", return_value=response):
             with self.assertRaisesRegex(
                     expected_exception=DownloadError,
-                    expected_regex=r"^Download not okay\? http://localhost <Response \[404\]>$"
+                    expected_regex=r"^Download not okay\? http://localhost <Response \[404\]>$",
             ):
                 download_utils.download_file_to_directory(
                     download=Download(url="http://localhost", filename="dummy"),
@@ -125,7 +122,7 @@ class DownloadFileToDirectoryTestCase(TestCase):
         with mock.patch.object(session, "get", return_value=response):
             with self.assertRaisesRegex(
                     expected_exception=ChecksumError,
-                    expected_regex=r"^Checksum mismatch: Got 03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340, expected INVALID!$"
+                    expected_regex=r"^Checksum mismatch: Got 03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340, expected INVALID!$",
             ):
                 download_utils.download_file_to_directory(
                     download=Download(url="http://localhost", filename="dummy", sha256="INVALID"),
@@ -147,7 +144,7 @@ class DownloadFileToDirectoryTestCase(TestCase):
             )
             self.assertEqual(
                 b"Hello World!\n",
-                Path(directory, "test.txt").read_bytes()
+                Path(directory, "test.txt").read_bytes(),
             )
 
 
@@ -180,14 +177,14 @@ class DownloadOneFilePerSecondTestCase(TestCase):
         with mock.patch.object(self.session, "get", side_effect=get), TemporaryDirectory() as directory:
             with self.assertRaisesRegex(
                     expected_exception=ChecksumError,
-                    expected_regex=r"^Checksum mismatch: Got 03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340, expected INVALID!$"
+                    expected_regex=r"^Checksum mismatch: Got 03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340, expected INVALID!$",
             ):
                 download_utils.download_one_file_per_second(downloads=self.downloads, directory=Path(directory))
             actual = [x[1] for x in get_files_from_directory(directory)]
             self.assertEqual(["file1.txt"], actual)
             self.assertEqual(
                 b"Hello World!\n",
-                Path(directory, "file1.txt").read_bytes()
+                Path(directory, "file1.txt").read_bytes(),
             )
 
     def test_delays(self) -> None:
@@ -206,7 +203,7 @@ class DownloadOneFilePerSecondTestCase(TestCase):
                 self.assertEqual(
                     b"Hello World!\n",
                     Path(directory, name).read_bytes(),
-                    name
+                    name,
                 )
 
         deltas: list[datetime.timedelta] = [y - x for x, y in zip(self.timestamps[:-1], self.timestamps[1:])]

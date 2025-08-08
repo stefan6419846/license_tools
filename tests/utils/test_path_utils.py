@@ -10,7 +10,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
 
-from license_tools.utils.path_utils import get_file_type, get_files_from_directory, DirectoryWithFixedNameContext, get_mime_type
+from license_tools.utils.path_utils import DirectoryWithFixedNameContext, get_file_type, get_files_from_directory, get_mime_type
 from tests import get_file
 from tests.data import LICENSE_PATH, SETUP_PATH
 
@@ -51,7 +51,7 @@ class DirectoryWithFixedNameContextTestCase(TestCase):
             target_name = Path(tempdir) / "foo" / "bar"
             with self.assertRaisesRegex(
                     expected_exception=FileNotFoundError,
-                    expected_regex=fr"^\[Errno 2\] No such file or directory: '{re.escape(str(target_name))}'$"
+                    expected_regex=fr"^\[Errno 2\] No such file or directory: '{re.escape(str(target_name))}'$",
             ):
                 with DirectoryWithFixedNameContext(Path(tempdir) / "foo" / "bar") as target:
                     self.assertTrue(target.is_dir())
@@ -62,7 +62,7 @@ class DirectoryWithFixedNameContextTestCase(TestCase):
             target_name.mkdir()
             with self.assertRaisesRegex(
                     expected_exception=FileExistsError,
-                    expected_regex=fr"^\[Errno 17\] File exists: '{re.escape(str(target_name))}'$"
+                    expected_regex=fr"^\[Errno 17\] File exists: '{re.escape(str(target_name))}'$",
             ):
                 with DirectoryWithFixedNameContext(Path(tempdir) / "foo", fallback_to_random_if_exists=False) as target:
                     self.assertTrue(target.is_dir())
@@ -83,7 +83,7 @@ class DirectoryWithFixedNameContextTestCase(TestCase):
                 expected_regex = fr"^\[Errno 2\] No such file or directory: {re.escape(repr(target_name))}$"
             with self.assertRaisesRegex(
                     expected_exception=FileNotFoundError,
-                    expected_regex=expected_regex
+                    expected_regex=expected_regex,
             ):
                 with DirectoryWithFixedNameContext(Path(tempdir) / "foo") as target:
                     self.assertTrue(target.is_dir())
@@ -100,17 +100,17 @@ class GetMimeTypeTestCase(TestCase):
     def test_get_mime_type(self) -> None:
         self.assertEqual(
             "text/x-script.python",
-            get_mime_type(SETUP_PATH)
+            get_mime_type(SETUP_PATH),
         )
         self.assertEqual(
             "text/plain",
-            get_mime_type(LICENSE_PATH)
+            get_mime_type(LICENSE_PATH),
         )
 
         with get_file("croissant.jpg") as path:
             self.assertEqual(
                 "image/jpeg",
-                get_mime_type(path)
+                get_mime_type(path),
             )
 
 
@@ -118,21 +118,21 @@ class GetFileTypeTestCase(TestCase):
     def test_get_file_type(self) -> None:
         self.assertEqual(
             "Python script, ASCII text executable",
-            get_file_type(SETUP_PATH)
+            get_file_type(SETUP_PATH),
         )
         self.assertEqual(
             "ASCII text",
-            get_file_type(LICENSE_PATH)
+            get_file_type(LICENSE_PATH),
         )
 
         with get_file("croissant.jpg") as path:
             self.assertEqual(
                 "JPEG image data, Exif standard: [TIFF image data, little-endian, direntries=0], baseline, precision 8, 1280x853, components 3",
-                get_file_type(path)
+                get_file_type(path),
             )
 
         with get_file("Carlito-Regular.ttf") as path:
             self.assertEqual(
                 'TrueType Font data, 17 tables, 1st "GDEF", 15 names, Microsoft, language 0x409',
-                get_file_type(path)
+                get_file_type(path),
             )

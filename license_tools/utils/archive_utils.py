@@ -15,7 +15,8 @@ from typing import cast
 
 import extractcode  # type: ignore[import-untyped]
 from extractcode import all_kinds
-from extractcode.api import extract_archive as _extract_archive, extract_archives as _extract_archives  # type: ignore[import-untyped]
+from extractcode.api import extract_archive as _extract_archive  # type: ignore[import-untyped]
+from extractcode.api import extract_archives as _extract_archives
 from extractcode.archive import should_extract as _should_extract  # type: ignore[import-untyped]
 
 # Mitigate https://github.com/aboutcode-org/extractcode/issues/65
@@ -64,5 +65,5 @@ def can_extract(archive_path: Path) -> bool:
         _should_extract(
             location=archive_path,
             kinds=all_kinds,
-        )
+        ),
     )

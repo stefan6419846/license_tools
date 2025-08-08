@@ -10,9 +10,11 @@ from __future__ import annotations
 
 import datetime
 from collections import OrderedDict
+from io import BytesIO
 from pathlib import Path
 from typing import Any, Union  # TODO: Remove `Union` when dropping support for Python 3.9.
 
+from eot_tools.eot import EOTFile
 from fontTools import ttx  # type: ignore[import-untyped]
 from fontTools.misc import timeTools  # type: ignore[import-untyped]
 from fontTools.ttLib import TTFont  # type: ignore[import-untyped]
@@ -92,7 +94,7 @@ def convert_timestamp_to_datetime(value: int) -> datetime.datetime:
     :return: The regular datetime object.
     """
     return datetime.datetime.fromtimestamp(
-        max(0, value) + timeTools.epoch_diff, tz=datetime.timezone.utc
+        max(0, value) + timeTools.epoch_diff, tz=datetime.timezone.utc,
     )
 
 
@@ -188,7 +190,7 @@ _TTF_HEAD_IDS = {
     "glyphDataFormat": ("Glyph Data Format", identity),
 }
 
-KNOWN_FONT_EXTENSIONS = {".otf", ".ttf", ".woff", ".woff2"}
+KNOWN_FONT_EXTENSIONS = {".eot", ".otf", ".ttf", ".woff", ".woff2"}
 
 FONT_VALUE_TYPE = Union[str, int, datetime.datetime]
 
@@ -237,8 +239,12 @@ def analyze_font(path: Path) -> dict[str, None | dict[str, FONT_VALUE_TYPE]] | N
     if path.suffix not in KNOWN_FONT_EXTENSIONS:
         return None
 
+    input_file: Union[Path, BytesIO] = path
+    if path.suffix == ".eot":
+        input_file = BytesIO(EOTFile(path).font_data)
+
     result: dict[str, None | dict[str, FONT_VALUE_TYPE]] = {"head": None, "name": None}
-    with TTFont(file=path) as font:
+    with TTFont(file=input_file) as font:
         for key in font.keys():
             if key not in {"head", "name"}:
                 continue
@@ -266,10 +272,9 @@ def check_font(path: Path) -> str | None:
     if not names:
         return None
     maximum_length = max(map(len, names.keys()))
-    rendered = "\n".join(
+    return "\n".join(
         f"{key:>{maximum_length}}: {value}" for key, value in names.items()
     )
-    return rendered
 
 
 def dump_to_ttx(source_path: Path, target_path: Path) -> Path:

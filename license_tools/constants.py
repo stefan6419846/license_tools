@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from importlib.metadata import version as _version
 
-
 VERSION: str = _version("license_tools")
 
 del _version

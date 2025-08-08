@@ -38,13 +38,13 @@ def main() -> None:
     source_group = parser.add_argument_group("Artifact source")
     source_group = source_group.add_mutually_exclusive_group(required=False)
     source_group.add_argument(
-        "--directory", action="store", type=str, help="Directory to work on."
+        "--directory", action="store", type=str, help="Directory to work on.",
     )
     source_group.add_argument(
-        "--file", action="store", type=str, help="File to work on."
+        "--file", action="store", type=str, help="File to work on.",
     )
     source_group.add_argument(
-        "--archive", action="store", type=str, help="Archive file to work on."
+        "--archive", action="store", type=str, help="Archive file to work on.",
     )
     source_group.add_argument(
         "--package",
@@ -53,7 +53,7 @@ def main() -> None:
         help="Python package specification to use.",
     )
     source_group.add_argument(
-        "--url", action="store", type=str, help="Download URL to use."
+        "--url", action="store", type=str, help="Download URL to use.",
     )
 
     parser.add_argument(
@@ -157,14 +157,14 @@ def main() -> None:
         type=str,
         required=False,
         default=None,
-        help="Path to the Cargo.lock file to use with `--cargo-lock-download`."
+        help="Path to the Cargo.lock file to use with `--cargo-lock-download`.",
     )
     parser.add_argument(
         "--target-directory",
         type=str,
         required=False,
         default=None,
-        help="Path to write the Cargo crate files to when using the `--cargo-lock-download` option."
+        help="Path to write the Cargo crate files to when using the `--cargo-lock-download` option.",
     )
 
     parser.add_argument(
@@ -172,7 +172,7 @@ def main() -> None:
         type=log_level_type,
         required=False,
         default=logging.WARNING,
-        help="Log level to use (name or integer). Defaults to ≥ warning."
+        help="Log level to use (name or integer). Defaults to ≥ warning.",
     )
 
     arguments = parser.parse_args()
@@ -182,7 +182,7 @@ def main() -> None:
         from license_tools.tools import cargo_tools
         return cargo_tools.download_from_lock_file(
             lock_path=arguments.cargo_lock,
-            target_directory=arguments.target_directory
+            target_directory=arguments.target_directory,
         )
 
     from license_tools import retrieval
@@ -205,6 +205,7 @@ def main() -> None:
         retrieve_cargo_metadata=arguments.retrieve_cargo_metadata,
         retrieve_image_metadata=arguments.retrieve_image_metadata,
     )
+    return None
 
 
 if __name__ == "__main__":

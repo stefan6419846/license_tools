@@ -1,10 +1,11 @@
 # Ensure that we always test against the latest versions
 # as soon as they get released by pinning them here and
 # letting `dependabot` update them for new releases.
-scancode-toolkit==32.3.3
+scancode-toolkit==32.4.1
 typecode-libmagic==5.39.210531
 joblib==1.5.1
-fontTools[woff]==4.58.4
+eot-tools==0.1.0
+fontTools[woff]==4.59.0
 pip-licenses-lib==0.6.0
 rpmfile==2.1.0
 requests==2.32.4
