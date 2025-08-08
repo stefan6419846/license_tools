@@ -65,8 +65,10 @@ BASE64__0_22_0__CRATE = Download(
     suffix=".crate",
 )
 
+# In theory, the URL should be identical to https://raw.githubusercontent.com/marshallpierce/rust-base64/refs/tags/v0.22.0/Cargo.toml,
+# but it appears to be broken and/or returns data for version 0.22.1.
 BASE64__0_22_0__CARGO_TOML = Download(
-    url="https://github.com/marshallpierce/rust-base64/raw/v0.22.0/Cargo.toml",
+    url="https://github.com/marshallpierce/rust-base64/raw/5d70ba7576f9aafcbf02bd8acfcb9973411fb95f/Cargo.toml",
     name="Cargo.toml",
     suffix=".toml",
 )

@@ -354,6 +354,51 @@ class AnalyzeFontTestCase(TestCase):
             result,
         )
 
+    def test_eot_file(self) -> None:
+        with get_file("Maki.eot") as path:
+            result = font_tools.analyze_font(path)
+
+        self.assertEqual(
+            {
+                "head": OrderedDict(
+                    [
+                        ("Font Table Version", 1.0),
+                        ("Font Revision", 1.0),
+                        ("Checksum", 3236315134),
+                        ("Magic number", 1594834165),
+                        ("Flags", "Baseline for font at y=0; Left sidebearing point at x=0; Force ppem to integer values"),
+                        ("Units per em", 1000),
+                        ("Created", "2025-08-05 12:53:19"),
+                        ("Modified", "2025-08-05 13:40:27"),
+                        ("xMin", -2),
+                        ("yMin", -210),
+                        ("xMax", 1010),
+                        ("yMax", 807),
+                        ("Mac Style", "%"),
+                        ("Smallest readable size in pixels", 8),
+                        ("Font direction hint", "Strongly left to right, but also contains neutrals"),
+                        ("Index to Loc format", "Short offsets (Offset16)"),
+                        ("Glyph Data Format", 0)
+                    ]
+                ),
+                "name": OrderedDict(
+                    [
+                        (
+                            "Copyright notice",
+                            "SPDX-FileCopyrightText: Copyright (c) 2013, Mapbox, LLC. All rights reserved.\nSPDX-License-Identifier: CC0-1.0"
+                        ),
+                        ("Font family name", "Maki"),
+                        ("Font subfamily name", "Regular"),
+                        ("Unique font identifier", "FontForge 2.0 : Maki : 5-8-2025"),
+                        ("Full font name", "Maki"),
+                        ("Version string", "Version 001.000"),
+                        ("PostScript name", "Maki")
+                    ]
+                )
+            },
+            result,
+        )
+
 
 class CheckFontTestCase(TestCase):
     def test_no_known_font_type(self) -> None:

@@ -40,6 +40,7 @@ dependencies = [
     "scancode-toolkit>=32.3.0",
     "typecode-libmagic",
     "joblib",
+    "eot-tools",
     "fontTools[woff]",
     "pip-licenses-lib>=0.4.0",
     "requests",
