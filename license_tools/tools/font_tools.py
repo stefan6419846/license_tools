@@ -12,7 +12,7 @@ import datetime
 from collections import OrderedDict
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Union  # TODO: Remove `Union` when dropping support for Python 3.9.
+from typing import Any, Union
 
 from eot_tools.eot import EOTFile
 from fontTools import ttx  # type: ignore[import-untyped]
@@ -239,7 +239,7 @@ def analyze_font(path: Path) -> dict[str, None | dict[str, FONT_VALUE_TYPE]] | N
     if path.suffix not in KNOWN_FONT_EXTENSIONS:
         return None
 
-    input_file: Union[Path, BytesIO] = path
+    input_file: Path | BytesIO = path
     if path.suffix == ".eot":
         input_file = BytesIO(EOTFile(path).font_data)
 
