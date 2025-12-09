@@ -11,4 +11,5 @@ This currently covers the following assets:
   * *Maki.eot* by Mapbox, LLC, subject to CC0-1.0: https://github.com/mapbox/maki
   * *meson-generated_ieee754.c.o*, part of numpy 2.2.5 and subject to the terms of the BSD-3-Clause.
   * *mountain.jpg* by George Hiles, subject to CC0-1.0: https://commons.wikimedia.org/wiki/File:Mountain_highway_(Unsplash).jpg (resized)
+  * *oft.cff*, based upon an OTF XML dump of the *fontTools* project and subject to the terms of the MIT license.
   * *Weather Icons* by Lukas Bischoff and Erik Flowers, subject to the terms of the OFL-1.1: https://github.com/erikflowers/weather-icons/blob/bb80982bf1f43f2d57f9dd753e7413bf88beb9ed/font/weathericons-regular-webfont.woff

@@ -9,6 +9,7 @@ Tools related to fonts.
 from __future__ import annotations
 
 import datetime
+import logging
 from collections import OrderedDict
 from io import BytesIO
 from pathlib import Path
@@ -16,10 +17,14 @@ from typing import Any, Union
 
 from eot_tools.eot import EOTFile
 from fontTools import ttx  # type: ignore[import-untyped]
+from fontTools.cffLib import CFFFontSet  # type: ignore[import-untyped]
 from fontTools.misc import timeTools  # type: ignore[import-untyped]
 from fontTools.ttLib import TTFont  # type: ignore[import-untyped]
 from fontTools.ttLib.tables._h_e_a_d import table__h_e_a_d as HeadTable  # type: ignore[import-untyped]  # noqa: N812
 from fontTools.ttLib.tables._n_a_m_e import table__n_a_m_e as NameTable  # type: ignore[import-untyped]  # noqa: N812
+
+logger = logging.getLogger(__name__)
+del logging
 
 
 # https://learn.microsoft.com/en-us/typography/opentype/spec/name#name-ids
@@ -51,6 +56,16 @@ _TTF_NAME_IDS: list[str] = [
     "Dark Background Palette",
     "Variations PostScript Name Prefix",
 ]
+
+_CCF_PER_ENTRY_NAME_MAPPING = {
+    "version": "Version",
+    "Notice": "Copyright notice",
+    "Copyright": "Copyright",
+    "FullName": "Full font name",
+    "FontName": "Font name",
+    "FamilyName": "Font family name",
+    "BaseFontName": "Base font name",
+}
 
 
 # https://learn.microsoft.com/en-us/typography/opentype/spec/head
@@ -190,7 +205,7 @@ _TTF_HEAD_IDS = {
     "glyphDataFormat": ("Glyph Data Format", identity),
 }
 
-KNOWN_FONT_EXTENSIONS = {".eot", ".otf", ".ttf", ".woff", ".woff2"}
+KNOWN_FONT_EXTENSIONS = {".cff", ".eot", ".otf", ".ttf", ".woff", ".woff2"}
 
 FONT_VALUE_TYPE = Union[str, int, datetime.datetime]
 
@@ -227,6 +242,30 @@ def handle_ttfont_names(names: NameTable) -> OrderedDict[str, FONT_VALUE_TYPE]:
     return result
 
 
+def _analyze_cff_font(path: Path) -> dict[str, None | dict[str, FONT_VALUE_TYPE]] | None:
+    """
+    Analyze the given CFF font file and provide a human-readable mapping for the head and name
+    sections.
+
+    :param path: The font path.
+    :return: `None` if this is no known font type, the parsed results grouped by
+             section name otherwise.
+    """
+    cff = CFFFontSet()
+    with path.open(mode="rb") as fd:
+        cff.decompile(fd, otFont=None)
+        if len(cff.fontNames) != 1:
+            logger.warning("Expected one font name, got %d. Skipping output.", len(cff.fontNames))
+            return None
+        font = cff[cff.fontNames[0]]
+        name = {}
+        for key, verbose_name in _CCF_PER_ENTRY_NAME_MAPPING.items():
+            value = getattr(font, key, None)
+            if value:
+                name[verbose_name] = value
+        return {"head": None, "name": name}
+
+
 def analyze_font(path: Path) -> dict[str, None | dict[str, FONT_VALUE_TYPE]] | None:
     """
     Analyze the given font and provide a human-readable mapping for the head and name
@@ -238,6 +277,8 @@ def analyze_font(path: Path) -> dict[str, None | dict[str, FONT_VALUE_TYPE]] | N
     """
     if path.suffix not in KNOWN_FONT_EXTENSIONS:
         return None
+    if path.suffix == ".cff":
+        return _analyze_cff_font(path)
 
     input_file: Path | BytesIO = path
     if path.suffix == ".eot":

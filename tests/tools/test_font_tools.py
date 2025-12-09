@@ -399,6 +399,23 @@ class AnalyzeFontTestCase(TestCase):
             result,
         )
 
+    def test_ccf_file(self) -> None:
+        with get_file("otf.cff") as path:
+            result = font_tools.analyze_font(path)
+
+        self.assertEqual(
+            {
+                "head": None,
+                "name": {
+                    "Copyright notice": "Copyright \\(c\\) 2015 by FontTools. No rights reserved.",
+                    "Font family name": "Test OTF",
+                    "Full font name": "Test OTF",
+                    "Version": "001.001"
+                }
+            },
+            result
+        )
+
 
 class CheckFontTestCase(TestCase):
     def test_no_known_font_type(self) -> None:
