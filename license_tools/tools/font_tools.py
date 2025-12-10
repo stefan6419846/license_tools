@@ -57,7 +57,7 @@ _TTF_NAME_IDS: list[str] = [
     "Variations PostScript Name Prefix",
 ]
 
-_CCF_PER_ENTRY_NAME_MAPPING = {
+_CFF_PER_ENTRY_NAME_MAPPING = {
     "version": "Version",
     "Notice": "Copyright notice",
     "Copyright": "Copyright",
@@ -259,7 +259,7 @@ def _analyze_cff_font(path: Path) -> dict[str, None | dict[str, FONT_VALUE_TYPE]
             return None
         font = cff[cff.fontNames[0]]
         name = {}
-        for key, verbose_name in _CCF_PER_ENTRY_NAME_MAPPING.items():
+        for key, verbose_name in _CFF_PER_ENTRY_NAME_MAPPING.items():
             value = getattr(font, key, None)
             if value:
                 name[verbose_name] = value
