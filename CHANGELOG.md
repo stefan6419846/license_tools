@@ -1,5 +1,9 @@
 # Development version
 
+
+
+# Version 0.18.0 - 2025-12-10
+
 * Drop support for Python <= 3.9.
 * Add support for reading CFF font files.
 
