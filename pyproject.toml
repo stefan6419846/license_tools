@@ -94,6 +94,9 @@ parallel = true  # Due to `joblib` for `MainTestCase.test_retrieval`
 source = [
     "license_tools",
 ]
+patch = [
+    "subprocess",
+]
 
 [tool.mypy]
 strict = true
