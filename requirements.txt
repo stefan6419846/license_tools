@@ -1,7 +1,7 @@
 # Ensure that we always test against the latest versions
 # as soon as they get released by pinning them here and
 # letting `dependabot` update them for new releases.
-scancode-toolkit==32.4.1
+scancode-toolkit==32.5.0
 typecode-libmagic==5.39.210531
 joblib==1.5.3
 eot-tools==0.1.0
