@@ -1,0 +1,11 @@
+about_resource: fa-solid-900.woff2
+name: Font Awesome 6 Free Solid
+version: 6.5.1
+download_url: https://github.com/FortAwesome/Font-Awesome/raw/refs/tags/6.5.1/webfonts/fa-solid-900.woff2
+package_url: pkg:github/fortawesome/font-awesome@refs#tags/6.5.1/webfonts/fa-solid-900.woff2
+
+copyright: Copyright (c) 2023 Fonticons, Inc. (https://fontawesome.com) with Reserved Font Name: "Font Awesome".
+license_expression: OFL-1.1
+notice_file: font-awesome.NOTICE
+
+homepage_url: https://fontawesome.com/

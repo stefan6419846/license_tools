@@ -1,0 +1,17 @@
+about_resource: meson-generated_ieee754.c.o
+name: NumPy low-level routines related to IEEE-754 format
+version: 2.2.5
+download_url: https://files.pythonhosted.org/packages/ad/c9/1bf6ada582eebcbe8978f5feb26584cd2b39f94ededeea034ca8f84af8c8/numpy-2.2.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+package_url: pkg:pypi/numpy@2.2.5
+
+copyright: Copyright (c) 2005-2024, NumPy Developers. All rights reserved.
+license_expression: BSD-3-Clause
+notice_file: meson-generated_ieee754.NOTICE
+
+homepage_url: https://numpy.org/
+
+notes: The file is part of the aforementioned wheel and can be found inside `numpy/_core/lib/libnpymath.a`.
+    Unpacking `libnpymath.a` yields the actual file `meson-generated_ieee754.c.o` we use here.
+
+    The corresponding source code is available at https://github.com/numpy/numpy/blob/v2.2.5/numpy/_core/src/npymath/ieee754.cpp
+    and https://github.com/numpy/numpy/blob/v2.2.5/numpy/_core/src/npymath/ieee754.c.src

@@ -1,4 +1,6 @@
 include license_tools/py.typed
+include tests/files/*.ABOUT
+include tests/files/*.NOTICE
 include tests/files/*.cff
 include tests/files/*.eot
 include tests/files/*.otf
@@ -6,7 +8,6 @@ include tests/files/*.ttf
 include tests/files/*.woff
 include tests/files/*.woff2
 include tests/files/*.txt
-include tests/files/*.md
 include tests/files/croissant.jpg
 include tests/files/mountain.jpg
 include tests/files/django_mo.po

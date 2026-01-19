@@ -133,6 +133,9 @@ class GetFileTypeTestCase(TestCase):
 
         with get_file("Carlito-Regular.ttf") as path:
             self.assertEqual(
-                'TrueType Font data, 17 tables, 1st "GDEF", 15 names, Microsoft, language 0x409',
+                (
+                    'TrueType Font data, 17 tables, 1st "GDEF", 15 names, Microsoft, language 0x409, '
+                    'Copyright 2013 The Carlito Project Authors (https://github.com/googlefonts/carlito)CarlitoRegula'
+                ),
                 get_file_type(path),
             )

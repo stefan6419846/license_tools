@@ -1,0 +1,14 @@
+about_resource: otf.cff
+name: Test OTF
+version: d4df57fecf5567298f0c749d362c461649b22269
+download_url: https://github.com/fonttools/fonttools/raw/d4df57fecf5567298f0c749d362c461649b22269/Tests/cffLib/data/TestOTF.ttx
+package_url: pkg:github/fonttools/fonttools@d4df57fecf5567298f0c749d362c461649b22269#Tests/cffLib/data/TestOTF.ttx
+
+copyright: Copyright (c) 2017 Just van Rossum
+license_expression: MIT
+notice_file: otf.NOTICE
+
+homepage_url: https://github.com/fonttools/fonttools/
+
+notes: This file has been generated from https://github.com/fonttools/fonttools/blob/d4df57fecf5567298f0c749d362c461649b22269/Tests/cffLib/data/TestOTF.ttx
+    using the approach taken from https://github.com/fonttools/fonttools/blob/d4df57fecf5567298f0c749d362c461649b22269/Tests/cffLib/cffLib_test.py#L66-L71

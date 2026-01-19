@@ -121,7 +121,7 @@ class AnalyzeFontTestCase(TestCase):
                     [
                         ("Font Table Version", 1.0),
                         ("Font Revision", 1.10400390625),
-                        ("Checksum", 1913909807),
+                        ("Checksum", 3134932317),
                         ("Magic number", 1594834165),
                         (
                             "Flags",

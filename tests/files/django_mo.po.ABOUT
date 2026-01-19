@@ -1,0 +1,13 @@
+about_resource: django_mo.po
+name: django.po
+version: 8d9901c961bf9d5cfa6bddddbbcebfbf487a5125
+download_url: https://github.com/django/django/raw/8d9901c961bf9d5cfa6bddddbbcebfbf487a5125/django/contrib/admin/locale/de/LC_MESSAGES/django.mo
+package_url: pkg:github/django/django@8d9901c961bf9d5cfa6bddddbbcebfbf487a5125#django/contrib/admin/locale/de/LC_MESSAGES/django.mo
+
+copyright: Copyright (c) Django Software Foundation and individual contributors. All rights reserved.
+license_expression: BSD-3-Clause
+notice_file: django_mo.NOTICE
+
+homepage_url: https://www.djangoproject.com/
+
+notes: This is the original file after decompiling it with `msgunfmt`.

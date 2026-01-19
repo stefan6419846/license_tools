@@ -1,0 +1,11 @@
+about_resource: Carlito-Regular.ttf
+name: Carlito Regular
+version: 1.104
+download_url: https://github.com/googlefonts/carlito/raw/3a810cab78ebd6e2e4eed42af9e8453c4f9b850a/fonts/ttf/Carlito-Regular.ttf
+package_url: pkg:github/googlefonts/carlito@3a810cab78ebd6e2e4eed42af9e8453c4f9b850a#fonts/ttf/Carlito-Regular.ttf
+
+copyright: Copyright 2013 The Carlito Project Authors (https://github.com/googlefonts/carlito), with Reserved Font Name "Carlito"
+license_expression: OFL-1.1
+notice_file: Carlito.NOTICE
+
+homepage_url: https://github.com/googlefonts/carlito

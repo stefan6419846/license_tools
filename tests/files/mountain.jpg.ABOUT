@@ -1,0 +1,15 @@
+about_resource: mountain.jpg
+name: Mountain_highway_(Unsplash).jpg
+version: 2017-08-22
+download_url: https://upload.wikimedia.org/wikipedia/commons/c/c5/Mountain_highway_%28Unsplash%29.jpg
+package_url: pkg:generic/Mountain_highway_%28Unsplash%29.jpg?download_url=https://upload.wikimedia.org/wikipedia/commons/c/c5/Mountain_highway_%2528Unsplash%2529.jpg
+
+copyright: Copyright (c) George Hiles
+license_expression: CC0-1.0
+notice_file: mountain.NOTICE
+
+homepage_url: https://commons.wikimedia.org/wiki/File:Mountain_highway_(Unsplash).jpg
+
+notes: The original picture has been uploaded to https://unsplash.com/photos/yL3TgwFnRKQ
+
+    The file has been resized by stefan6419846 to keep the distribution size small.

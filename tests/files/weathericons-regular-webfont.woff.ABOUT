@@ -1,0 +1,11 @@
+about_resource: weathericons-regular-webfont.woff
+name: Weather Icons Regular
+version: bb80982bf1f43f2d57f9dd753e7413bf88beb9ed
+download_url: https://github.com/erikflowers/weather-icons/raw/bb80982bf1f43f2d57f9dd753e7413bf88beb9ed/font/weathericons-regular-webfont.woff
+package_url: pkg:github/erikflowers/weather-icons@bb80982bf1f43f2d57f9dd753e7413bf88beb9ed#font/weathericons-regular-webfont.woff
+
+copyright: Copyright Erik Flowers, Lukas Bischoff (v1 Art)
+license_expression: OFL-1.1
+notice_file: weather-icons.NOTICE
+
+homepage_url: https://github.com/erikflowers/weather-icons
