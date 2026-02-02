@@ -1,6 +1,6 @@
 # Development version
 
-
+* Include notice and other licensing-related files in Python package metadata output as well.
 
 # Version 0.18.0 - 2025-12-10
 

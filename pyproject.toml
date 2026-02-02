@@ -5,7 +5,6 @@
 [build-system]
 requires = [
     "setuptools",
-    "wheel"
 ]
 build-backend = "setuptools.build_meta"
 
@@ -42,7 +41,7 @@ dependencies = [
     "joblib",
     "eot-tools",
     "fontTools[woff]",
-    "pip-licenses-lib>=0.4.0",
+    "pip-licenses-lib>=1.0.0",
     "requests",
     "tomli",
 ]
