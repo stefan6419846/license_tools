@@ -9,8 +9,10 @@ Retrieve license-related data.
 from __future__ import annotations
 
 import atexit
+import logging
 import math
 import shutil
+import sys
 from collections import defaultdict
 from collections.abc import Generator
 from pathlib import Path
@@ -26,6 +28,9 @@ from license_tools.tools.scancode_tools import FileResults, Licenses, PackageRes
 from license_tools.utils import archive_utils
 from license_tools.utils.download_utils import download_file
 from license_tools.utils.path_utils import DirectoryWithFixedNameContext, get_files_from_directory
+
+logger = logging.getLogger(__name__)
+del logging
 
 
 class RetrievalFlags:
@@ -174,6 +179,7 @@ def run_on_file(
     path: Path,
     short_path: str,
     retrieval_flags: int = 0,
+    file_size_limit: int = sys.maxsize,
 ) -> FileResults:
     """
     Run the analysis on the given file.
@@ -181,6 +187,7 @@ def run_on_file(
     :param path: The file path to analyze.
     :param short_path: The short path to use for display.
     :param retrieval_flags: Values to retrieve.
+    :param file_size_limit: The file size limit in bytes to skip analysis for.
     :return: The requested results.
     """
     if archive_utils.can_extract(archive_path=path):
@@ -194,6 +201,12 @@ def run_on_file(
             FileResults,
             _run_on_archive_file(path=path, short_path=short_path, default_to_none=False),
         )
+    if (size := path.stat().st_size) > file_size_limit:
+        logger.warning(
+            "%s exceeds size limit (%d > %d). Skipping further analysis ...",
+            short_path, size, file_size_limit,
+        )
+        return _get_dummy_file_results(path=path, short_path=short_path)
 
     retrieval_kwargs = RetrievalFlags.to_kwargs(flags=retrieval_flags)
 
@@ -240,6 +253,7 @@ def run_on_directory(
     prefix: str | None = None,
     allow_random_directory_for_archive: bool = True,
     delete_unpacked_archive_directories: bool = True,
+    file_size_limit: int = sys.maxsize,
 ) -> Generator[FileResults]:
     """
     Run the analysis on the given directory.
@@ -250,6 +264,7 @@ def run_on_directory(
     :param prefix: Custom prefix to use.
     :param allow_random_directory_for_archive: Allow a random directory for unpacking archives.
     :param delete_unpacked_archive_directories: Delete the directories of unpacked archives afterwards.
+    :param file_size_limit: The file size limit in bytes to skip analysis for.
     :return: The requested results per file.
     """
     files = list(get_files_from_directory(directory, prefix))
@@ -258,6 +273,7 @@ def run_on_directory(
             path=path,
             short_path=short_path,
             retrieval_flags=retrieval_flags,
+            file_size_limit=file_size_limit,
         )
         for path, short_path in files
     )
@@ -278,6 +294,7 @@ def run_on_directory(
                     job_count=job_count,
                     retrieval_flags=retrieval_flags,
                     prefix=directory,
+                    file_size_limit=file_size_limit,
                 )
 
 
@@ -285,6 +302,7 @@ def run_on_package_archive_file(
     archive_path: Path,
     job_count: int = 4,
     retrieval_flags: int = 0,
+    file_size_limit: int = sys.maxsize,
 ) -> Generator[FileResults]:
     """
     Run the analysis on the given package archive file.
@@ -292,6 +310,7 @@ def run_on_package_archive_file(
     :param archive_path: The package archive path to analyze.
     :param job_count: The number of parallel jobs to use.
     :param retrieval_flags: Values to retrieve.
+    :param file_size_limit: The file size limit in bytes to skip analysis for.
     :return: The requested results.
     """
     archive_results = _run_on_archive_file(path=archive_path, short_path=archive_path.name, default_to_none=True)
@@ -310,6 +329,7 @@ def run_on_package_archive_file(
             directory=working_directory,
             job_count=job_count,
             retrieval_flags=retrieval_flags,
+            file_size_limit=file_size_limit,
         )
 
 
@@ -317,6 +337,7 @@ def run_on_downloaded_archive_file(
     download_url: str,
     job_count: int = 4,
     retrieval_flags: int = 0,
+    file_size_limit: int = sys.maxsize,
 ) -> Generator[FileResults]:
     """
     Run the analysis on the given archive file after downloading it.
@@ -324,6 +345,7 @@ def run_on_downloaded_archive_file(
     :param download_url: The URL to download the archive from.
     :param job_count: The number of parallel jobs to use.
     :param retrieval_flags: Values to retrieve.
+    :param file_size_limit: The file size limit in bytes to skip analysis for.
     :return: The requested results.
     """
     # Retrieving the correct suffixes is a bit tricky here, so we use some guessing as well.
@@ -342,6 +364,7 @@ def run_on_downloaded_archive_file(
             archive_path=Path(downloaded_file.name),
             job_count=job_count,
             retrieval_flags=retrieval_flags,
+            file_size_limit=file_size_limit,
         )
 
 
@@ -351,6 +374,7 @@ def run_on_downloaded_package_file(
     job_count: int = 4,
     retrieval_flags: int = 0,
     prefer_sdist: bool = False,
+    file_size_limit: int = sys.maxsize,
 ) -> Generator[FileResults]:
     """
     Run the analysis for the given package definition.
@@ -360,6 +384,7 @@ def run_on_downloaded_package_file(
     :param job_count: The number of parallel jobs to use.
     :param retrieval_flags: Values to retrieve.
     :param prefer_sdist: Download the source distribution instead of the wheel.
+    :param file_size_limit: The file size limit in bytes to skip analysis for.
     :return: The requested results.
     """
     with TemporaryDirectory() as download_directory:
@@ -374,6 +399,7 @@ def run_on_downloaded_package_file(
             archive_path=name.resolve(),
             job_count=job_count,
             retrieval_flags=retrieval_flags,
+            file_size_limit=file_size_limit,
         )
 
 
@@ -386,6 +412,7 @@ def _check_that_exactly_one_value_is_set(values: list[Path | str | None]) -> boo
 
 
 def run(
+    *,
     directory: Path | str | None = None,
     file_path: Path | str | None = None,
     archive_path: Path | str | None = None,
@@ -403,6 +430,7 @@ def run(
     retrieve_python_metadata: bool = False,
     retrieve_cargo_metadata: bool = False,
     retrieve_image_metadata: bool = False,
+    file_size_limit: int = sys.maxsize,
 ) -> list[FileResults]:
     """
     Run the analysis for the given input definition.
@@ -427,6 +455,7 @@ def run(
     :param retrieve_python_metadata: Whether to retrieve Python package metadata.
     :param retrieve_cargo_metadata: Whether to retrieve Cargo metadata.
     :param retrieve_image_metadata: Whether to retrieve image metadata.
+    :param file_size_limit: The file size limit in bytes to skip analysis for.
     :return: The requested results.
     """
     # Remove the temporary directory of the main thread.
@@ -458,6 +487,7 @@ def run(
                 retrieval_flags=retrieval_flags,
                 job_count=job_count,
                 prefer_sdist=prefer_sdist,
+                file_size_limit=file_size_limit,
             ),
         )
     elif directory:
@@ -466,6 +496,7 @@ def run(
                 directory=str(directory),
                 retrieval_flags=retrieval_flags,
                 job_count=job_count,
+                file_size_limit=file_size_limit,
             ),
         )
     elif archive_path:
@@ -474,6 +505,7 @@ def run(
                 archive_path=Path(archive_path),
                 retrieval_flags=retrieval_flags,
                 job_count=job_count,
+                file_size_limit=file_size_limit,
             ),
         )
     elif download_url:
@@ -482,6 +514,7 @@ def run(
                 download_url=download_url,
                 retrieval_flags=retrieval_flags,
                 job_count=job_count,
+                file_size_limit=file_size_limit,
             ),
         )
     elif file_path:
@@ -490,6 +523,7 @@ def run(
                 path=Path(file_path),
                 short_path=str(file_path),
                 retrieval_flags=retrieval_flags,
+                file_size_limit=file_size_limit,
             ),
          ]
     else:

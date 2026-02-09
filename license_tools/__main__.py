@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import sys
 from typing import cast
 
 
@@ -144,6 +145,13 @@ def main() -> None:
         default=False,
         help="Retrieve image metadata.",
     )
+    parser.add_argument(
+        "--file-size-limit",
+        type=int,
+        required=False,
+        default=sys.maxsize,
+        help="Skip files in analysis which are larger than this byte limit."
+    )
 
     parser.add_argument(
         "--cargo-lock-download",
@@ -204,6 +212,7 @@ def main() -> None:
         retrieve_python_metadata=arguments.retrieve_python_metadata,
         retrieve_cargo_metadata=arguments.retrieve_cargo_metadata,
         retrieve_image_metadata=arguments.retrieve_image_metadata,
+        file_size_limit=arguments.file_size_limit,
     )
     return None
 
