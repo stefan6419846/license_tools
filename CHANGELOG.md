@@ -1,5 +1,7 @@
 # Development version
 
+# Version 0.19.0 - 2026-02-09
+
 * Include notice and other licensing-related files in Python package metadata output as well.
 * Add parameter for limiting the size of files to scan.
 * Make parameters to `license_tools.retrieval.run` keyword-only.
