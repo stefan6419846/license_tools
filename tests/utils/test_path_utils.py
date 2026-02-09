@@ -38,6 +38,19 @@ class GetFilesFromDirectoryTestCase(TestCase):
                 result,
             )
 
+    def test_current_directory(self) -> None:
+        directory = Path.cwd()
+
+        result = list(get_files_from_directory("."))
+        self.assertIn((directory / 'README.md', 'README.md'), result)
+        self.assertIn((directory / 'license_tools' / 'retrieval.py', 'license_tools/retrieval.py'), result)
+        self.assertIn((directory / 'tests' / 'test_main.py', 'tests/test_main.py'), result)
+
+        result = list(get_files_from_directory("./"))
+        self.assertIn((directory / 'README.md', 'README.md'), result)
+        self.assertIn((directory / 'license_tools' / 'retrieval.py', 'license_tools/retrieval.py'), result)
+        self.assertIn((directory / 'tests' / 'test_main.py', 'tests/test_main.py'), result)
+
 
 class DirectoryWithFixedNameContextTestCase(TestCase):
     def test_normal(self) -> None:

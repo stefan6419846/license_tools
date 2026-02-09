@@ -1,5 +1,7 @@
 # Development version
 
+* Avoid removing leading characters when scanning the current directory.
+
 # Version 0.19.0 - 2026-02-09
 
 * Include notice and other licensing-related files in Python package metadata output as well.

@@ -26,6 +26,8 @@ def get_files_from_directory(
     :return: For each file, the complete Path object as well as the path string
              relative to the given directory.
     """
+    if str(directory) in {".", "./"}:
+        directory = Path(".").resolve()
     directory_string = str(directory) if prefix is None else prefix
     common_prefix_length = len(directory_string) + int(
         not directory_string.endswith("/"),
