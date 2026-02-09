@@ -493,7 +493,7 @@ def run(
     elif directory:
         results = list(
             run_on_directory(
-                directory=str(directory),
+                directory=str(Path(directory).absolute()),
                 retrieval_flags=retrieval_flags,
                 job_count=job_count,
                 file_size_limit=file_size_limit,
