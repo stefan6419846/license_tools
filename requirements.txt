@@ -6,7 +6,7 @@ typecode-libmagic==5.39.210531
 joblib==1.5.3
 eot-tools==0.1.0
 fontTools[woff]==4.61.1
-pip-licenses-lib==1.0.0
+pip-licenses-lib==1.1.0
 rpmfile==2.1.0
 requests==2.32.5
 tomli==2.4.0
