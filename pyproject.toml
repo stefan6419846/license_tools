@@ -41,7 +41,7 @@ dependencies = [
     "joblib",
     "eot-tools",
     "fontTools[woff]",
-    "pip-licenses-lib>=1.0.0",
+    "pip-licenses-lib>=1.1.0",
     "requests",
     "tomli",
 ]

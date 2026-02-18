@@ -61,10 +61,11 @@ def check_metadata(path: Path | str) -> str:
     metadata_dict["license_files"] = list(metadata.license_files)
     metadata_dict["notice_files"] = list(metadata.notice_files)
     metadata_dict["other_files"] = list(metadata.other_files)
+    metadata_dict["sbom_files"] = list(metadata.sbom_files)
     return rendering_utils.render_dictionary(
         dictionary=metadata_dict,
         verbose_names_mapping=_VERBOSE_NAMES,
-        multi_value_keys={"license_files", "notice_files", "other_files", "license_classifiers", "requirements"},
+        multi_value_keys={"license_files", "notice_files", "other_files", "sbom_files", "license_classifiers", "requirements"},
     )
 
 
