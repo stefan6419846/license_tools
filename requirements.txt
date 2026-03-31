@@ -8,5 +8,5 @@ eot-tools==0.1.0
 fontTools[woff]==4.62.1
 pip-licenses-lib==1.1.0
 rpmfile==2.1.0
-requests==2.33.0
+requests==2.33.1
 tomli==2.4.1
