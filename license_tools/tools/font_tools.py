@@ -23,6 +23,8 @@ from fontTools.ttLib import TTFont  # type: ignore[import-untyped]
 from fontTools.ttLib.tables._h_e_a_d import table__h_e_a_d as HeadTable  # type: ignore[import-untyped]  # noqa: N812
 from fontTools.ttLib.tables._n_a_m_e import table__n_a_m_e as NameTable  # type: ignore[import-untyped]  # noqa: N812
 
+from license_tools.utils import rendering_utils
+
 logger = logging.getLogger(__name__)
 del logging
 
@@ -312,9 +314,10 @@ def check_font(path: Path) -> str | None:
     names = font_data["name"]
     if not names:
         return None
-    maximum_length = max(map(len, names.keys()))
-    return "\n".join(
-        f"{key:>{maximum_length}}: {value}" for key, value in names.items()
+    return rendering_utils.render_dictionary(
+        dictionary=names,
+        verbose_names_mapping={key: key for key in names},
+        multi_value_keys=set(),
     )
 
 

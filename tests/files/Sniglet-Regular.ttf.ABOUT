@@ -1,0 +1,14 @@
+about_resource: Sniglet-Regular.ttf
+name: Sniglet Regular
+version: 2.0.0
+download_url: https://github.com/google/fonts/raw/b669b896a75927719f611ac76f329bbeab32dc61/ofl/sniglet/Sniglet-Regular.ttf
+package_url: pkg:github/google/fonts@b669b896a75927719f611ac76f329bbeab32dc61#ofl/sniglet/Sniglet-Regular.ttf
+
+copyright: Copyright (c) 2008, Haley Fiege (haley@kingdomofawesome.com)
+    Copyright (c) 2012, Brenda Gallo (gbrenda1987@gmail.com)
+    Copyright (c) 2013, Pablo Impallari (www.impallari.com|impallari@gmail.com),
+    with no Reserved Font Name.
+license_expression: OFL-1.1
+notice_file: Sniglet.NOTICE
+
+homepage_url: https://fonts.google.com/specimen/Sniglet

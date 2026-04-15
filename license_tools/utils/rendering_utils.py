@@ -38,5 +38,11 @@ def render_dictionary(dictionary: dict[str, Any], verbose_names_mapping: dict[st
                 value = "\n" + "\n".join(" " * maximum_length + f"   * {x}" for x in sorted(value))
                 rendered.append(f"{verbose_name:>{maximum_length}}:{value}")
         else:
-            rendered.append(f"{verbose_name:>{maximum_length}}: {value}")
+            if isinstance(value, str):
+                lines = value.splitlines(keepends=False)
+                rendered.append(f"{verbose_name:>{maximum_length}}: {lines[0]}")
+                for line in lines[1:]:
+                    rendered.append(" " * maximum_length + "  " + line)
+            else:
+                rendered.append(f"{verbose_name:>{maximum_length}}: {value}")
     return "\n".join(rendered)

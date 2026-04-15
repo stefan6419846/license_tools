@@ -1,7 +1,8 @@
 # Development version
 
 * Avoid removing leading characters when scanning the current directory.
-* Include SBOM files in Python package metadata output (PEP 770)
+* Include SBOM files in Python package metadata output (PEP 770).
+* Fix handling of carriage returns in font metadata fields.
 
 # Version 0.19.0 - 2026-02-09
 

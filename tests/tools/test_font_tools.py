@@ -458,6 +458,38 @@ Typographic Subfamily name: Solid"""[1:],
             result,
         )
 
+    def test_carriage_return(self) -> None:
+        with get_file("Sniglet-Regular.ttf") as path:
+            result = font_tools.check_font(path)
+        # Important note: The output does not end with a newline!
+        self.assertEqual(
+            """
+          Copyright notice: Copyright (c) 2008, Haley Fiege (haley@kingdomofawesome.com), 
+                            Copyright (c) 2012, Brenda Gallo (gbrenda1987@gmail.com)
+                            Copyright (c) 2013, Pablo Impallari (www.impallari.com|impallari@gmail.com), 
+                            with no Reserved Font Name.
+          Font family name: Sniglet
+       Font subfamily name: Regular
+    Unique font identifier: HaleyFiege,PabloImpallari,BrendaGallo: Sniglet Regular: 2008
+            Full font name: Sniglet Regular
+            Version string: Version 2.000; ttfautohint (v0.95) -l 8 -r 50 -G 200 -x 14 -w "G"
+           PostScript name: Sniglet-Regular
+                 Trademark: Sniglet is a trademark of Haley Fiege
+              Manufacturer: Haley Fiege, Pablo Impallari, Brenda Gallo
+                  Designer: Haley Fiege
+               Description: A rounded display face that’s great for headlines.
+                            
+                            Originally designed in 2008 by Haley Fiege in Extra-bold.
+                            In 2013 Brenda Gallo and Pablo Impallari added a Regular weight
+                            
+                            To contribute to the project contact Haley Fiege (haley@kingdomofawesome.com) or Pablo Impallari (impallari@gmail.com)
+              URL Designer: kingdomofawesome.com
+       License Description: This Font Software is licensed under the SIL Open Font License, Version 1.1. This license is available with a FAQ at: http://scripts.sil.org/OFL
+          License Info URL: http://scripts.sil.org/OFL
+Compatible Full (Mac only): Sniglet Regular"""[1:],  # noqa: E501, W291, W293
+            result,
+        )
+
 
 class DumpToTtxTestCase(TestCase):
     def test_dump_to_ttx(self) -> None:
