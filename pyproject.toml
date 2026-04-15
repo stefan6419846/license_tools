@@ -5,14 +5,13 @@
 [build-system]
 requires = [
     "setuptools",
-    "wheel"
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "license_tools"
 description = "Collection of tools for working with Open Source licenses"
-version = "0.18.0"
+version = "0.19.0"
 license = "Apache-2.0"
 readme = {file = "README.md", content-type = "text/markdown"}
 authors = [
@@ -42,7 +41,7 @@ dependencies = [
     "joblib",
     "eot-tools",
     "fontTools[woff]",
-    "pip-licenses-lib>=0.4.0",
+    "pip-licenses-lib>=1.1.0",
     "requests",
     "tomli",
 ]

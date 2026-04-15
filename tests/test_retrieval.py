@@ -7,6 +7,8 @@ from __future__ import annotations
 import copy
 import os
 import re
+import string
+import sys
 import tarfile
 from collections.abc import Generator
 from contextlib import contextmanager, redirect_stdout
@@ -372,6 +374,44 @@ Typographic Subfamily name: Solid
                 result,
             )
 
+    def test_size_limit(self) -> None:
+        with NamedTemporaryFile() as example_file:
+            example_file.write(string.ascii_letters.encode("utf-8") * 1000)
+            example_file.flush()
+
+            # Direct call.
+            with (
+                    mock.patch("license_tools.retrieval.RetrievalFlags.to_kwargs") as kwargs_mock,
+                    self.assertLogs(logger=retrieval.logger, level="WARNING") as logs
+            ):
+                result = retrieval.run_on_file(path=Path(example_file.name), short_path="/path/to/large", file_size_limit=50_000)
+            self.assertEqual(
+                FileResults(path=Path(example_file.name), short_path="/path/to/large", licenses=Licenses()),
+                result
+            )
+            kwargs_mock.assert_not_called()
+            self.assertEqual(
+                ["WARNING:license_tools.retrieval:/path/to/large exceeds size limit (52000 > 50000). Skipping further analysis ..."],
+                logs.output,
+            )
+
+            # Forwarding.
+            with (
+                    mock.patch("license_tools.retrieval.RetrievalFlags.to_kwargs") as kwargs_mock,
+                    self.assertLogs(logger=retrieval.logger, level="WARNING") as logs,
+                    redirect_stdout(StringIO()),
+            ):
+                results = retrieval.run(file_path=Path(example_file.name), file_size_limit=51_000)
+            self.assertEqual(
+                [FileResults(path=Path(example_file.name), short_path=example_file.name, licenses=Licenses())],
+                results
+            )
+            kwargs_mock.assert_not_called()
+            self.assertEqual(
+                [f"WARNING:license_tools.retrieval:{example_file.name} exceeds size limit (52000 > 51000). Skipping further analysis ..."],
+                logs.output,
+            )
+
 
 class RunOnDirectoryTestCase(TestCase):
     def test_run_on_directory(self) -> None:
@@ -379,7 +419,7 @@ class RunOnDirectoryTestCase(TestCase):
         file_results_iterable = iter(file_results)
         paths = [(Path(f"/tmp/file{i}.py"), f"file{i}.py") for i in range(1, 6)]
 
-        def run_on_file(path: Path, short_path: str, retrieval_flags: int = 0) -> Any:
+        def run_on_file(path: Path, short_path: str, retrieval_flags: int = 0, file_size_limit: int = sys.maxsize) -> Any:
             return next(file_results_iterable)
 
         with mock.patch.object(
@@ -397,6 +437,7 @@ class RunOnDirectoryTestCase(TestCase):
             [
                 mock.call(
                     path=current_path, short_path=current_short_path, retrieval_flags=42,
+                    file_size_limit=sys.maxsize,
                 )
                 for current_path, current_short_path in paths
             ],
@@ -428,6 +469,7 @@ class RunOnDirectoryTestCase(TestCase):
             [
                 mock.call(
                     path=current_path, short_path=current_short_path, retrieval_flags=42,
+                    file_size_limit=sys.maxsize,
                 )
                 for current_path, current_short_path in expected
             ],
@@ -443,7 +485,7 @@ class RunOnDirectoryTestCase(TestCase):
             directory.joinpath("nested_tar_bz2").write_text("Dummy")
             nested_path = self._generate_tar_bz2_archive(directory)
 
-            def run_on_file(path: Path, short_path: str, retrieval_flags: int = 0) -> Any:
+            def run_on_file(path: Path, short_path: str, retrieval_flags: int = 0, file_size_limit: int = sys.maxsize) -> Any:
                 return path
 
             with mock.patch.object(
@@ -477,7 +519,7 @@ class RunOnDirectoryTestCase(TestCase):
             directory.joinpath("directory", "file.txt").write_text("MIT-0")
             nested_path = self._generate_tar_bz2_archive(directory)
 
-            def run_on_file(path: Path, short_path: str, retrieval_flags: int = 0) -> Any:
+            def run_on_file(path: Path, short_path: str, retrieval_flags: int = 0, file_size_limit: int = sys.maxsize) -> Any:
                 return path
 
             with mock.patch.object(
@@ -511,7 +553,7 @@ class RunOnDirectoryTestCase(TestCase):
             directory.joinpath("directory", "file.txt").write_text("MIT-0")
             _ = self._generate_tar_bz2_archive(directory)
 
-            def run_on_file(path: Path, short_path: str, retrieval_flags: int = 0) -> Any:
+            def run_on_file(path: Path, short_path: str, retrieval_flags: int = 0, file_size_limit: int = sys.maxsize) -> Any:
                 return path
 
             with mock.patch.object(retrieval, "run_on_file", side_effect=run_on_file):
@@ -548,7 +590,7 @@ class RunOnPackageArchiveFileTestCase(TestCase):
             directory_result = [object(), object(), object()]
 
             def run_on_directory(
-                directory: Path, job_count: int, retrieval_flags: int,
+                directory: Path, job_count: int, retrieval_flags: int, file_size_limit: int = sys.maxsize
             ) -> Generator[Any]:
                 self.assertEqual(2, job_count)
                 self.assertEqual(42, retrieval_flags)
@@ -602,7 +644,7 @@ class RunOnDownloadedArchiveFileTestCase(TestCase):
         directory_result = [object(), object(), object()]
 
         def run_on_package_archive_file(
-            archive_path: Path, job_count: int, retrieval_flags: int,
+            archive_path: Path, job_count: int, retrieval_flags: int, file_size_limit: int = sys.maxsize
         ) -> Generator[Any]:
             self.assertEqual(2, job_count)
             self.assertEqual(42, retrieval_flags)
@@ -634,6 +676,7 @@ class RunOnDownloadedPackageFileTestCase(TestCase):
 
         def run_on_package_archive_file(
             archive_path: Path, job_count: int, retrieval_flags: int, retrieve_python_metadata: bool = False,
+                file_size_limit: int = sys.maxsize
         ) -> Generator[Any]:
             self.assertEqual("typing_extensions-4.8.0-py3-none-any.whl", archive_path.name)
             self.assertEqual(3, job_count)
@@ -661,6 +704,7 @@ class RunOnDownloadedPackageFileTestCase(TestCase):
 
         def run_on_package_archive_file(
             archive_path: Path, job_count: int, retrieval_flags: int, retrieve_python_metadata: bool = False,
+            file_size_limit: int = sys.maxsize
         ) -> Generator[Any]:
             self.assertEqual("typing_extensions-4.8.0.tar.gz", archive_path.name)
             self.assertEqual(3, job_count)
@@ -731,6 +775,7 @@ class RunTestCase(TestCase):
             retrieval_flags=0,
             job_count=4,
             prefer_sdist=False,
+            file_size_limit=sys.maxsize,
         )
         self.assertEqual(TYPING_EXTENSION_4_8_0__LICENSES, result)
         self.assertEqual(TYPING_EXTENSION_4_8_0__EXPECTED_OUTPUT, str(stdout))
@@ -777,7 +822,7 @@ License classifiers: Python Software Foundation License
                 ) as run_mock:
                     result = retrieval.run(directory=path, retrieve_ldd_data=True)
             run_mock.assert_called_once_with(
-                directory=directory, retrieval_flags=16, job_count=4,
+                directory=directory, retrieval_flags=16, job_count=4, file_size_limit=sys.maxsize,
             )
             self.assertEqual(TYPING_EXTENSION_4_8_0__LICENSES, result)
             self.assertEqual(TYPING_EXTENSION_4_8_0__EXPECTED_OUTPUT, str(stdout))
@@ -798,6 +843,7 @@ License classifiers: Python Software Foundation License
             archive_path=Path("/tmp/dummy/typing_extensions-4.8.0.tar.gz"),
             retrieval_flags=1,
             job_count=1,
+            file_size_limit=sys.maxsize,
         )
         self.assertEqual(TYPING_EXTENSION_4_8_0__LICENSES, result)
         self.assertEqual(TYPING_EXTENSION_4_8_0__EXPECTED_OUTPUT, str(stdout))
@@ -818,6 +864,7 @@ License classifiers: Python Software Foundation License
             download_url="https://example.org/archive.tar.gz",
             retrieval_flags=1,
             job_count=1,
+            file_size_limit=sys.maxsize,
         )
         self.assertEqual(TYPING_EXTENSION_4_8_0__LICENSES, result)
         self.assertEqual(TYPING_EXTENSION_4_8_0__EXPECTED_OUTPUT, str(stdout))

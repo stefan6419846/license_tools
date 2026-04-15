@@ -1,6 +1,14 @@
 # Development version
 
+* Avoid removing leading characters when scanning the current directory.
+* Include SBOM files in Python package metadata output (PEP 770).
+* Fix handling of carriage returns in font metadata fields.
 
+# Version 0.19.0 - 2026-02-09
+
+* Include notice and other licensing-related files in Python package metadata output as well.
+* Add parameter for limiting the size of files to scan.
+* Make parameters to `license_tools.retrieval.run` keyword-only.
 
 # Version 0.18.0 - 2025-12-10
 
