@@ -7,6 +7,6 @@ joblib==1.5.3
 eot-tools==0.1.0
 fontTools[woff]==4.62.1
 pip-licenses-lib==1.2.1
-rpmfile==2.2.0
+rpmfile==2.2.1
 requests==2.33.1
 tomli==2.4.1
