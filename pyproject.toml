@@ -62,7 +62,6 @@ dev = [
     "flake8-bugbear",
     "pep8-naming",
     "mypy",
-    "types-requests",
 ]
 extended_rpm = [
     "rpmfile>=2.1.0",
