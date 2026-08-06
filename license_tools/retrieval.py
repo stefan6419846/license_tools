@@ -210,7 +210,7 @@ def run_on_file(
 
     retrieval_kwargs = RetrievalFlags.to_kwargs(flags=retrieval_flags)
 
-    if path.name.startswith("Cargo.toml") and retrieval_kwargs.pop("retrieve_cargo_metadata"):
+    if path.name == "Cargo.toml" and retrieval_kwargs.pop("retrieve_cargo_metadata"):
         print(short_path)
         print(cargo_tools.check_metadata(path=path) + "\n")
 

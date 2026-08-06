@@ -374,6 +374,16 @@ Typographic Subfamily name: Solid
                 result,
             )
 
+    def test_cargo_toml_orig(self) -> None:
+        with TemporaryDirectory() as directory:
+            cargo_toml_path = Path(directory) / "Cargo.toml.orig"
+            cargo_toml_path.write_bytes(b"INVALID")
+
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                retrieval.run_on_file(path=cargo_toml_path, short_path="/path/to/Cargo.toml.orig", retrieval_flags=RetrievalFlags.CARGO_METADATA)
+            self.assertEqual("", stdout.getvalue())
+
     def test_size_limit(self) -> None:
         with NamedTemporaryFile() as example_file:
             example_file.write(string.ascii_letters.encode("utf-8") * 1000)

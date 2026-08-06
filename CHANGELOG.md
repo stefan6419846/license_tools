@@ -3,6 +3,7 @@
 * Avoid removing leading characters when scanning the current directory.
 * Include SBOM files in Python package metadata output (PEP 770).
 * Fix handling of carriage returns in font metadata fields.
+* Only run a `Cargo.toml` analysis on `Cargo.toml` files, not on `Cargo.toml.orig` or similar.
 
 # Version 0.19.0 - 2026-02-09
 
