@@ -1,4 +1,4 @@
-# Copyright (c) stefan6419846. All rights reserved.
+# SPDX-FileCopyrightText: Copyright (c) stefan6419846
 # SPDX-License-Identifier: Apache-2.0
 # See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
 
@@ -64,7 +64,6 @@ class MainTestCase(TestCase):
     def custom_env(self) -> dict[str, str]:
         custom_env = os.environ.copy()
         custom_env["COLUMNS"] = "100"
-        custom_env["COVERAGE_PROCESS_START"] = "pyproject.toml"
         return custom_env
 
     def test_retrieval(self) -> None:

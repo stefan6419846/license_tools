@@ -1,4 +1,4 @@
-# Copyright (c) stefan6419846. All rights reserved.
+# SPDX-FileCopyrightText: Copyright (c) stefan6419846
 # SPDX-License-Identifier: Apache-2.0
 # See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
 
@@ -367,8 +367,12 @@ def extract(archive_path: Path, target_path: Path) -> None:
     """
     target_path_str = str(target_path)
 
-    # See `rpmfile.cli` for the `extract` option.
-    # This is a pathlib-based approach of the original implementation.
+    # SPDX-SnippetBegin
+    # SPDX-License-Identifier: MIT OR Apache-2.0
+    # SPDX-SnippetCopyrightText: Copyright (c) 2015 Sean Ross-Ross
+    # SPDX-SnippetCopyrightText: Copyright (c) stefan6419846
+    # SDPX—SnippetName: Option `extract` from `rpmfile.cli``
+    # SPDX-SnippetComment: This is a pathlib-based approach of the original implementation.
     #
     # Upstream code:
     # https://github.com/srossross/rpmfile/blob/c0498cd5173afb6fb0af9ed5c7d61335b7c9af0e/rpmfile/cli.py
@@ -420,6 +424,7 @@ def extract(archive_path: Path, target_path: Path) -> None:
                 if not str(target_file).startswith(target_path_str):
                     raise ValueError(f"Attempted path traversal: {target_file}")
                 target_file.write_bytes(file_object.read())
+    # SPDX-SnippetEnd
 
 
 def get_headers(rpm_path: Path) -> dict[str, Any]:
