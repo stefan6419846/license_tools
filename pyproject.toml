@@ -40,7 +40,7 @@ dependencies = [
     "typecode-libmagic",
     "joblib",
     "eot-tools",
-    "fontTools[woff]",
+    "fontTools[woff]<4.67.0",  # https://github.com/fonttools/fonttools/issues/4322
     "pip-licenses-lib>=1.1.0",
     "requests",
     "tomli",
