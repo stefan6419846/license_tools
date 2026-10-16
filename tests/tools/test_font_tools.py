@@ -6,9 +6,12 @@ from __future__ import annotations
 
 import datetime
 from collections import OrderedDict
+from importlib.metadata import version as get_version
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from unittest import TestCase, mock
+
+from packaging.version import Version
 
 from license_tools.tools import font_tools
 from tests import get_file
@@ -462,8 +465,7 @@ Typographic Subfamily name: Solid"""[1:],
         with get_file("Sniglet-Regular.ttf") as path:
             result = font_tools.check_font(path)
         # Important note: The output does not end with a newline!
-        self.assertEqual(
-            """
+        expected = """
           Copyright notice: Copyright (c) 2008, Haley Fiege (haley@kingdomofawesome.com), 
                             Copyright (c) 2012, Brenda Gallo (gbrenda1987@gmail.com)
                             Copyright (c) 2013, Pablo Impallari (www.impallari.com|impallari@gmail.com), 
@@ -486,9 +488,11 @@ Typographic Subfamily name: Solid"""[1:],
               URL Designer: kingdomofawesome.com
        License Description: This Font Software is licensed under the SIL Open Font License, Version 1.1. This license is available with a FAQ at: http://scripts.sil.org/OFL
           License Info URL: http://scripts.sil.org/OFL
-Compatible Full (Mac only): Sniglet Regular"""[1:],  # noqa: E501, W291, W293
-            result,
-        )
+Compatible Full (Mac only): Sniglet Regular"""[1:]  # noqa: E501, W291, W293
+        if Version(get_version("fonttools")) >= Version("4.67.0"):
+            # https://github.com/fonttools/fonttools/issues/4322
+            expected = expected.replace("’", "Õ")
+        self.assertEqual(expected, result)
 
 
 class DumpToTtxTestCase(TestCase):

@@ -1,5 +1,7 @@
 # Development version
 
+* Fix tests for `fonttools>=4.67.0`.
+
 # Version 0.20.0 - 2026-08-06
 
 * Avoid removing leading characters when scanning the current directory.
