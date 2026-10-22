@@ -42,7 +42,7 @@ dependencies = [
     "eot-tools",
     "fontTools[woff]",
     "pip-licenses-lib>=1.1.0",
-    "pluggy<=1.6.0",  # https://github.com/aboutcode-org/scancode-toolkit/issues/5363
+    "pluggy<=1.7.0",  # https://github.com/aboutcode-org/scancode-toolkit/issues/5363
     "requests",
     "tomli",
 ]
