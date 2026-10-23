@@ -148,7 +148,8 @@ class CheckImageMetadataTestCase(TestCase):
 \[File\]          MIME Type                       : image/jpeg
 \[File\]          Current IPTC Digest             : d41d8cd98f00b204e9800998ecf8427e
 \[File\]          Exif Byte Order                 : Big\-endian \(Motorola, MM\)
-\[File\]          Image Width                     : 630
+(\[File\]          Maker Note Byte Order           : Little-endian \(Intel, II\)
+)?\[File\]          Image Width                     : 630
 \[File\]          Image Height                    : 420
 \[File\]          Encoding Process                : Baseline DCT, Huffman coding
 \[File\]          Bits Per Sample                 : 8
