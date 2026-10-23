@@ -317,7 +317,7 @@ class CheckImageMetadataTestCase(TestCase):
 \[Composite\]     Circle Of Confusion             : 0\.007 mm
 \[Composite\]     Depth Of Field                  : inf \(3\.12 m \- inf\)
 \[Composite\]     Field Of View                   : 43\.4 deg
-\[Composite\]     Focal Length                    : 10\.3 mm \(35 mm equivalent: 45\.2 mm\)
+\[Composite\]     Focal Length (35mm Equiv|          )         : 10\.3 mm \(35 mm equivalent: 45\.2 mm\)
 \[Composite\]     Hyperfocal Distance             : 3\.45 m
 \[Composite\]     Light Value                     : 13\.3
             """.strip() + "\n$",  # noqa: E501, W291
